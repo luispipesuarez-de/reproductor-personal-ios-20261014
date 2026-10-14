@@ -1,0 +1,36 @@
+name: iOS
+on:
+  workflow_dispatch:
+    inputs:
+      package_ipa:
+        description: Generar también el IPA Release
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+      - name: Preparar XcodeGen
+        run: |
+          command -v xcodegen >/dev/null || brew install xcodegen
+          xcodebuild -version
+          xcodegen --version
+      - name: XCTest en iPhone simulado
+        run: bash scripts/ci.sh test
+      - name: Empaquetar para firma personal
+        if: inputs.package_ipa
+        run: bash scripts/ci.sh ipa
+      - name: Guardar evidencias
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ReproductorPersonal-${{ github.run_number }}
+          path: |
+            build/*.xcresult
+            build/*.ipa
+            build/*.log
+          if-no-files-found: warn

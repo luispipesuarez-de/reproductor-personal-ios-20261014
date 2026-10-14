@@ -14,6 +14,12 @@ jobs:
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v6
+      - name: Recuperar paquete fijado
+        id: youtube-cache
+        uses: actions/cache/restore@v6.1.0
+        with:
+          path: build/SourcePackages
+          key: youtube-kit-${{ runner.os }}-6532af39da4c1612b0a1af603792419d8fb0e67f
       - name: Preparar XcodeGen
         run: |
           command -v xcodegen >/dev/null || brew install xcodegen
@@ -24,6 +30,12 @@ jobs:
       - name: Empaquetar para firma personal
         if: inputs.package_ipa
         run: bash scripts/ci.sh ipa
+      - name: Conservar paquete fijado
+        if: always() && steps.youtube-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6.1.0
+        with:
+          path: build/SourcePackages
+          key: youtube-kit-${{ runner.os }}-6532af39da4c1612b0a1af603792419d8fb0e67f
       - name: Guardar evidencias
         if: always()
         uses: actions/upload-artifact@v7
@@ -33,4 +45,5 @@ jobs:
             build/*.xcresult
             build/*.ipa
             build/*.log
+            build/*.png
           if-no-files-found: warn

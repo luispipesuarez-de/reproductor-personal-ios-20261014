@@ -10,6 +10,9 @@ case "${1:-}" in
     xcrun simctl boot "$simulator" 2>/dev/null || true
     xcrun simctl bootstatus "$simulator" -b
     xcodebuild "${common[@]}" test -destination "platform=iOS Simulator,id=$simulator" -parallel-testing-enabled NO -resultBundlePath "build/Tests-$(date +%s).xcresult" 2>&1 | tee build/tests.log
+    xcrun simctl launch --terminate-running-process "$simulator" personal.reproductor.ios
+    sleep 2
+    xcrun simctl io "$simulator" screenshot build/preview.png
     ;;
   ipa)
     xcodebuild "${common[@]}" build -configuration Release -destination 'generic/platform=iOS' 2>&1 | tee build/ipa.log

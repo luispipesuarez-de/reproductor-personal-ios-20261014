@@ -18,6 +18,11 @@ targets:
     sources: [ReproductorPersonal]
     dependencies:
       - package: YouTubeKit
+    info:
+      path: ReproductorPersonal/Resources/Info.plist
+      properties:
+        UIBackgroundModes: [audio]
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: personal.reproductor.ios
@@ -26,7 +31,7 @@ targets:
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         MARKETING_VERSION: 0.1.0
-        CURRENT_PROJECT_VERSION: 1
+        CURRENT_PROJECT_VERSION: 2
   ReproductorPersonalTests:
     type: bundle.unit-test
     platform: iOS

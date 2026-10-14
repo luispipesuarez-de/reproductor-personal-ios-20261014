@@ -2,3 +2,4 @@ build/
 *.xcodeproj/
 .DS_Store
 .superpowers/
+ReproductorPersonal/Resources/Info.plist

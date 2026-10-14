@@ -43,6 +43,7 @@ final class PlaybackController: ObservableObject {
     }
 
     func play(_ video: Video) async {
+        if case .loading(let current) = state, current.id == video.id { return }
         let currentRequest = UUID()
         requestID = currentRequest
         selectedVideo = video

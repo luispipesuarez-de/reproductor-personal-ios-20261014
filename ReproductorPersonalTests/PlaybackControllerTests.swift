@@ -64,17 +64,23 @@ final class PlaybackControllerTests: XCTestCase {
     }
 
     func testEndedMediaCanBeResumedFromStart() async throws {
-        let url = try TestAudioAsset.makeSilenceFile(duration: 0.5)
+        let url = try TestAudioAsset.makeSilenceFile()
         addTeardownBlock { try? FileManager.default.removeItem(at: url) }
         let controller = PlaybackController(source: StubYouTubeProvider(onResolve: { _ in
             PlaybackResource(url: url, expiresAt: nil)
         }))
         await controller.play(videoA)
-        await expectEventually { controller.state == .playing(videoA) }
+        await expectEventually(timeout: 30) { controller.state == .playing(videoA) }
+        let seekCompleted = await withCheckedContinuation { continuation in
+            controller.player.seek(to: CMTime(seconds: 59, preferredTimescale: 8000), toleranceBefore: .zero, toleranceAfter: .zero) {
+                continuation.resume(returning: $0)
+            }
+        }
+        XCTAssertTrue(seekCompleted)
         await expectEventually { controller.state == .paused(videoA) }
         await controller.resume()
         await expectEventually { controller.state == .playing(videoA) }
-        XCTAssertLessThan(controller.player.currentTime().seconds, 0.5)
+        XCTAssertLessThan(controller.player.currentTime().seconds, 5)
         controller.pause()
     }
 

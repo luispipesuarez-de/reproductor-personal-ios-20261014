@@ -13,4 +13,13 @@ enum AppError: Error, LocalizedError, Equatable {
         case .libraryIncompatible: return "No se pudo abrir tu biblioteca. Tus datos no se han modificado."
         }
     }
+
+    static func classify(_ error: Error) -> AppError {
+        if let known = error as? AppError { return known }
+        if let urlError = error as? URLError,
+           [.notConnectedToInternet, .networkConnectionLost, .timedOut,
+            .cannotFindHost, .cannotConnectToHost, .dnsLookupFailed,
+            .dataNotAllowed].contains(urlError.code) { return .offline }
+        return .resolutionFailed
+    }
 }

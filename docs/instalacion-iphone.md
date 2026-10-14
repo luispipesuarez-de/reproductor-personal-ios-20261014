@@ -4,8 +4,10 @@ Dispositivo indicado por el usuario: iPhone 13, iOS 26.2. La app requiere iOS 16
 
 ## Obtener el archivo
 
+La entrega comprobada está en `build/ReproductorPersonal.ipa` dentro de la carpeta de este proyecto. Puedes transferir ese archivo directamente al iPhone. Su [ejecución de origen](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38638945973) contiene las 25 pruebas correctas y el mismo IPA.
+
 1. Abre [las ejecuciones privadas del proyecto](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/workflows/ios.yml) con tu cuenta de GitHub.
-2. Elige una ejecución correcta que haya generado IPA; descarga su artefacto ReproductorPersonal.
+2. Elige la ejecución 38638945973 y descarga su artefacto ReproductorPersonal-8, o una entrega posterior comprobada que haya generado IPA.
 3. Extrae el ZIP y busca ReproductorPersonal.ipa. Transfiérelo a Archivos en el iPhone, por ejemplo mediante iCloud Drive.
 
 ## Preparar AltStore Classic

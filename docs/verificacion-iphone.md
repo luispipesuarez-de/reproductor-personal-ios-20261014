@@ -4,6 +4,8 @@ Estado: pendiente de instalación y prueba física. No se ha demostrado aún rep
 
 Dispositivo: iPhone 13. iOS: 26.2 (información del usuario).
 
+Prototipo disponible: versión 0.1.0, compilación 2, commit `6c619ac`. [CI 38638945973](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38638945973): 25/25 tests correctos y Release/IPA comprobados. Estos resultados proceden de fixtures y un WAV local; no se han reproducido videos reales de YouTube en el iPhone.
+
 ## Hito 1 — antes de ampliar la biblioteca
 
 | Prueba | Contenido / duración | Resultado observado |

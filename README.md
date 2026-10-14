@@ -2,7 +2,7 @@
 
 Proyecto personal en SwiftUI, desarrollado desde Windows y compilado con Xcode en GitHub Actions. La primera entrega prepara búsqueda interna de contenido público y reproducción mediante AVQueuePlayer, con audio en segundo plano. La resolución se realiza desde el iPhone, sin servidor de extracción propio.
 
-Estado actual: prototipo en construcción. La biblioteca, la cola y la integración con la cuenta de YouTube están sujetas a los hitos de la especificación; no son funciones disponibles todavía.
+Estado actual: prototipo 0.1.0, compilación 2, con 25 pruebas automatizadas correctas y un IPA Release comprobado. La reproducción real de YouTube en el iPhone sigue pendiente. La biblioteca, la cola y la integración con la cuenta de YouTube están sujetas a los hitos de la especificación; no son funciones disponibles todavía.
 
 ## Código y compilación
 
@@ -18,6 +18,8 @@ bash scripts/ci.sh ipa
 Desde Windows, abre [el workflow privado](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/workflows/ios.yml), elige la rama `feat/reproductor-ios` y activa la opción para generar IPA. Los tests no consultan YouTube: prueban datos controlados y reproducción nativa de un WAV local. El IPA usa el proveedor real.
 
 La compilación genera un IPA sin firmar. Sigue [la guía de instalación](docs/instalacion-iphone.md) para firmarlo con AltStore Classic en tu equipo.
+
+Entrega comprobada: [ejecución 38638945973](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38638945973), commit `6c619ac`. Archivo local: `build/ReproductorPersonal.ipa`. [Estado y decisiones de implementación](docs/estado-implementacion.md).
 
 ## Alcance y comprobación
 

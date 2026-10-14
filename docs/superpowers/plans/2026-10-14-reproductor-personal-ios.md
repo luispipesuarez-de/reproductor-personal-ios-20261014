@@ -122,7 +122,7 @@ Mensajes de `AppError.errorDescription`: `offline` → «Necesitas conexión a I
 - Produces: `AudioSessionController.configure() throws` y `PlayerView(player: AVQueuePlayer)`.
 - Test support: `TestAudioAsset.makeSilenceFile(duration: TimeInterval = 60) throws -> URL` genera un WAV PCM local, que permite observar AVQueuePlayer sin peticiones de red; cada prueba elimina su propio archivo al terminar. El stub puede devolver ese recurso local y las pruebas esperan estados nativos con un plazo acotado.
 
-- [ ] **Step 1: Escribir pruebas fallidas con un proveedor controlado.** El stub implementa las dos funciones de YouTubeProviding mediante closures asíncronas; para la prueba de orden, completar la consulta nueva antes que la vieja. Probar texto vacío sin petición, consulta recortada, resultados vacíos, error de resolución y dos selecciones que terminan fuera de orden. Afirmaciones:
+- [x] **Step 1: Escribir pruebas fallidas con un proveedor controlado.** El stub implementa las dos funciones de YouTubeProviding mediante closures asíncronas; para la prueba de orden, completar la consulta nueva antes que la vieja. Probar texto vacío sin petición, consulta recortada, resultados vacíos, error de resolución y dos selecciones que terminan fuera de orden. Afirmaciones:
 
 ```swift
 // testOldSearchCannotReplaceNewResults
@@ -137,11 +137,11 @@ XCTAssertEqual(player.state, .failed(
 XCTAssertEqual(selectedVideoID, "bbbbbbbbbbb")
 ```
 
-- [ ] **Step 2: Confirmar RED.** Ejecutar `bash scripts/ci.sh test`; fallan los tests nuevos porque faltan los estados y el control de solicitudes vigentes.
-- [ ] **Step 3: Implementar el flujo mínimo.** SearchView abre con el campo visible, envía al pulsar Buscar, muestra resultados con miniatura/metadatos y toca para reproducir. Usar tokens de solicitud o cancelación con comprobación de vigencia tanto en búsqueda como en preparación de reproducción. Mantener el controlador en la raíz de la app. Configurar AVAudioSession para `.playback`, declarar `UIBackgroundModes: [audio]` y permitir continuación audiovisual en segundo plano cuando corresponda. Publicar `playing` solo cuando el reproductor tenga evidencia de reproducción; publicar error cuando falle la preparación o el recurso.
+- [x] **Step 2: Confirmar RED.** Ejecutar `bash scripts/ci.sh test`; fallan los tests nuevos porque faltan los estados y el control de solicitudes vigentes.
+- [x] **Step 3: Implementar el flujo mínimo.** SearchView abre con el campo visible, envía al pulsar Buscar, muestra resultados con miniatura/metadatos y toca para reproducir. Usar tokens de solicitud o cancelación con comprobación de vigencia tanto en búsqueda como en preparación de reproducción. Mantener el controlador en la raíz de la app. Configurar AVAudioSession para `.playback`, declarar `UIBackgroundModes: [audio]` y permitir continuación audiovisual en segundo plano cuando corresponda. Publicar `playing` solo cuando el reproductor tenga evidencia de reproducción; publicar error cuando falle la preparación o el recurso.
 - [ ] **Step 4: Verificar GREEN y generar el IPA del prototipo.** Ejecutar los dos comandos de CI, instalar con AltStore Classic y completar en el iPhone: búsqueda por texto, un video público con video/audio, una canción y bloqueo de pantalla. Anotar contenido probado, versión de iOS y resultado real. El IPA Release utiliza el proveedor real, no el stub.
 - [ ] **Step 5: Aplicar el hito técnico de la especificación.** Si la extracción o el segundo plano fallan, investigar aquí y repetir la prueba; no ampliar la biblioteca hasta resolverlo. Si no se obtiene reproducción local estable, presentar la evidencia y revisar el diseño con el usuario antes de cambiar de vía. La instalación inicial la realiza el usuario en su teléfono con la guía y el IPA proporcionados.
-- [ ] **Step 6: Commit.** Guardar prototipo, pruebas y guía; mensaje `feat: add in-app search and background playback prototype`.
+- [x] **Step 6: Commit.** Guardar prototipo, pruebas y guía; mensaje `feat: add in-app search and background playback prototype`.
 
 ## Task 3: Cola, controles del sistema y recuperación limitada
 

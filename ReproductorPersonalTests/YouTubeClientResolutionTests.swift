@@ -6,7 +6,7 @@ final class YouTubeClientResolutionTests: XCTestCase {
     func testNativeHLSCanResolveWithoutAWebPlayer() async throws {
         XCTAssertTrue(URLProtocol.registerClass(NativePlaybackFixture.self))
         defer { URLProtocol.unregisterClass(NativePlaybackFixture.self) }
-        let resource = try await YouTubeClient().resolve(videoID: "aaaaaaaaaaa")
+        let resource = try await YouTubeClient().resolve(videoID: "aaaaaaaaaa0")
         XCTAssertEqual(resource.url, URL(string: "https://media.example.test/native.m3u8"))
         XCTAssertGreaterThan(try XCTUnwrap(resource.expiresAt), Date().addingTimeInterval(30))
     }
@@ -14,7 +14,7 @@ final class YouTubeClientResolutionTests: XCTestCase {
     func testNativeCombinedMP4CanResolveWithoutAWebPlayer() async throws {
         XCTAssertTrue(URLProtocol.registerClass(CombinedPlaybackFixture.self))
         defer { URLProtocol.unregisterClass(CombinedPlaybackFixture.self) }
-        let resource = try await YouTubeClient().resolve(videoID: "aaaaaaaaaaa")
+        let resource = try await YouTubeClient().resolve(videoID: "aaaaaaaaaa0")
         XCTAssertEqual(resource.url, URL(string: "https://media.example.test/native.mp4"))
     }
 
@@ -22,7 +22,7 @@ final class YouTubeClientResolutionTests: XCTestCase {
         XCTAssertTrue(URLProtocol.registerClass(SABRPlaybackFixture.self))
         defer { URLProtocol.unregisterClass(SABRPlaybackFixture.self) }
         do {
-            _ = try await YouTubeClient().resolve(videoID: "aaaaaaaaaaa")
+            _ = try await YouTubeClient().resolve(videoID: "aaaaaaaaaa0")
             XCTFail("SABR must not be passed to AVPlayer")
         } catch {
             XCTAssertEqual(error as? AppError, .unavailable)
@@ -32,14 +32,14 @@ final class YouTubeClientResolutionTests: XCTestCase {
     func testDirectMP4SurvivesAnotherFormatsDecoderFailure() async throws {
         XCTAssertTrue(URLProtocol.registerClass(MixedPlaybackFixture.self))
         defer { URLProtocol.unregisterClass(MixedPlaybackFixture.self) }
-        let resource = try await YouTubeClient().resolve(videoID: "aaaaaaaaaaa")
+        let resource = try await YouTubeClient().resolve(videoID: "aaaaaaaaaa0")
         XCTAssertEqual(resource.url, URL(string: "https://media.example.test/native.mp4"))
     }
 
     func testDirectMP4CanReplaceHLSWhoseDecodingFails() async throws {
         XCTAssertTrue(URLProtocol.registerClass(EncryptedHLSPlaybackFixture.self))
         defer { URLProtocol.unregisterClass(EncryptedHLSPlaybackFixture.self) }
-        let resource = try await YouTubeClient().resolve(videoID: "aaaaaaaaaaa")
+        let resource = try await YouTubeClient().resolve(videoID: "aaaaaaaaaa0")
         XCTAssertEqual(resource.url, URL(string: "https://media.example.test/native.mp4"))
     }
 }
@@ -48,7 +48,7 @@ final class YouTubeClientResolutionTests: XCTestCase {
 // access and no replacement of the client's actual resolution code.
 private class NativePlaybackFixture: URLProtocol, @unchecked Sendable {
     class var playerJSON: String {
-        #"{"playabilityStatus":{"status":"OK"},"videoDetails":{"videoId":"aaaaaaaaaaa"},"streamingData":{"hlsManifestUrl":"https://media.example.test/native.m3u8","expiresInSeconds":"60"}}"#
+        #"{"playabilityStatus":{"status":"OK"},"videoDetails":{"videoId":"aaaaaaaaaa0"},"streamingData":{"hlsManifestUrl":"https://media.example.test/native.m3u8","expiresInSeconds":"60"}}"#
     }
 
     override class func canInit(with request: URLRequest) -> Bool {
@@ -71,24 +71,24 @@ private class NativePlaybackFixture: URLProtocol, @unchecked Sendable {
 
 private final class CombinedPlaybackFixture: NativePlaybackFixture, @unchecked Sendable {
     override class var playerJSON: String {
-        #"{"playabilityStatus":{"status":"OK"},"videoDetails":{"videoId":"aaaaaaaaaaa"},"streamingData":{"formats":[{"itag":18,"mimeType":"video/mp4","fps":30,"url":"https://media.example.test/native.mp4"}]}}"#
+        #"{"playabilityStatus":{"status":"OK"},"videoDetails":{"videoId":"aaaaaaaaaa0"},"streamingData":{"formats":[{"itag":18,"mimeType":"video/mp4","fps":30,"url":"https://media.example.test/native.mp4"}]}}"#
     }
 }
 
 private final class SABRPlaybackFixture: NativePlaybackFixture, @unchecked Sendable {
     override class var playerJSON: String {
-        #"{"playabilityStatus":{"status":"OK"},"videoDetails":{"videoId":"aaaaaaaaaaa"},"streamingData":{"serverAbrStreamingUrl":"https://media.example.test/sabr"}}"#
+        #"{"playabilityStatus":{"status":"OK"},"videoDetails":{"videoId":"aaaaaaaaaa0"},"streamingData":{"serverAbrStreamingUrl":"https://media.example.test/sabr"}}"#
     }
 }
 
 private final class MixedPlaybackFixture: NativePlaybackFixture, @unchecked Sendable {
     override class var playerJSON: String {
-        #"{"playabilityStatus":{"status":"OK"},"videoDetails":{"videoId":"aaaaaaaaaaa"},"streamingData":{"formats":[{"itag":22,"mimeType":"video/mp4","fps":30,"url":"https://media.example.test/encrypted.mp4?n=encrypted"},{"itag":18,"mimeType":"video/mp4","fps":30,"url":"https://media.example.test/native.mp4"}]}}"#
+        #"{"playabilityStatus":{"status":"OK"},"videoDetails":{"videoId":"aaaaaaaaaa0"},"streamingData":{"formats":[{"itag":22,"mimeType":"video/mp4","fps":30,"url":"https://media.example.test/encrypted.mp4?n=encrypted"},{"itag":18,"mimeType":"video/mp4","fps":30,"url":"https://media.example.test/native.mp4"}]}}"#
     }
 }
 
 private final class EncryptedHLSPlaybackFixture: NativePlaybackFixture, @unchecked Sendable {
     override class var playerJSON: String {
-        #"{"playabilityStatus":{"status":"OK"},"videoDetails":{"videoId":"aaaaaaaaaaa"},"streamingData":{"hlsManifestUrl":"https://media.example.test/n/encrypted/index.m3u8","formats":[{"itag":18,"mimeType":"video/mp4","fps":30,"url":"https://media.example.test/native.mp4"}]}}"#
+        #"{"playabilityStatus":{"status":"OK"},"videoDetails":{"videoId":"aaaaaaaaaa0"},"streamingData":{"hlsManifestUrl":"https://media.example.test/n/encrypted/index.m3u8","formats":[{"itag":18,"mimeType":"video/mp4","fps":30,"url":"https://media.example.test/native.mp4"}]}}"#
     }
 }

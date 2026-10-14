@@ -2,7 +2,7 @@
 
 Fecha: 14 de octubre de 2026.
 
-Estado: alcance de la primera etapa acordado en la conversación; especificación técnica pendiente de revisión del usuario. Todavía no hay una aplicación implementada ni pruebas de reproducción en el iPhone.
+Estado: especificación aprobada por el usuario el 14 de octubre de 2026. El plan de implementación y su método de ejecución se revisan antes de comenzar el código. Todavía no hay una aplicación implementada ni pruebas de reproducción en el iPhone.
 
 ## 1. Objetivo y decisiones acordadas
 

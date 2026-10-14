@@ -28,6 +28,20 @@ final class YouTubeClientResolutionTests: XCTestCase {
             XCTAssertEqual(error as? AppError, .unavailable)
         }
     }
+
+    func testDirectMP4SurvivesAnotherFormatsDecoderFailure() async throws {
+        XCTAssertTrue(URLProtocol.registerClass(MixedPlaybackFixture.self))
+        defer { URLProtocol.unregisterClass(MixedPlaybackFixture.self) }
+        let resource = try await YouTubeClient().resolve(videoID: "aaaaaaaaaaa")
+        XCTAssertEqual(resource.url, URL(string: "https://media.example.test/native.mp4"))
+    }
+
+    func testDirectMP4CanReplaceHLSWhoseDecodingFails() async throws {
+        XCTAssertTrue(URLProtocol.registerClass(EncryptedHLSPlaybackFixture.self))
+        defer { URLProtocol.unregisterClass(EncryptedHLSPlaybackFixture.self) }
+        let resource = try await YouTubeClient().resolve(videoID: "aaaaaaaaaaa")
+        XCTAssertEqual(resource.url, URL(string: "https://media.example.test/native.mp4"))
+    }
 }
 
 // Intercept the third-party request at the URL loading boundary. No YouTube network
@@ -64,5 +78,17 @@ private final class CombinedPlaybackFixture: NativePlaybackFixture, @unchecked S
 private final class SABRPlaybackFixture: NativePlaybackFixture, @unchecked Sendable {
     override class var playerJSON: String {
         #"{"playabilityStatus":{"status":"OK"},"videoDetails":{"videoId":"aaaaaaaaaaa"},"streamingData":{"serverAbrStreamingUrl":"https://media.example.test/sabr"}}"#
+    }
+}
+
+private final class MixedPlaybackFixture: NativePlaybackFixture, @unchecked Sendable {
+    override class var playerJSON: String {
+        #"{"playabilityStatus":{"status":"OK"},"videoDetails":{"videoId":"aaaaaaaaaaa"},"streamingData":{"formats":[{"itag":22,"mimeType":"video/mp4","fps":30,"url":"https://media.example.test/encrypted.mp4?n=encrypted"},{"itag":18,"mimeType":"video/mp4","fps":30,"url":"https://media.example.test/native.mp4"}]}}"#
+    }
+}
+
+private final class EncryptedHLSPlaybackFixture: NativePlaybackFixture, @unchecked Sendable {
+    override class var playerJSON: String {
+        #"{"playabilityStatus":{"status":"OK"},"videoDetails":{"videoId":"aaaaaaaaaaa"},"streamingData":{"hlsManifestUrl":"https://media.example.test/n/encrypted/index.m3u8","formats":[{"itag":18,"mimeType":"video/mp4","fps":30,"url":"https://media.example.test/native.mp4"}]}}"#
     }
 }

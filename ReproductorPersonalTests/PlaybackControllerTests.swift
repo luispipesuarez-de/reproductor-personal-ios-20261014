@@ -93,6 +93,27 @@ final class PlaybackControllerTests: XCTestCase {
         XCTAssertNil(controller.player.currentItem)
     }
 
+    func testRepeatedSelectionDuringPreparationUsesOneResolution() async throws {
+        let url = try audioFile()
+        let recorder = QueryRecorder()
+        let gate = RequestGate<PlaybackResource>()
+        let started = expectation(description: "first resolution")
+        let controller = PlaybackController(source: StubYouTubeProvider(onResolve: { id in
+            await recorder.append(id)
+            let requests = await recorder.queries
+            if requests.count == 1 { return try await gate.request(id, started: started) }
+            return PlaybackResource(url: url, expiresAt: nil)
+        }))
+        let first = Task { await controller.play(videoA) }
+        await fulfillment(of: [started], timeout: 1)
+        await controller.play(videoA)
+        await gate.complete(videoA.id, with: .success(PlaybackResource(url: url, expiresAt: nil)))
+        await first.value
+        let requests = await recorder.queries
+        XCTAssertEqual(requests, [videoA.id])
+        controller.pause()
+    }
+
     private func audioFile() throws -> URL {
         let url = try TestAudioAsset.makeSilenceFile()
         addTeardownBlock { try? FileManager.default.removeItem(at: url) }

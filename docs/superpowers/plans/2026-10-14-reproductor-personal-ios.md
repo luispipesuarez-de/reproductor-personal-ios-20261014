@@ -159,7 +159,7 @@ XCTAssertEqual(selectedVideoID, "bbbbbbbbbbb")
 - Internal event handlers: `func handlePlaybackFailure(entryID: UUID, progressSeconds: Double) async`, `func handleInterruption(ended: Bool, shouldResume: Bool)` y `func handleHeadphonesDisconnected()`; los observadores de producción y tests utilizan el mismo comportamiento.
 - Produces: `SystemMediaControls.init(controller: PlaybackController)` y `func update(video: Video?, elapsed: Double, duration: Double?, isPlaying: Bool)`; sus comandos llaman al controlador anterior sin retenerlo mediante un ciclo.
 
-- [ ] **Step 1: Escribir pruebas fallidas de cola, recuperación y eventos.** Dos ocurrencias de un mismo video reciben UUID distintos. Quitar una entrada anterior mantiene el contenido actual; quitar la actual pausa y deja seleccionada la siguiente disponible, o la anterior si era la última. Un índice restaurado inválido se convierte en ausencia de selección; el progreso negativo o no finito se normaliza a 0. Al finalizar la cola se pausa sin volver al inicio. Afirmaciones de los casos críticos:
+- [x] **Step 1: Escribir pruebas fallidas de cola, recuperación y eventos.** Dos ocurrencias de un mismo video reciben UUID distintos. Quitar una entrada anterior mantiene el contenido actual; quitar la actual pausa y deja seleccionada la siguiente disponible, o la anterior si era la última. Un índice restaurado inválido se convierte en ausencia de selección; el progreso negativo o no finito se normaliza a 0. Al finalizar la cola se pausa sin volver al inicio. Afirmaciones de los casos críticos:
 
 ```swift
 // testRepeatedVideoKeepsIndependentQueueEntries
@@ -174,11 +174,13 @@ XCTAssertEqual(player.state, .paused(videoA))
 XCTAssertEqual(nativePlayer.rate, 0)
 ```
 
-- [ ] **Step 2: Confirmar RED.** Ejecutar `bash scripts/ci.sh test`; fallan las pruebas nuevas por ausencia de la cola y los manejadores de recuperación.
-- [ ] **Step 3: Implementar la cola con un único reproductor.** El método `play(Video)` delega en el método de lista. Resolver el actual y preparar el siguiente cuando sea posible; comprobar vigencia al usar un recurso preparado. Observar final/error del elemento nativo y mantener la correspondencia con el UUID de la ocurrencia. Error de extracción del siguiente pausa y muestra el fallo; el usuario decide pasar o reintentar. Los reintentos automáticos se limitan a una recuperación de un recurso caducado; un error genérico de extracción no provoca un bucle.
-- [ ] **Step 4: Integrar sesión y comandos del sistema.** Publicar título, autor, progreso y estado en MPNowPlayingInfoCenter. Añadir reproducción, pausa, siguiente, anterior y seek en MPRemoteCommandCenter. Retirar observadores y handlers al liberar sus propietarios. Pausar al desconectar auriculares; al acabar una interrupción reanudar únicamente si el sistema lo permite y el usuario no había pausado. La restauración no obtiene URLs ni reproduce hasta que el usuario pulse reproducir.
+- [x] **Step 2: Confirmar RED.** Ejecutar `bash scripts/ci.sh test`; fallan las pruebas nuevas por ausencia de la cola y los manejadores de recuperación.
+- [x] **Step 3: Implementar la cola con un único reproductor.** El método `play(Video)` delega en el método de lista. Resolver el actual y preparar el siguiente cuando sea posible; comprobar vigencia al usar un recurso preparado. Observar final/error del elemento nativo y mantener la correspondencia con el UUID de la ocurrencia. Error de extracción del siguiente pausa y muestra el fallo; el usuario decide pasar o reintentar. Los reintentos automáticos se limitan a una recuperación de un recurso caducado; un error genérico de extracción no provoca un bucle.
+- [x] **Step 4: Integrar sesión y comandos del sistema.** Publicar título, autor, progreso y estado en MPNowPlayingInfoCenter. Añadir reproducción, pausa, siguiente, anterior y seek en MPRemoteCommandCenter. Retirar observadores y handlers al liberar sus propietarios. Pausar al desconectar auriculares; al acabar una interrupción reanudar únicamente si el sistema lo permite y el usuario no había pausado. La restauración no obtiene URLs ni reproduce hasta que el usuario pulse reproducir.
 - [ ] **Step 5: Confirmar GREEN y probar el cambio automático bloqueado.** Ejecutar tests; después, en el iPhone, pasar por una cola de tres elementos con pantalla bloqueada y verificar los comandos, desconexión de auriculares e interrupción. Un test de cola pura no demuestra transición real en segundo plano.
-- [ ] **Step 6: Commit.** Mensaje `feat: add playback queue and system media controls`.
+- [x] **Step 6: Commit.** Mensaje `feat: add playback queue and system media controls`.
+
+Verificación automatizada: 51/51 pruebas correctas en [38680277405](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38680277405), commit `73fb437`. La parte física de Step 5 se traslada a Task 6, cuando Task 5 exponga la cola en la interfaz; permanece pendiente.
 
 ## Task 4: Biblioteca local que conserva los datos
 

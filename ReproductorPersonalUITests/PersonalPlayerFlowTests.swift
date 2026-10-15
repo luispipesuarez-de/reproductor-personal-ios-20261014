@@ -21,8 +21,9 @@ final class PersonalPlayerFlowTests: XCTestCase {
         XCTAssertTrue(app.buttons["favorite-aaaaaaaaaaa"].waitForExistence(timeout: 5))
         app.navigationBars.buttons.element(boundBy: 0).tap()
         app.buttons["createPlaylist"].tap()
-        let name = app.alerts.textFields["playlistNameField"]
+        let name = app.alerts["Nueva lista"].textFields.firstMatch
         XCTAssertTrue(name.waitForExistence(timeout: 3))
+        XCTAssertEqual(name.placeholderValue, "Nombre de la lista")
         name.typeText("Mi lista")
         app.alerts.buttons["Crear"].tap()
         XCTAssertTrue(app.staticTexts["Mi lista"].waitForExistence(timeout: 5))

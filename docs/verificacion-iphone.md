@@ -4,7 +4,7 @@ Estado: instalado y abierto en el iPhone el 14 de octubre de 2026, según confir
 
 Dispositivo: iPhone 13. iOS: 26.2 (información del usuario).
 
-Prototipo disponible: versión 0.1.0, compilación 2, commit `6c619ac`. [CI 38638945973](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38638945973): 25/25 tests correctos y Release/IPA comprobados. Estos resultados proceden de fixtures y un WAV local; no se han reproducido videos reales de YouTube en el iPhone.
+Prototipo instalado en la primera prueba: versión 0.1.0, compilación 2, commit `6c619ac`. Actualización disponible: versión 0.1.0, compilación 3, commit `586a761`. [CI 38676199279](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38676199279): 28/28 tests correctos y Release/IPA comprobados. Los tests proceden de fixtures y un WAV local; no demuestran reproducción real de YouTube en el iPhone.
 
 ## Hito 1 — antes de ampliar la biblioteca
 
@@ -12,7 +12,8 @@ Prototipo disponible: versión 0.1.0, compilación 2, commit `6c619ac`. [CI 3863
 | --- | --- | --- |
 | Buscar por texto sin pegar enlace | Resultado «Frankie Ruíz - Tú Con Él (Visualizer)» | Resultado seleccionado y vista de reproducción abierta en la captura del usuario |
 | Video público: imagen y sonido | Pendiente | No probado |
-| Canción pública | «Frankie Ruíz - Tú Con Él (Visualizer)» y otro resultado de una búsqueda distinta | Fallan: «No se pudo reproducir» / «Este contenido no está disponible en esta versión» |
+| Canción pública, compilación 2 | «Frankie Ruíz - Tú Con Él (Visualizer)» y otro resultado de una búsqueda distinta | Fallan: «No se pudo reproducir» / «Este contenido no está disponible en esta versión» |
+| Repetir con la compilación 3 | La misma canción | Pendiente de instalar y probar |
 | Audio al bloquear la pantalla | Pendiente | No probado |
 | Audio al cambiar de aplicación | Pendiente | No probado |
 | Anuncios insertados durante estas pruebas | Pendiente | No probado |

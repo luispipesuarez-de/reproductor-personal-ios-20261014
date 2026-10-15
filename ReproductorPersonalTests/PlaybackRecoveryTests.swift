@@ -121,7 +121,7 @@ final class PlaybackRecoveryTests: PlaybackTestCase {
     func testLatePrefetchCannotReinsertARemovedEntry() async throws {
         let url = try audioURL()
         let gate = RequestGate<PlaybackResource>()
-        let started = expectation(description: "next entry is being prepared")
+        let started = XCTestExpectation(description: "next entry is being prepared")
         let controller = PlaybackController(source: StubYouTubeProvider(onResolve: { id in
             if id == videoB.id { return try await gate.request(id, started: started) }
             return PlaybackResource(url: url, expiresAt: nil)

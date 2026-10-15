@@ -9,6 +9,7 @@ struct PlayerView: UIViewControllerRepresentable {
         controller.player = player
         controller.videoGravity = .resizeAspect
         controller.allowsPictureInPicturePlayback = true
+        controller.updatesNowPlayingInfoCenter = false
         return controller
     }
 

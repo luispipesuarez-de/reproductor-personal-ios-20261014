@@ -47,11 +47,22 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: personal.reproductor.ios.tests
         GENERATE_INFOPLIST_FILE: YES
+  ReproductorPersonalUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [ReproductorPersonalUITests]
+    dependencies:
+      - target: ReproductorPersonal
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: personal.reproductor.ios.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: ReproductorPersonal
 schemes:
   ReproductorPersonal:
     build:
       targets:
         ReproductorPersonal: all
     test:
-      targets: [ReproductorPersonalTests]
+      targets: [ReproductorPersonalTests, ReproductorPersonalUITests]
       gatherCoverageData: true

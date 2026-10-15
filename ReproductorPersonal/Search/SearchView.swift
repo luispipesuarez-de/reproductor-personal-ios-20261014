@@ -175,7 +175,7 @@ struct SearchView: View {
             .navigationTitle("Ahora suena")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) { Button("Cerrar") { showPlayer = false } }
+                ToolbarItem(placement: .confirmationAction) { Button("Cerrar") { showPlayer = false }.accessibilityIdentifier("closePlayer") }
             }
         }
     }

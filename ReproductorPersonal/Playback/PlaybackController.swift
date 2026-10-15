@@ -151,6 +151,9 @@ final class PlaybackController: ObservableObject {
         await startCurrent(progress: 0, usePrepared: true)
     }
 
+    // Task 5 queue-selection contract, before its RED run.
+    func playQueueEntry(id: UUID) async {}
+
     func previous() async {
         guard queue.previous() != nil else { seek(to: 0); return }
         await startCurrent(progress: 0)

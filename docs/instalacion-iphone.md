@@ -1,6 +1,6 @@
 # Instalar y usar Reproductor desde Windows
 
-Dispositivo del usuario: iPhone 13 con iOS 26.2. La app requiere iOS 16 o posterior. Entrega: versión 0.1.0, compilación 4, comprobada en [38753161729](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38753161729): 69 pruebas unitarias, 4 de interfaz y compilación Release correctas. Falta probar esta actualización en el teléfono.
+Dispositivo del usuario: iPhone 13 con iOS 26.2. La app requiere iOS 16 o posterior. Entrega: versión 0.1.0, compilación 5, comprobada en [38813838217](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38813838217): 71 pruebas unitarias, 4 de interfaz y compilación Release correctas. Falta probar esta actualización en el teléfono.
 
 ## Actualizar la app que ya tienes
 
@@ -33,7 +33,16 @@ Si tu iPhone no aparece, vuelve a conectarlo desbloqueado y abre su pantalla Res
 
 La biblioteca y la cola se guardan en el almacenamiento privado de la app. La escucha necesita conexión; los registros locales contienen referencias y metadatos. Al abrir de nuevo, la cola se restaura en pausa y la app obtiene el flujo de YouTube al reanudar.
 
-## Primera comprobación en el iPhone
+## Repetir la prueba de Favoritos después de actualizar
+
+1. Comprueba que aparecen el favorito, la lista y la cola que ya habías guardado.
+2. Pausa la reproducción y cierra Reproductor desde el selector de aplicaciones del iPhone.
+3. Abre Reproductor de nuevo y entra directamente en **Biblioteca → Favoritos**, sin entrar antes en Buscar.
+4. Toca **Rata Blanca - Talisman (AUDIO)**. Comprueba que comienza a sonar. Repite el cierre y la apertura una segunda vez para confirmar el resultado.
+
+Esta actualización prepara el contexto anónimo necesario para reproducir un elemento guardado desde el inicio. La regresión automática pasó; falta esta comprobación del contenido real en el teléfono. Anota si la biblioteca se conservó durante la instalación y si el favorito reproduce después de reiniciar.
+
+## Otras comprobaciones en el iPhone
 
 1. Busca la misma canción que ya funcionó. Comprueba imagen/sonido y prueba pausa/reanudación tanto en los controles de la app como en los del video.
 2. Busca otras dos canciones y, en sus tres puntos, toca «Añadir a la cola». Abre «Ahora suena» → «Ver cola» y confirma el orden de tres elementos.
@@ -52,4 +61,4 @@ Las apps gestionadas desde **AltStore → My Apps** pueden renovarse con **Refre
 
 En un Windows nuevo, sigue [la instalación oficial de AltStore Classic](https://faq.altstore.io/altstore-classic/how-to-install-altstore-windows) para iTunes, iCloud y AltServer. Conecta el iPhone, acepta confiar en el equipo y activa la sincronización Wi-Fi en iTunes. El perfil de desarrollador y Modo de desarrollador ya se habilitaron en el iPhone del usuario.
 
-Puedes descargar el ZIP **ReproductorPersonal-2** de [la ejecución 38753161729](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38753161729), extraerlo y seleccionar **ReproductorPersonal.ipa**. El IPA no está firmado: AltServer realiza la firma personal durante la instalación.
+Puedes descargar el ZIP **ReproductorPersonal-4** de [la ejecución 38813838217](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38813838217), extraerlo y seleccionar **ReproductorPersonal.ipa**. El IPA no está firmado: AltServer realiza la firma personal durante la instalación.

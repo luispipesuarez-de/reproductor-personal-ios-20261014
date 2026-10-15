@@ -1,8 +1,8 @@
 # Estado de la primera etapa
 
-Entrega preparada: versión 0.1.0, compilación 4, código `0b391ba`, rama `feat/reproductor-ios` del [repositorio privado](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014). El IPA está comprobado para firma personal. La validación física es parcial: el usuario confirmó el avance automático de una cola de tres canciones con pantalla bloqueada. La biblioteca y las demás comprobaciones siguen abiertas.
+Entrega preparada: versión 0.1.0, compilación 5, código `65d54fc`, rama `feat/reproductor-ios` del [repositorio privado](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014). El IPA está comprobado para firma personal. La compilación 5 está pendiente de validación física. En la compilación 4, el usuario confirmó una cola de tres canciones con avance automático y pantalla bloqueada y la conservación de favorito, lista y cola al reabrir en pausa. Las demás comprobaciones siguen abiertas.
 
-Fallo físico abierto: el usuario confirma que favorito, lista y cola se conservan en pausa al reabrir, pero un favorito no reproduce hasta buscar primero la canción. La captura de «Rata Blanca - Talisman (AUDIO)» muestra «No se pudo preparar este contenido». El diagnóstico compara el contexto anónimo perdido al reiniciar con el obtenido al buscar; se prepararon regresiones de arranque frío y una ampliación del flujo UI. La corrección todavía no está implementada ni verificada. El IPA disponible sigue siendo la compilación 4.
+La compilación 5 corrige la preparación del contexto anónimo al reproducir un favorito después de reiniciar la app. En la compilación 4, «Rata Blanca - Talisman (AUDIO)» fallaba con «No se pudo preparar este contenido», y funcionaba después de buscarla. El cliente nuevo inicializa el contexto mediante la API existente antes de solicitar el reproductor, sin depender de una búsqueda manual ni de cargar la página del video. Las regresiones automáticas y el recorrido de reapertura pasaron; falta repetir el caso con ese contenido en el iPhone. El formato de biblioteca y el identificador de la app se conservan.
 
 ## Comportamiento implementado
 
@@ -16,23 +16,24 @@ Fallo físico abierto: el usuario confirma que favorito, lista y cola se conserv
 
 La extracción consulta YouTube desde el dispositivo. Se conservan HLS/MP4 y la ruta alternativa HLS para respuestas SABR, sin servidor propio ni credenciales de cuenta. La integración con la cuenta queda para la segunda etapa.
 
-## Verificación de la compilación 4
+## Verificación de la compilación 5
 
-[Ejecución 38753161729](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38753161729), commit público `a16da8f`, con el mismo código que `0b391ba` del repositorio privado:
+[Ejecución 38813838217](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38813838217), commit público `9850a39`, con el mismo código que `65d54fc` del repositorio privado:
 
 | Comprobación | Resultado |
 | --- | --- |
-| `bash scripts/ci.sh test` | 69/69 unitarias y 4/4 de interfaz; cero fallos |
+| `bash scripts/ci.sh test` | 71/71 unitarias y 4/4 de interfaz; cero fallos |
+| Favorito después de reiniciar | Contexto anónimo preparado antes de la primera petición del reproductor; ausencia de contexto devuelve error controlado |
 | Cola y recuperación | Transiciones nativas con WAV local, identidad de entradas, reintento y progreso conservado |
 | Intención de reproducción | Play/pausa nativos, pausa durante preparación y reanudación tras interrupción cubiertos por regresiones |
 | Biblioteca | Archivos reales: ida/vuelta, duplicados, fallos de escritura y protección de datos incompatibles/corruptos |
-| Interfaz | Buscar→favorito→crear/añadir lista; reapertura en pausa; estados vacío/error; navegación con texto grande y modo oscuro |
-| `bash scripts/ci.sh ipa` | Release correcto, artefacto ReproductorPersonal-2 |
+| Interfaz | Buscar→favorito→crear/añadir lista; reapertura en pausa y reproducción del favorito; estados vacío/error; navegación con texto grande y modo oscuro |
+| `bash scripts/ci.sh ipa` | Release correcto, artefacto ReproductorPersonal-4 |
 | Contenido del IPA | CRC correcto, Mach-O arm64, identificador y versión esperados, audio en segundo plano; proveedor de pruebas ausente |
 
 Herramientas de CI: Xcode 26.6 (17F113), XcodeGen 2.46.0; simulador iPhone 17 Pro. Las pruebas de reproducción usan un WAV local y datos controlados. No demuestran compatibilidad de YouTube en el teléfono ni funcionamiento de accesorios físicos. Las capturas del simulador se inspeccionaron para verificar la distribución y legibilidad de la interfaz.
 
-Archivo: `build/ReproductorPersonal.ipa`. Identificador: `personal.reproductor.ios`. Versión: 0.1.0/4. iOS mínimo: 16.0. `UIBackgroundModes: [audio]`. IPA sin firmar. Tamaño: 1.843.134 bytes. SHA-256: `3b00cd74ff20160f426c9008acfb3fd19ff12fc8a85b1330fa049bf7f3fa6ef5`. La compilación 3 comprobada se conserva en `build/anteriores/ReproductorPersonal-compilacion-3.ipa`.
+Archivo: `build/ReproductorPersonal.ipa`. Identificador: `personal.reproductor.ios`. Versión: 0.1.0/5. iOS mínimo: 16.0. `UIBackgroundModes: [audio]`. IPA sin firmar. Tamaño: 1.839.018 bytes. SHA-256: `d90479b4ea258c7c564515605115ac39c4e3381af1dfd5d2348f87e64b187783`. La compilación 4 anterior se conserva en `build/anteriores/ReproductorPersonal-compilacion-4.ipa`.
 
 Xcode conserva advertencias de extracción de metadatos sin AppIntents y de orientaciones para iPad. No hubo errores de compilación ni fallos de tests. Esta entrega se prepara para el iPhone indicado por el usuario; no se ha realizado validación física en iPad.
 
@@ -48,12 +49,12 @@ Decisiones vigentes:
 - Conservar listas locales y referencias, sin adelantar autenticación, sincronización ni descargas.
 - Compilar una copia pública de código autorizada por el usuario, después del bloqueo de cuota/facturación del repositorio privado. La copia tiene historial nuevo y excluye conversaciones, capturas, registros y archivos de cuenta.
 - Trabajar en la carpeta y rama aprobadas, usando PowerShell para el registro de tareas en Windows. Las interfaces vacías usadas para demostrar RED ya fueron reemplazadas.
-- Considerar la evidencia física por separado de CI. Los resultados de la compilación 3 no validan automáticamente la compilación 4.
+- Considerar la evidencia física por separado de CI. Los resultados físicos de las compilaciones 3 y 4 no validan automáticamente la compilación 5.
 
 La revisión anterior del prototipo corrigió selección de formatos y preparación duplicada con regresiones. La ruta HLS alternativa pasó [38676199279](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38676199279), con 28 pruebas y el IPA de la compilación 3. El usuario confirmó en esa versión imagen/sonido, continuidad al salir y bloquear y ausencia de anuncios en la muestra probada.
 
 ## Pruebas físicas abiertas
 
-El usuario confirmó la prueba guiada de tres canciones y su avance automático con la pantalla bloqueada. La primera etapa sigue pendiente de dos videos (uno de al menos quince minutos), quince minutos medidos de audio bloqueado, controles del sistema, auriculares/interrupciones, biblioteca, conservación durante una actualización, fallos de conexión y accesibilidad. No se promete cobertura del catálogo ni ausencia universal de anuncios.
+La primera comprobación de la compilación 5 es instalar sobre la app existente, verificar la biblioteca y reproducir directamente desde Favoritos después de cerrar/reabrir, sin pasar por Buscar. El usuario confirmó en la compilación 4 la prueba guiada de tres canciones y su avance automático con la pantalla bloqueada. La primera etapa sigue pendiente de dos videos (uno de al menos quince minutos), quince minutos medidos de audio bloqueado, controles del sistema, auriculares/interrupciones, biblioteca, conservación durante una actualización, fallos de conexión y accesibilidad. No se promete cobertura del catálogo ni ausencia universal de anuncios.
 
 La instalación requiere participación del usuario porque esta sesión no tiene control del iPhone. Sigue [instalacion-iphone.md](instalacion-iphone.md) y registra las observaciones en [verificacion-iphone.md](verificacion-iphone.md). El registro y la rama se conservan para continuar con esos resultados.

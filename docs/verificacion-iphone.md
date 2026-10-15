@@ -39,7 +39,7 @@ Entrega anterior del 15 de octubre: el IPA 0.1.0/4 se instaló desde `build/Repr
 | Buscar y escuchar tres canciones públicas | Pasó según el usuario | Confirmó la guía de tres canciones; títulos no indicados |
 | Ver dos videos públicos, uno de al menos quince minutos | No probado | Títulos, imagen/sonido y duración |
 | Escuchar quince minutos con el teléfono bloqueado | Pasó en 5 según el usuario | Después de pedir una cola suficiente, anotar la hora y escuchar quince minutos bloqueado, respondió «Sí, sin problemas y sin anuncios». Duración de la prueba guiada confirmada por el usuario, no cronometrada por el agente |
-| Cambiar entre apps con la nueva versión | No probado | Continuidad del audio |
+| Cambiar entre apps con la nueva versión | Pasó en 5 según el usuario | Respondió «Sí» a si la música continúa sin interrupciones tras abrir Notas durante un minuto y volver a Reproductor |
 | Pasar automáticamente por una cola de tres elementos con pantalla bloqueada | Pasó según el usuario | Confirmó continuidad y paso automático a la segunda y tercera tras la guía; duración no medida |
 | Pausar, reanudar, siguiente y anterior desde el sistema | Pasó en 5 según el usuario | Tras pedirle una cola de tres elementos y probar los cuatro controles con el iPhone bloqueado, respondió «Sí, guarda» |
 | Desconectar auriculares e interrumpir el audio | No probado | Pausa y reanudación según la intención del usuario |
@@ -71,3 +71,7 @@ El 15 de octubre de 2026, después de la guía de reproducir una canción, añad
 ## Escucha prolongada — confirmación del usuario
 
 El 15 de octubre de 2026 se pidió preparar una cola de más de quince minutos, anotar la hora de inicio y escuchar quince minutos con el iPhone bloqueado, comprobando continuidad, avance automático, anuncios y errores. El usuario respondió «Sí, sin problemas y sin anuncios». Se registra la prueba guiada como pasada según el usuario en la compilación 5: sin cortes ni errores informados, cambios automáticos y ningún anuncio observado en esa muestra. No se proporcionaron títulos ni horas de inicio/final; el agente no midió la duración ni observó directamente el teléfono. Esta muestra no acredita todos los videos, accesorios ni la conservación completa de la biblioteca.
+
+## Cambiar de aplicación — confirmación del usuario
+
+El 15 de octubre de 2026 se pidió reproducir una canción, abrir Notas durante un minuto y volver a Reproductor. El usuario respondió «Sí» a si la música continuaba sin interrupciones. Se registra esa prueba guiada como pasada según el usuario en la compilación 5; no se observó directamente el teléfono ni se midió el intervalo. Las demás pruebas de videos, accesorios, biblioteca, actualización y accesibilidad permanecen abiertas.

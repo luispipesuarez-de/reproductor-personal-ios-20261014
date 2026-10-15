@@ -34,6 +34,9 @@ final class PlaybackController: ObservableObject {
     private var activeResource: PlaybackResource?
     private var wantsPlayback = false
     private var resumeAfterInterruption = false
+    private var isStartingItem = false
+    private var isInterrupted = false
+    private var nativeEndCandidateEntryID: UUID?
     private var recoveredEntries: Set<UUID> = []
     private var recoveringEntryID: UUID?
     private var timeObservation: NSKeyValueObservation?
@@ -93,6 +96,8 @@ final class PlaybackController: ObservableObject {
         requestID = UUID()
         wantsPlayback = false
         resumeAfterInterruption = false
+        isStartingItem = false
+        nativeEndCandidateEntryID = nil
         player.pause()
         updateProgress()
         guard let video = queue.current?.video else { return }
@@ -111,6 +116,8 @@ final class PlaybackController: ObservableObject {
         let currentRequest = UUID()
         requestID = currentRequest
         wantsPlayback = true
+        isStartingItem = true
+        nativeEndCandidateEntryID = nil
         do {
             try AudioSessionController.configure()
             if let item = player.currentItem, item.duration.seconds.isFinite,
@@ -118,6 +125,7 @@ final class PlaybackController: ObservableObject {
                 await nativeSeek(0)
             }
             guard requestID == currentRequest, !Task.isCancelled else { return }
+            isStartingItem = false
             state = .loading(entry.video)
             player.play()
             prepareNext()
@@ -201,6 +209,9 @@ final class PlaybackController: ObservableObject {
     func handleInterruption(ended: Bool, shouldResume: Bool) {
         if !ended {
             resumeAfterInterruption = wantsPlayback
+            isInterrupted = true
+            isStartingItem = false
+            nativeEndCandidateEntryID = nil
             requestID = UUID()
             player.pause()
             updateProgress()
@@ -208,7 +219,10 @@ final class PlaybackController: ObservableObject {
         } else {
             let resume = shouldResume && resumeAfterInterruption && wantsPlayback
             resumeAfterInterruption = false
+            isInterrupted = false
             if resume {
+                // Preserve intention while the interruption's pause observation is queued.
+                isStartingItem = true
                 let interruptionRequest = requestID
                 Task { [weak self] in
                     guard let self, self.wantsPlayback, self.requestID == interruptionRequest else { return }
@@ -241,6 +255,8 @@ final class PlaybackController: ObservableObject {
         activeEntryID = nil
         activeResource = nil
         wantsPlayback = autoplay
+        isStartingItem = true
+        nativeEndCandidateEntryID = nil
         player.pause()
         elapsed = progress.isFinite ? max(0, progress) : 0
         duration = nil
@@ -268,6 +284,7 @@ final class PlaybackController: ObservableObject {
             try AudioSessionController.configure()
             if elapsed > 0 { await nativeSeek(elapsed) }
             guard requestID == currentRequest, !Task.isCancelled else { return }
+            isStartingItem = false
             if autoplay { player.play() }
             else { state = .paused(entry.video) }
             prepareNext()
@@ -313,6 +330,8 @@ final class PlaybackController: ObservableObject {
         requestID = UUID()
         wantsPlayback = false
         resumeAfterInterruption = false
+        isStartingItem = false
+        nativeEndCandidateEntryID = nil
         activeEntryID = nil
         activeResource = nil
         discardPrepared()
@@ -335,7 +354,10 @@ final class PlaybackController: ObservableObject {
                 Task { @MainActor [weak self, weak item] in
                     guard let self, self.player.currentItem === item, self.queue.current?.id == entryID else { return }
                     self.updateProgress()
-                    if self.wantsPlayback { await self.next() }
+                    // AVPlayer may report paused before delivering its natural-end notification.
+                    let shouldAdvance = self.wantsPlayback || self.nativeEndCandidateEntryID == entryID
+                    self.nativeEndCandidateEntryID = nil
+                    if shouldAdvance { await self.next() }
                 }
             },
             center.addObserver(forName: AVPlayerItem.failedToPlayToEndTimeNotification, object: item, queue: .main) { [weak self] _ in
@@ -369,11 +391,22 @@ final class PlaybackController: ObservableObject {
         guard item.status == .readyToPlay else { return }
         updateProgress()
         switch player.timeControlStatus {
-        case .playing: state = .playing(entry.video)
+        case .playing:
+            wantsPlayback = true
+            nativeEndCandidateEntryID = nil
+            state = .playing(entry.video)
         case .paused:
-            if case .loading = state, wantsPlayback { return }
+            if isStartingItem { return }
+            if !isInterrupted {
+                if wantsPlayback { nativeEndCandidateEntryID = entry.id }
+                wantsPlayback = false
+                resumeAfterInterruption = false
+            }
             state = .paused(entry.video)
-        case .waitingToPlayAtSpecifiedRate: state = .loading(entry.video)
+        case .waitingToPlayAtSpecifiedRate:
+            wantsPlayback = true
+            nativeEndCandidateEntryID = nil
+            state = .loading(entry.video)
         @unknown default: break
         }
     }
@@ -397,6 +430,8 @@ final class PlaybackController: ObservableObject {
 
     private func fail(_ error: Error) {
         wantsPlayback = false
+        isStartingItem = false
+        nativeEndCandidateEntryID = nil
         player.pause()
         updateProgress()
         state = .failed(video: queue.current?.video, message: AppError.classify(error).localizedDescription)

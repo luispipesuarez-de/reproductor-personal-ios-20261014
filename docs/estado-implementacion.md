@@ -2,6 +2,8 @@
 
 Entrega preparada: versión 0.1.0, compilación 4, código `0b391ba`, rama `feat/reproductor-ios` del [repositorio privado](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014). El IPA está comprobado para firma personal. La validación física es parcial: el usuario confirmó el avance automático de una cola de tres canciones con pantalla bloqueada. La biblioteca y las demás comprobaciones siguen abiertas.
 
+Fallo físico abierto: el usuario confirma que favorito, lista y cola se conservan en pausa al reabrir, pero un favorito no reproduce hasta buscar primero la canción. La captura de «Rata Blanca - Talisman (AUDIO)» muestra «No se pudo preparar este contenido». El diagnóstico compara el contexto anónimo perdido al reiniciar con el obtenido al buscar; se prepararon regresiones de arranque frío y una ampliación del flujo UI. La corrección todavía no está implementada ni verificada. El IPA disponible sigue siendo la compilación 4.
+
 ## Comportamiento implementado
 
 - Búsqueda por texto, video y audio mediante un único AVQueuePlayer compartido al navegar.

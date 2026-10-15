@@ -2,6 +2,8 @@
 
 Estado: compilación 3 instalada y probada en el iPhone el 14 de octubre de 2026, con reproducción, continuidad al salir/bloquear y sin anuncios observados en esa muestra. En la compilación 4, el usuario confirmó la prueba guiada de una cola de tres canciones que avanza automáticamente con la pantalla bloqueada. Las demás pruebas físicas específicas siguen abiertas.
 
+Incidencia posterior de la compilación 4: los datos del favorito, lista y cola se conservan tras pausar/cerrar/reabrir, según la respuesta «Sí» a esa prueba guiada. Sin embargo, el usuario corrigió el alcance de esa confirmación: al intentar reproducir desde Favoritos después de reabrir aparece «No se pudo preparar este contenido. Intenta de nuevo». La captura muestra «Rata Blanca - Talisman (AUDIO)», de «Lo Mejor del Rock Argentino». Buscar la misma canción y reproducirla hace que después también funcione desde Favoritos, confirmado explícitamente por el usuario. La persistencia de datos y la reproducción posterior son comprobaciones distintas.
+
 Dispositivo: iPhone 13. iOS: 26.2 (información del usuario).
 
 Prototipo de la primera prueba: versión 0.1.0/2, commit `6c619ac`. Versión que funcionó en el teléfono: 0.1.0/3, commit `586a761`, [CI 38676199279](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38676199279). Actualización disponible: 0.1.0/4, commit público `a16da8f`, mismo código que `0b391ba` del repositorio privado. [CI 38753161729](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38753161729): 69/69 pruebas unitarias, 4/4 de interfaz y Release/IPA correctos. Los tests usan respuestas controladas y un WAV local; no demuestran reproducción real de YouTube en el iPhone.
@@ -42,9 +44,10 @@ Actualización del 15 de octubre: el IPA 0.1.0/4 está disponible en `build/Repr
 | Pausar, reanudar, siguiente y anterior desde el sistema | No probado | Resultado de cada comando disponible |
 | Desconectar auriculares e interrumpir el audio | No probado | Pausa y reanudación según la intención del usuario |
 | Anuncios insertados en la prueba ampliada | No probado | Presencia o ausencia observada en esa muestra |
-| Crear, renombrar y borrar una lista; añadir y quitar elementos | No probado | Resultado en la nueva interfaz |
-| Guardar y quitar favoritos sin duplicados | No probado | Resultado y conservación de otras entradas |
-| Cerrar/abrir y recuperar listas, favoritos, recientes y cola en pausa | No probado | Datos conservados y ausencia de inicio automático |
+| Crear, renombrar y borrar una lista; añadir y quitar elementos | Parcial | Crear «Mi música», añadir una canción y conservarla al reabrir confirmados; faltan renombrar, quitar y borrar |
+| Guardar y quitar favoritos sin duplicados | Parcial | Guardar y conservar el favorito confirmados; faltan quitar y comprobar duplicados |
+| Cerrar/abrir y recuperar listas, favoritos, recientes y cola en pausa | Parcial | Favorito, lista y cola conservados y reproducción en pausa confirmados; Recientes no comprobado |
+| Reproducir un favorito inmediatamente después de reabrir | Falló en compilación 4 | Captura y comparación del usuario: falla en frío; funciona después de buscar la misma canción |
 | Actualizar con el mismo identificador conservando la biblioteca | No probado | Instalación de una actualización posterior con datos previos |
 | Búsqueda vacía, contenido no disponible y pérdida de conexión | No probado | Mensajes y posibilidad de continuar usando la biblioteca |
 | Texto grande, VoiceOver, teclado y uso con una mano en el teléfono | No probado | La navegación con texto grande y modo oscuro pasó en simulador; falta la comprobación física |
@@ -52,3 +55,5 @@ Actualización del 15 de octubre: el IPA 0.1.0/4 está disponible en `build/Repr
 Verificación automática de cola y controles: [38680277405](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38680277405), commit `73fb437`, 51/51 pruebas correctas. Incluye tres transiciones con un WAV local, recuperación de progreso, restauración en pausa, eventos de ruta/interrupción y metadatos. Es evidencia del comportamiento programado en el simulador; no verifica accesorios ni controles físicos del iPhone.
 
 Verificación integrada de la compilación 4: [38753161729](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38753161729), 73/73 pruebas y paquete Release correctos. Se inspeccionaron las capturas de Buscar con el reproductor compacto y de Biblioteca con texto grande/modo oscuro: texto visible, controles separados y navegación operable. El recorrido completo de buscar, guardar favorito, crear lista y añadir contenido pasa. Sigue pendiente la comprobación física completa de accesibilidad.
+
+Diagnóstico del favorito en frío: en Windows, sin cookies ni credenciales, la petición nativa inicial para el video `2tkT5Divh0A` devuelve SABR y la página `/watch` devuelve HTTP 429. La API de búsqueda sí devuelve HTTP 200 y un visitante anónimo; con él se obtiene HLS y su manifiesto HTTP 200. Consultar la API con el identificador guardado, sin búsqueda manual, también funciona. En otra petición fría el perfil inicial devolvió `LOGIN_REQUIRED` antes de inicializar el contexto; por eso la prueba cubre preparar el visitante antes de la petición del reproductor. Son observaciones de red en Windows, no códigos HTTP medidos en el iPhone. La comparación del usuario confirma que la búsqueda previa cambia el resultado en su teléfono. No se han modificado los favoritos ni guardado URLs temporales para resolverlo.

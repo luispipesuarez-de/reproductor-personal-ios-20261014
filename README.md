@@ -4,6 +4,8 @@ App personal en SwiftUI con búsqueda interna de videos y canciones, reproducci�
 
 Entrega: versión 0.1.0, compilación 4. La verificación automática pasó 69 pruebas unitarias y 4 de interfaz; se generó y comprobó el IPA Release. El usuario confirmó que una cola de tres canciones avanza con la pantalla bloqueada en esta versión. Siguen pendientes controles, biblioteca y escucha prolongada medida. La compilación 3 había reproducido contenido sin anuncios observados en su muestra; ese resultado no se extrapola a toda la nueva entrega.
 
+Incidencia abierta en la compilación 4: un favorito guardado puede fallar al reproducirse después de cerrar y abrir la app, hasta buscar primero la canción. Los datos se conservan. La corrección de la preparación del contexto anónimo de reproducción está en curso; la nueva versión todavía no está generada. Véase [el diagnóstico y estado](docs/estado-implementacion.md).
+
 ## Instalar y usar
 
 El archivo local es `build/ReproductorPersonal.ipa`. Se firma e instala desde Windows con AltServer. Sigue [la guía de instalación y uso](docs/instalacion-iphone.md) para actualizar la app existente y empezar con favoritos, listas y cola. La biblioteca se guarda en el almacenamiento privado de la app; la escucha necesita conexión.

@@ -1,6 +1,6 @@
 # Comprobación en el iPhone
 
-Estado: compilación 3 instalada y probada en el iPhone el 14 de octubre de 2026. El usuario confirmó reproducción, continuidad al salir de la app y con pantalla bloqueada. No observó anuncios en esa prueba. La compilación 4 está preparada para instalar y tiene comprobación automática; sus pruebas físicas siguen pendientes.
+Estado: compilación 3 instalada y probada en el iPhone el 14 de octubre de 2026. El usuario confirmó reproducción, continuidad al salir de la app y con pantalla bloqueada. No observó anuncios en esa prueba. Tras entregar la compilación 4, el usuario informó que la comprobación se dejó realizar sin inconvenientes; las pruebas físicas específicas de esta versión siguen pendientes.
 
 Dispositivo: iPhone 13. iOS: 26.2 (información del usuario).
 
@@ -30,7 +30,7 @@ Hito 1 superado con la confirmación del usuario. Cola, controles del sistema y 
 
 Estos criterios requieren el iPhone real y la versión que integre la biblioteca. No se deducen de la compilación 3 ni de los tests del simulador.
 
-Actualización del 15 de octubre: el IPA 0.1.0/4 está disponible en `build/ReproductorPersonal.ipa`. Se generó mediante una copia pública del código autorizada por el usuario después del bloqueo de cuota/facturación del repositorio privado. La compilación 3 sigue siendo la última confirmada en el teléfono; los criterios de la tabla conservan su estado «No probado» hasta obtener los resultados de la actualización.
+Actualización del 15 de octubre: el IPA 0.1.0/4 está disponible en `build/ReproductorPersonal.ipa`. Se generó mediante una copia pública del código autorizada por el usuario después del bloqueo de cuota/facturación del repositorio privado. Tras la guía de actualización y la aclaración de compatibilidad, el usuario respondió: «Perfecto. Ya lo comprobé y se dejó sin inconveniente». Se registra esta confirmación general sin atribuirle resultados individuales de cola, bloqueo, biblioteca o duración. Los criterios de la tabla conservan su estado «No probado» hasta obtener esas observaciones.
 
 | Criterio | Estado físico | Evidencia que falta |
 | --- | --- | --- |

@@ -26,6 +26,7 @@ enum PlaybackState: Equatable {
 final class PlaybackController: ObservableObject {
     let player: AVQueuePlayer
     @Published private(set) var state: PlaybackState = .idle
+    @Published private(set) var queue = PlaybackQueue()
     private let source: any YouTubeProviding
     private var requestID = UUID()
     private var selectedVideo: Video?
@@ -104,6 +105,19 @@ final class PlaybackController: ObservableObject {
             fail(error)
         }
     }
+
+    // Compile-only Task 3 interfaces; behavior follows its RED run.
+    func play(_ videos: [Video], startingAt index: Int = 0) async {}
+    func enqueue(_ video: Video) {}
+    func removeQueueEntry(id: UUID) async {}
+    func next() async {}
+    func previous() async {}
+    func seek(to seconds: Double) {}
+    func snapshot() -> QueueSnapshot { QueueSnapshot() }
+    func restore(_ snapshot: QueueSnapshot) {}
+    func handlePlaybackFailure(entryID: UUID, progressSeconds: Double) async {}
+    func handleInterruption(ended: Bool, shouldResume: Bool) {}
+    func handleHeadphonesDisconnected() {}
 
     private func updateNativeState() {
         guard let video = selectedVideo, let item = player.currentItem else { return }

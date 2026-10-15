@@ -9,6 +9,7 @@ actor YouTubeClient: YouTubeProviding {
             let response = try await SearchResponse.sendThrowingRequest(
                 youtubeModel: model, data: [.query: query], useCookies: false
             )
+            if let visitor = response.visitorData, !visitor.isEmpty { model.visitorData = visitor }
             return YouTubeMapping.videos(from: response)
         } catch {
             throw AppError.classify(error)
@@ -71,6 +72,9 @@ actor YouTubeClient: YouTubeProviding {
                 }
             }
             if let resource = try? YouTubeMapping.resource(hlsURL: nil, combinedURLs: processedURLs, expiresAt: expiresAt) { return resource }
+            if response.videoInfos.serverAbrStreamingURL != nil {
+                return try await nativeHLS(videoID: videoID)
+            }
             if let processingFailure { throw processingFailure }
             throw AppError.unavailable
         } catch is ResponseExtractionError {
@@ -78,6 +82,62 @@ actor YouTubeClient: YouTubeProviding {
         } catch {
             throw AppError.classify(error)
         }
+    }
+
+    private func nativeHLS(videoID: String) async throws -> PlaybackResource {
+        let visitor = try await anonymousVisitor(videoID: videoID)
+        // Native HLS profile checked against public content on 2026-10-14.
+        // Reference: yt-dlp/extractor/youtube/_base.py, VISIONOS client.
+        let userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15"
+        let body: [String: Any] = [
+            "context": ["client": [
+                "clientName": "VISIONOS", "clientVersion": "1.02",
+                "deviceMake": "Apple", "deviceModel": "RealityDevice17,1",
+                "osName": "visionOS", "osVersion": "26.5.23O471",
+                "userAgent": userAgent, "hl": model.selectedLocaleLanguageCode,
+                "visitorData": visitor
+            ]],
+            "videoId": videoID, "contentCheckOk": true, "racyCheckOk": true
+        ]
+        var request = URLRequest(url: URL(string: "https://www.youtube.com/youtubei/v1/player?prettyPrint=false")!, timeoutInterval: 20)
+        request.httpMethod = "POST"
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
+        request.setValue("101", forHTTPHeaderField: "X-Youtube-Client-Name")
+        request.setValue("1.02", forHTTPHeaderField: "X-Youtube-Client-Version")
+        request.setValue(visitor, forHTTPHeaderField: "X-Goog-Visitor-Id")
+        let data = try await anonymousData(for: request)
+        let response = try VideoInfosWithDownloadFormatsResponse.decodeData(data: data)
+        return try YouTubeMapping.resource(
+            hlsURL: response.videoInfos.streamingURL, combinedURLs: [],
+            expiresAt: response.videoInfos.videoURLsExpireAt
+        )
+    }
+
+    private func anonymousVisitor(videoID: String) async throws -> String {
+        if !model.visitorData.isEmpty { return model.visitorData }
+        var components = URLComponents(string: "https://www.youtube.com/watch")!
+        components.queryItems = [URLQueryItem(name: "v", value: videoID)]
+        var request = URLRequest(url: components.url!, timeoutInterval: 20)
+        request.setValue("Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15", forHTTPHeaderField: "User-Agent")
+        let html = String(decoding: try await anonymousData(for: request), as: UTF8.self)
+        let expression = try NSRegularExpression(pattern: #""(?:VISITOR_DATA|visitorData)"\s*:\s*("(?:[^"\\]|\\.)+")"#)
+        guard let match = expression.firstMatch(in: html, range: NSRange(html.startIndex..<html.endIndex, in: html)),
+              let range = Range(match.range(at: 1), in: html) else { throw AppError.unavailable }
+        let visitor = try JSONDecoder().decode(String.self, from: Data(html[range].utf8))
+        model.visitorData = visitor
+        return visitor
+    }
+
+    private func anonymousData(for request: URLRequest) async throws -> Data {
+        var request = request
+        request.httpShouldHandleCookies = false
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let response = response as? HTTPURLResponse, (200..<300).contains(response.statusCode) else {
+            throw AppError.resolutionFailed
+        }
+        return data
     }
 
     private func webPlayer(videoID: String) async throws -> PlayerProcessing.Player {

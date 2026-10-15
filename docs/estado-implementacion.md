@@ -1,6 +1,6 @@
 # Estado de la primera etapa
 
-Entrega preparada: versión 0.1.0, compilación 4, código `0b391ba`, rama `feat/reproductor-ios` del [repositorio privado](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014). El IPA está comprobado para firma personal. La validación física de esta entrega sigue pendiente.
+Entrega preparada: versión 0.1.0, compilación 4, código `0b391ba`, rama `feat/reproductor-ios` del [repositorio privado](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014). El IPA está comprobado para firma personal. La validación física es parcial: el usuario confirmó el avance automático de una cola de tres canciones con pantalla bloqueada. La biblioteca y las demás comprobaciones siguen abiertas.
 
 ## Comportamiento implementado
 
@@ -52,6 +52,6 @@ La revisión anterior del prototipo corrigió selección de formatos y preparaci
 
 ## Pruebas físicas abiertas
 
-La primera etapa sigue pendiente de comprobar esta actualización en el iPhone: tres canciones, dos videos (uno de al menos quince minutos), quince minutos de audio bloqueado, cola, controles del sistema, auriculares/interrupciones, biblioteca, conservación durante una actualización, fallos de conexión y accesibilidad. No se promete cobertura del catálogo ni ausencia universal de anuncios.
+El usuario confirmó la prueba guiada de tres canciones y su avance automático con la pantalla bloqueada. La primera etapa sigue pendiente de dos videos (uno de al menos quince minutos), quince minutos medidos de audio bloqueado, controles del sistema, auriculares/interrupciones, biblioteca, conservación durante una actualización, fallos de conexión y accesibilidad. No se promete cobertura del catálogo ni ausencia universal de anuncios.
 
 La instalación requiere participación del usuario porque esta sesión no tiene control del iPhone. Sigue [instalacion-iphone.md](instalacion-iphone.md) y registra las observaciones en [verificacion-iphone.md](verificacion-iphone.md). El registro y la rama se conservan para continuar con esos resultados.

@@ -1,6 +1,6 @@
 # Comprobación en el iPhone
 
-Estado: compilación 3 instalada y probada en el iPhone el 14 de octubre de 2026. El usuario confirmó reproducción, continuidad al salir de la app y con pantalla bloqueada. No observó anuncios en esa prueba. Tras entregar la compilación 4, el usuario informó que la comprobación se dejó realizar sin inconvenientes; las pruebas físicas específicas de esta versión siguen pendientes.
+Estado: compilación 3 instalada y probada en el iPhone el 14 de octubre de 2026, con reproducción, continuidad al salir/bloquear y sin anuncios observados en esa muestra. En la compilación 4, el usuario confirmó la prueba guiada de una cola de tres canciones que avanza automáticamente con la pantalla bloqueada. Las demás pruebas físicas específicas siguen abiertas.
 
 Dispositivo: iPhone 13. iOS: 26.2 (información del usuario).
 
@@ -24,21 +24,21 @@ La instalación de esta compilación se completó mediante AltServer → Shift +
 
 Diagnóstico del 14 de octubre: al repetir en Windows la petición IOS de la dependencia, el video público `QEYGxzEGwaM` (coincidencia de título de la captura) y `aqz-KE-bpKQ` responden `playabilityStatus: OK`, con SABR y sin HLS ni formatos combinados. El prototipo rechaza ese formato. Una petición VISIONOS con identificador anónimo de visitante devuelve HLS: se comprobaron HTTP 200 en el manifiesto, una variante H.264 y fragmentos de audio y video de ambos contenidos. No se usaron credenciales ni cookies de cuenta. Esta prueba de red en Windows no demuestra todavía reproducción en el iPhone.
 
-Hito 1 superado con la confirmación del usuario. Cola, controles del sistema y biblioteca están implementados en la compilación 4. Las pruebas físicas de tres canciones, dos videos (uno largo), escucha bloqueada de quince minutos, cola, controles, auriculares, persistencia y actualización siguen pendientes.
+Hito 1 superado con la confirmación del usuario. Cola, controles del sistema y biblioteca están implementados en la compilación 4. La prueba guiada de tres canciones en cola con pantalla bloqueada está confirmada. Siguen pendientes dos videos (uno largo), escucha bloqueada de quince minutos medidos, controles, auriculares, persistencia y actualización.
 
 ## Hitos 2 y 3 — pruebas de la entrega integrada
 
 Estos criterios requieren el iPhone real y la versión que integre la biblioteca. No se deducen de la compilación 3 ni de los tests del simulador.
 
-Actualización del 15 de octubre: el IPA 0.1.0/4 está disponible en `build/ReproductorPersonal.ipa`. Se generó mediante una copia pública del código autorizada por el usuario después del bloqueo de cuota/facturación del repositorio privado. Tras la guía de actualización y la aclaración de compatibilidad, el usuario respondió: «Perfecto. Ya lo comprobé y se dejó sin inconveniente». Se registra esta confirmación general sin atribuirle resultados individuales de cola, bloqueo, biblioteca o duración. Los criterios de la tabla conservan su estado «No probado» hasta obtener esas observaciones.
+Actualización del 15 de octubre: el IPA 0.1.0/4 está disponible en `build/ReproductorPersonal.ipa`. Se generó mediante una copia pública del código autorizada por el usuario después del bloqueo de cuota/facturación del repositorio privado. Tras la guía de actualización y la aclaración de compatibilidad, el usuario respondió: «Perfecto. Ya lo comprobé y se dejó sin inconveniente». Después se le pidió reproducir una canción, añadir otras dos a la cola, bloquear el teléfono y comprobar el paso automático a la segunda y tercera. Respondió: «Perfecto. Si sirvió». Se registran las observaciones de esa prueba; los títulos y la duración total no se indicaron. No se deducen de ella quince minutos medidos, comandos del sistema, persistencia ni ausencia de anuncios.
 
-| Criterio | Estado físico | Evidencia que falta |
+| Criterio | Estado físico | Evidencia / pendiente |
 | --- | --- | --- |
-| Buscar y escuchar tres canciones públicas | No probado | Títulos, resultado y versión instalada |
+| Buscar y escuchar tres canciones públicas | Pasó según el usuario | Confirmó la guía de tres canciones; títulos no indicados |
 | Ver dos videos públicos, uno de al menos quince minutos | No probado | Títulos, imagen/sonido y duración |
 | Escuchar quince minutos con el teléfono bloqueado | No probado | Duración observada, cortes o errores |
 | Cambiar entre apps con la nueva versión | No probado | Continuidad del audio |
-| Pasar automáticamente por una cola de tres elementos con pantalla bloqueada | No probado | Orden y transición entre los tres |
+| Pasar automáticamente por una cola de tres elementos con pantalla bloqueada | Pasó según el usuario | Confirmó continuidad y paso automático a la segunda y tercera tras la guía; duración no medida |
 | Pausar, reanudar, siguiente y anterior desde el sistema | No probado | Resultado de cada comando disponible |
 | Desconectar auriculares e interrumpir el audio | No probado | Pausa y reanudación según la intención del usuario |
 | Anuncios insertados en la prueba ampliada | No probado | Presencia o ausencia observada en esa muestra |

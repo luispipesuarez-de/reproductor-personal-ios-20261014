@@ -2,7 +2,7 @@
 
 App personal en SwiftUI con búsqueda interna de videos y canciones, reproducción nativa, cola, favoritos, listas y recientes. La búsqueda y la preparación del contenido se realizan desde el iPhone, sin servidor de extracción propio. No requiere pegar enlaces.
 
-Entrega: versión 0.1.0, compilación 4. La verificación automática pasó 69 pruebas unitarias y 4 de interfaz; se generó y comprobó el IPA Release. La compilación 3 ya reprodujo contenido en el iPhone 13 del usuario, con continuidad al salir y bloquear y sin anuncios observados en esa muestra. La nueva versión necesita las pruebas físicas de cola, controles, biblioteca y escucha prolongada.
+Entrega: versión 0.1.0, compilación 4. La verificación automática pasó 69 pruebas unitarias y 4 de interfaz; se generó y comprobó el IPA Release. El usuario confirmó que una cola de tres canciones avanza con la pantalla bloqueada en esta versión. Siguen pendientes controles, biblioteca y escucha prolongada medida. La compilación 3 había reproducido contenido sin anuncios observados en su muestra; ese resultado no se extrapola a toda la nueva entrega.
 
 ## Instalar y usar
 

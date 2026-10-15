@@ -4,7 +4,7 @@ import SwiftUI
 struct VideoActionsMenu: View {
     let video: Video
     @ObservedObject var library: LibraryStore
-    @ObservedObject var playback: PlaybackController
+    let playback: PlaybackController
     var identifier: String? = nil
     @State private var showPlaylists = false
     @State private var errorMessage: String?

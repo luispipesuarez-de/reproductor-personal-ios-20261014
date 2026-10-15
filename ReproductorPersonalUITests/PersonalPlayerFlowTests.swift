@@ -29,7 +29,10 @@ final class PersonalPlayerFlowTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Mi lista"].waitForExistence(timeout: 5))
         app.tabBars.buttons["Buscar"].tap()
         app.buttons["actions-aaaaaaaaaaa"].tap()
-        app.buttons["Añadir a una lista"].tap()
+        let addToPlaylist = app.buttons["Añadir a una lista"]
+        XCTAssertTrue(addToPlaylist.waitForExistence(timeout: 5))
+        addToPlaylist.tap()
+        XCTAssertTrue(app.navigationBars["Añadir a una lista"].waitForExistence(timeout: 5))
         app.buttons["Mi lista"].tap()
         app.tabBars.buttons["Biblioteca"].tap()
         app.buttons["Mi lista"].tap()

@@ -6,22 +6,28 @@ struct VideoActionsMenu: View {
     @ObservedObject var library: LibraryStore
     let playback: PlaybackController
     var identifier: String? = nil
+    @State private var showActions = false
     @State private var showPlaylists = false
     @State private var errorMessage: String?
 
     private var isFavorite: Bool { library.snapshot.favorites.contains { $0.id == video.id } }
 
     var body: some View {
-        Menu {
+        Button { showActions = true } label: {
+            Image(systemName: "ellipsis").frame(minWidth: 44, minHeight: 44)
+        }
+        .buttonStyle(.borderless)
+        .accessibilityLabel("Más opciones para \(video.title)")
+        .accessibilityIdentifier(identifier ?? "actions-\(video.id)")
+        .confirmationDialog("Más opciones", isPresented: $showActions, titleVisibility: .visible) {
             Button {
                 do { try library.setFavorite(video, enabled: !isFavorite) }
                 catch { errorMessage = error.localizedDescription }
             } label: { Label(isFavorite ? "Quitar de Favoritos" : "Guardar en Favoritos", systemImage: isFavorite ? "heart.slash" : "heart") }
             Button { showPlaylists = true } label: { Label("Añadir a una lista", systemImage: "text.badge.plus") }
             Button { playback.enqueue(video) } label: { Label("Añadir a la cola", systemImage: "list.bullet") }
-        } label: { Image(systemName: "ellipsis").frame(minWidth: 44, minHeight: 44) }
-        .accessibilityLabel("Más opciones para \(video.title)")
-        .accessibilityIdentifier(identifier ?? "actions-\(video.id)")
+            Button("Cancelar", role: .cancel) {}
+        } message: { Text(video.title) }
         .sheet(isPresented: $showPlaylists) { PlaylistPickerView(video: video, library: library) }
         .alert("Biblioteca", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
             Button("Aceptar", role: .cancel) { errorMessage = nil }

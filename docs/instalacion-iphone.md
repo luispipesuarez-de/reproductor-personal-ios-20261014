@@ -1,43 +1,55 @@
-# Instalar el prototipo desde Windows
+# Instalar y usar Reproductor desde Windows
 
-Dispositivo indicado por el usuario: iPhone 13, iOS 26.2. La app requiere iOS 16 o posterior. El IPA generado no está firmado; se firma en el equipo mediante AltServer o AltStore Classic.
+Dispositivo del usuario: iPhone 13 con iOS 26.2. La app requiere iOS 16 o posterior. Entrega: versión 0.1.0, compilación 4, comprobada en [38753161729](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38753161729): 69 pruebas unitarias, 4 de interfaz y compilación Release correctas. Falta probar esta actualización en el teléfono.
 
-## Obtener el archivo
+## Actualizar la app que ya tienes
 
-La entrega comprobada está en `build/ReproductorPersonal.ipa` dentro de la carpeta de este proyecto: versión 0.1.0, compilación 3. Su [ejecución de origen](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38676199279) contiene las 28 pruebas correctas y el mismo IPA. Puedes seleccionarlo directamente desde AltServer con la ruta USB indicada más abajo.
+El archivo del PC está en:
 
-La ampliación con Biblioteca y cola aún no tiene un IPA verificado. La compilación de su último cambio quedó bloqueada por facturación/cuota en GitHub antes de iniciarse. El archivo de esta guía conserva la versión 3 que ya funcionó en el teléfono; no instala todavía las funciones nuevas. Consulta [el estado actual](estado-implementacion.md).
+```text
+C:\Users\Olga Lucia\Documents\Codex\2026-10-14\dime-c-mo-puedo-hacer-para\build\ReproductorPersonal.ipa
+```
 
-1. Abre [las ejecuciones privadas del proyecto](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/workflows/ios.yml) con tu cuenta de GitHub.
-2. Elige la ejecución 38676199279 y descarga su artefacto ReproductorPersonal-10, o una entrega posterior comprobada que haya generado IPA.
-3. Extrae el ZIP y busca ReproductorPersonal.ipa. Transfiérelo a Archivos en el iPhone, por ejemplo mediante iCloud Drive.
+1. Conecta el iPhone por USB y déjalo desbloqueado. Comprueba que iTunes muestra el dispositivo.
+2. En Windows, pulsa la flecha de iconos ocultos junto al reloj.
+3. Mantén pulsada **Shift (Mayús)** y haz clic en el rombo gris de **AltServer**.
+4. Elige **Sideload .ipa… → tu iPhone**.
+5. En la ventana **Abrir**, pega la ruta completa anterior en **Nombre de archivo** y pulsa **Abrir**. Usa el archivo del PC: la copia anterior de iCloud Drive no corresponde a esta entrega.
+6. Introduce la misma cuenta de Apple que usaste antes y su contraseña directamente en AltServer. Pulsa **Install** y mantén conectado el teléfono hasta que termine.
+7. Abre **Reproductor** en el iPhone. Deben aparecer las pestañas **Buscar** y **Biblioteca**.
 
-## Preparar AltStore Classic
+Instala sobre la app existente para comprobar la conservación de sus datos. La actualización conserva el identificador de la app; la conservación de la biblioteca durante una actualización posterior sigue siendo una prueba física pendiente.
 
-1. Sigue la [guía oficial de instalación en Windows](https://faq.altstore.io/altstore-classic/how-to-install-altstore-windows): instala las versiones de iTunes e iCloud que indica y después AltServer.
-2. Conecta el iPhone desbloqueado por USB y acepta confiar en el PC. Activa la sincronización Wi-Fi en iTunes.
-3. En el icono de AltServer, selecciona Install AltStore y tu iPhone. Introduce tus datos de Apple directamente allí.
-4. En el iPhone, confía en el perfil desde Ajustes → General → VPN y gestión de dispositivos.
-5. Activa Modo de desarrollador en Ajustes → Privacidad y seguridad y completa el reinicio solicitado.
-6. Abre AltStore → My Apps → +, selecciona el IPA y espera la instalación.
+Si tu iPhone no aparece, vuelve a conectarlo desbloqueado y abre su pantalla Resumen en iTunes antes de repetir el menú de AltServer.
 
-Para las aplicaciones gestionadas desde AltStore → My Apps, renueva antes de siete días con Refresh All mientras AltServer está disponible. Consulta los detalles de [renovación y límites](https://faq.altstore.io/altstore-classic/your-altstore).
+## Usar la biblioteca y la cola
 
-## Instalar o actualizar directamente por USB
+- **Buscar:** escribe un título o artista y toca un resultado. Cerrar «Ahora suena» deja el reproductor compacto disponible al navegar.
+- **Favoritos:** abre los tres puntos del resultado o de «Ahora suena» y elige «Guardar en Favoritos». Los encontrarás en Biblioteca → Favoritos; el mismo menú permite quitarlos.
+- **Listas:** Biblioteca → + pide el nombre. Para guardar un video, abre sus tres puntos → Añadir a una lista → elige la lista. Dentro de ella, «Reproducir lista» sigue su orden. «Editar» permite quitar posiciones; los tres puntos de la lista permiten renombrarla o eliminarla.
+- **Cola:** reproduce el primer elemento y usa los tres puntos de otros resultados → Añadir a la cola. En Ahora suena → Ver cola puedes elegir una entrada o usar Editar para quitarla. Tocar otro resultado para reproducirlo inicia una cola nueva con ese contenido.
+- **Controles:** Ahora suena ofrece pausa/reanudación, anterior/siguiente, saltos de quince segundos y una barra de progreso cuando el flujo la admite. La app publica también los controles del sistema; su comportamiento físico se registra en la guía de verificación.
+- **Recientes:** Biblioteca → Recientes se actualiza cuando el reproductor confirma que empezó a reproducirse el contenido.
 
-Esta ruta se utilizó en el iPhone del usuario después de que el IPA no apareciera en iCloud Drive. Permite seleccionar el archivo del PC directamente.
+La biblioteca y la cola se guardan en el almacenamiento privado de la app. La escucha necesita conexión; los registros locales contienen referencias y metadatos. Al abrir de nuevo, la cola se restaura en pausa y la app obtiene el flujo de YouTube al reanudar.
 
-1. Conecta el iPhone por USB, desbloquéalo y comprueba que iTunes permite abrir su pantalla Resumen.
-2. En Windows, pulsa la flecha de iconos ocultos junto al reloj. Mantén pulsada Shift (Mayús) y haz clic en el rombo gris de AltServer.
-3. Selecciona Sideload .ipa… y tu iPhone.
-4. En la ventana Abrir, selecciona `build/ReproductorPersonal.ipa` de este proyecto.
-5. Introduce la cuenta de Apple y su contraseña directamente en AltServer y pulsa Install. Mantén conectado el iPhone hasta que termine.
-6. Abre Reproductor en el teléfono y repite la búsqueda y reproducción.
+## Primera comprobación en el iPhone
 
-La [documentación oficial de AltServer](https://faq.altstore.io/release-notes/altserver) indica que las instalaciones directas requieren reinstalación manual cada siete días con una cuenta gratuita. La renovación sigue siendo gratuita. No se ha comprobado si esta instalación aparece en My Apps de AltStore; no se debe dar por hecho que Refresh All la incluye.
+1. Busca la misma canción que ya funcionó. Comprueba imagen/sonido y prueba pausa/reanudación tanto en los controles de la app como en los del video.
+2. Busca otras dos canciones y, en sus tres puntos, toca «Añadir a la cola». Abre «Ahora suena» → «Ver cola» y confirma el orden de tres elementos.
+3. Bloquea el teléfono y escucha quince minutos, incluyendo al menos un cambio automático de canción. Prueba también pausa/reanudación y siguiente/anterior en los controles de iOS. Anota cortes, errores o anuncios que observes.
+4. Guarda un favorito y crea una lista con dos elementos. Renombra la lista y quita una entrada. Pausa, cierra la app desde el selector y ábrela: comprueba que se conservan los datos y la cola, sin empezar a sonar por sí sola.
 
-## Probar la reproducción local
+Registra cada resultado en [verificacion-iphone.md](verificacion-iphone.md), donde están también los criterios restantes de videos, accesorios, actualización y accesibilidad. Si aparece «contenido no disponible», anota la búsqueda y el título exactos; los tests automáticos usan contenido controlado y no prueban todo el catálogo de YouTube.
 
-Abre Reproductor, busca por título o artista y toca un resultado. Prueba un video y una canción; con esta última bloquea la pantalla y cambia de aplicación. Registra el resultado en [verificacion-iphone.md](verificacion-iphone.md). El Mac de GitHub compila la app; las búsquedas y la preparación del contenido se ejecutan desde el iPhone.
+## Renovar la firma gratuita
 
-Si aparece «contenido no disponible», prueba otro contenido público y anota el título. La extracción depende del formato actual de YouTube; una compilación correcta no demuestra compatibilidad con todo el catálogo.
+La [documentación oficial de AltServer](https://faq.altstore.io/release-notes/altserver) indica que las instalaciones directas requieren reinstalación manual cada siete días. Con una cuenta gratuita, repite la instalación con el mismo IPA y la misma cuenta antes del vencimiento. El vencimiento no obliga a pasar a una cuenta de pago.
+
+Las apps gestionadas desde **AltStore → My Apps** pueden renovarse con **Refresh All** mientras AltServer esté disponible, según [la guía de AltStore](https://faq.altstore.io/altstore-classic/your-altstore). No se ha comprobado si esta instalación directa aparece allí; usa la ruta de AltServer que ya funcionó.
+
+## Preparar otro equipo u obtener el artefacto
+
+En un Windows nuevo, sigue [la instalación oficial de AltStore Classic](https://faq.altstore.io/altstore-classic/how-to-install-altstore-windows) para iTunes, iCloud y AltServer. Conecta el iPhone, acepta confiar en el equipo y activa la sincronización Wi-Fi en iTunes. El perfil de desarrollador y Modo de desarrollador ya se habilitaron en el iPhone del usuario.
+
+Puedes descargar el ZIP **ReproductorPersonal-2** de [la ejecución 38753161729](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38753161729), extraerlo y seleccionar **ReproductorPersonal.ipa**. El IPA no está firmado: AltServer realiza la firma personal durante la instalación.

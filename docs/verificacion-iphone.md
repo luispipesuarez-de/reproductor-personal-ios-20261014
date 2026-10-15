@@ -1,10 +1,10 @@
 # Comprobación en el iPhone
 
-Estado: compilación 3 instalada y probada en el iPhone el 14 de octubre de 2026. El usuario confirmó reproducción, continuidad al salir de la app y con pantalla bloqueada. No observó anuncios en esta prueba. El hito técnico inicial queda superado; las pruebas extensas del uso cotidiano siguen pendientes.
+Estado: compilación 3 instalada y probada en el iPhone el 14 de octubre de 2026. El usuario confirmó reproducción, continuidad al salir de la app y con pantalla bloqueada. No observó anuncios en esa prueba. La compilación 4 está preparada para instalar y tiene comprobación automática; sus pruebas físicas siguen pendientes.
 
 Dispositivo: iPhone 13. iOS: 26.2 (información del usuario).
 
-Prototipo instalado en la primera prueba: versión 0.1.0, compilación 2, commit `6c619ac`. Actualización disponible: versión 0.1.0, compilación 3, commit `586a761`. [CI 38676199279](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38676199279): 28/28 tests correctos y Release/IPA comprobados. Los tests proceden de fixtures y un WAV local; no demuestran reproducción real de YouTube en el iPhone.
+Prototipo de la primera prueba: versión 0.1.0/2, commit `6c619ac`. Versión que funcionó en el teléfono: 0.1.0/3, commit `586a761`, [CI 38676199279](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38676199279). Actualización disponible: 0.1.0/4, commit público `a16da8f`, mismo código que `0b391ba` del repositorio privado. [CI 38753161729](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38753161729): 69/69 pruebas unitarias, 4/4 de interfaz y Release/IPA correctos. Los tests usan respuestas controladas y un WAV local; no demuestran reproducción real de YouTube en el iPhone.
 
 ## Hito 1 — antes de ampliar la biblioteca
 
@@ -24,13 +24,13 @@ La instalación de esta compilación se completó mediante AltServer → Shift +
 
 Diagnóstico del 14 de octubre: al repetir en Windows la petición IOS de la dependencia, el video público `QEYGxzEGwaM` (coincidencia de título de la captura) y `aqz-KE-bpKQ` responden `playabilityStatus: OK`, con SABR y sin HLS ni formatos combinados. El prototipo rechaza ese formato. Una petición VISIONOS con identificador anónimo de visitante devuelve HLS: se comprobaron HTTP 200 en el manifiesto, una variante H.264 y fragmentos de audio y video de ambos contenidos. No se usaron credenciales ni cookies de cuenta. Esta prueba de red en Windows no demuestra todavía reproducción en el iPhone.
 
-Hito 1 superado con la confirmación del usuario. Se inicia la implementación de cola, controles del sistema y biblioteca del plan aprobado. Las pruebas de tres canciones, dos videos (uno largo), escucha bloqueada de quince minutos, cola, controles, auriculares, persistencia y actualización siguen pendientes.
+Hito 1 superado con la confirmación del usuario. Cola, controles del sistema y biblioteca están implementados en la compilación 4. Las pruebas físicas de tres canciones, dos videos (uno largo), escucha bloqueada de quince minutos, cola, controles, auriculares, persistencia y actualización siguen pendientes.
 
 ## Hitos 2 y 3 — pruebas de la entrega integrada
 
 Estos criterios requieren el iPhone real y la versión que integre la biblioteca. No se deducen de la compilación 3 ni de los tests del simulador.
 
-Actualización del 15 de octubre: el código integrado llega a `b6eb12f`, pero todavía no se generó un IPA comprobado. La última ejecución no inició los tests por un bloqueo de facturación/cuota de GitHub. La compilación 3 sigue siendo la instalada; los criterios de la tabla conservan su estado «No probado».
+Actualización del 15 de octubre: el IPA 0.1.0/4 está disponible en `build/ReproductorPersonal.ipa`. Se generó mediante una copia pública del código autorizada por el usuario después del bloqueo de cuota/facturación del repositorio privado. La compilación 3 sigue siendo la última confirmada en el teléfono; los criterios de la tabla conservan su estado «No probado» hasta obtener los resultados de la actualización.
 
 | Criterio | Estado físico | Evidencia que falta |
 | --- | --- | --- |
@@ -50,3 +50,5 @@ Actualización del 15 de octubre: el código integrado llega a `b6eb12f`, pero t
 | Texto grande, VoiceOver, teclado y uso con una mano en el teléfono | No probado | La navegación con texto grande y modo oscuro pasó en simulador; falta la comprobación física |
 
 Verificación automática de cola y controles: [38680277405](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38680277405), commit `73fb437`, 51/51 pruebas correctas. Incluye tres transiciones con un WAV local, recuperación de progreso, restauración en pausa, eventos de ruta/interrupción y metadatos. Es evidencia del comportamiento programado en el simulador; no verifica accesorios ni controles físicos del iPhone.
+
+Verificación integrada de la compilación 4: [38753161729](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38753161729), 73/73 pruebas y paquete Release correctos. Se inspeccionaron las capturas de Buscar con el reproductor compacto y de Biblioteca con texto grande/modo oscuro: texto visible, controles separados y navegación operable. El recorrido completo de buscar, guardar favorito, crear lista y añadir contenido pasa. Sigue pendiente la comprobación física completa de accesibilidad.

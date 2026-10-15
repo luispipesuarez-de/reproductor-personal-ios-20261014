@@ -1,58 +1,57 @@
-# Estado del prototipo
+# Estado de la primera etapa
 
-## Actualización en curso — 15 de octubre de 2026
+Entrega preparada: versión 0.1.0, compilación 4, código `0b391ba`, rama `feat/reproductor-ios` del [repositorio privado](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014). El IPA está comprobado para firma personal. La validación física de esta entrega sigue pendiente.
 
-La cola, los controles del sistema, favoritos, listas, recientes y su almacenamiento local están implementados en la rama. El código actual es `b6eb12f`; está guardado localmente y enviado al repositorio privado. Todavía no hay un IPA verificado de esta ampliación.
+## Comportamiento implementado
 
-La revisión independiente del cambio completo detectó una intención de reproducción desactualizada al usar los controles nativos de AVKit/PiP. Se reprodujo con tres regresiones y se corrigió en `562ed5b`. Las 69 pruebas unitarias pasaron en [38741740485](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38741740485) y [38747306605](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38747306605), incluida la cola, los archivos de biblioteca y las interrupciones. No hubo observaciones menores diferidas.
+- Búsqueda por texto, video y audio mediante un único AVQueuePlayer compartido al navegar.
+- Cola con entradas independientes para videos repetidos, avance automático, selección, eliminación y preparación del siguiente elemento.
+- Pausa/reanudación, anterior/siguiente, saltos de quince segundos y progreso cuando el flujo lo admite. Publicación de metadatos y comandos del sistema; manejo de interrupciones y desconexión de auriculares.
+- Recuperación limitada de un flujo caducado, conservando el progreso. Un error de otro tipo se muestra; el usuario puede reintentar.
+- Favoritos sin duplicados; listas con nombre y elementos repetibles; recientes al comenzar la reproducción.
+- Persistencia JSON en el contenedor privado: escritura atómica antes de publicar el cambio. Un archivo corrupto o con versión desconocida bloquea escrituras para conservar sus bytes. Los errores de almacenamiento se muestran en la interfaz.
+- Restauración de biblioteca y cola en pausa; los flujos temporales se resuelven de nuevo al reanudar. Interfaz con Buscar/Biblioteca, reproductor compacto y controles nativos de video/PiP.
 
-En esas ejecuciones pasan 3 de las 4 pruebas de interfaz: texto grande/modo oscuro, reapertura con favorito y cola pausada, y búsqueda vacía/error. El recorrido para crear y añadir a una lista falla al intentar abrir el selector desde el menú mientras hay reproducción. La creación de la lista sí pasa. La prueba completa había pasado en `e772129`, antes de la corrección nativa, pero eso no valida el código posterior. Se inspeccionaron el registro, la jerarquía accesible, el evento de toque y la grabación del simulador.
+La extracción consulta YouTube desde el dispositivo. Se conservan HLS/MP4 y la ruta alternativa HLS para respuestas SABR, sin servidor propio ni credenciales de cuenta. La integración con la cuenta queda para la segunda etapa.
 
-Herramientas de la ejecución `9ef14b3`: Xcode 26.6 (17F113), XcodeGen 2.46.0, simulador iPhone 17 Pro. Las pruebas utilizan respuestas controladas y un WAV local, no el catálogo real de YouTube.
+## Verificación de la compilación 4
 
-Quitar una observación innecesaria del progreso no resolvió el fallo. El cambio `b6eb12f` presenta las mismas acciones en una hoja nativa de iOS desde el botón de tres puntos, manteniendo todas las afirmaciones de la prueba. Su comprobación sigue pendiente: [38749396947](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38749396947) no inició ningún paso. GitHub informó de pagos recientes fallidos o de un límite de gasto que necesita revisión; el mensaje no permite distinguir la causa exacta.
+[Ejecución 38753161729](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38753161729), commit público `a16da8f`, con el mismo código que `0b391ba` del repositorio privado:
 
-El IPA canónico sigue siendo la compilación 3, con el hash indicado más abajo. Se conserva además una copia comprobada en `build/anteriores/ReproductorPersonal-compilacion-3.ipa`. Las instrucciones y los metadatos de una futura compilación 4 permanecen como borradores hasta verificarla. La primera etapa y las pruebas físicas de la entrega integrada siguen abiertas.
+| Comprobación | Resultado |
+| --- | --- |
+| `bash scripts/ci.sh test` | 69/69 unitarias y 4/4 de interfaz; cero fallos |
+| Cola y recuperación | Transiciones nativas con WAV local, identidad de entradas, reintento y progreso conservado |
+| Intención de reproducción | Play/pausa nativos, pausa durante preparación y reanudación tras interrupción cubiertos por regresiones |
+| Biblioteca | Archivos reales: ida/vuelta, duplicados, fallos de escritura y protección de datos incompatibles/corruptos |
+| Interfaz | Buscar→favorito→crear/añadir lista; reapertura en pausa; estados vacío/error; navegación con texto grande y modo oscuro |
+| `bash scripts/ci.sh ipa` | Release correcto, artefacto ReproductorPersonal-2 |
+| Contenido del IPA | CRC correcto, Mach-O arm64, identificador y versión esperados, audio en segundo plano; proveedor de pruebas ausente |
 
-## Última entrega instalable comprobada
+Herramientas de CI: Xcode 26.6 (17F113), XcodeGen 2.46.0; simulador iPhone 17 Pro. Las pruebas de reproducción usan un WAV local y datos controlados. No demuestran compatibilidad de YouTube en el teléfono ni funcionamiento de accesorios físicos. Las capturas del simulador se inspeccionaron para verificar la distribución y legibilidad de la interfaz.
 
-Código: rama `feat/reproductor-ios` del [repositorio privado](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014). Implementación inicial: `6c619ac`. Actualización de reproducción, compilación 3: `586a761`.
+Archivo: `build/ReproductorPersonal.ipa`. Identificador: `personal.reproductor.ios`. Versión: 0.1.0/4. iOS mínimo: 16.0. `UIBackgroundModes: [audio]`. IPA sin firmar. Tamaño: 1.843.134 bytes. SHA-256: `3b00cd74ff20160f426c9008acfb3fd19ff12fc8a85b1330fa049bf7f3fa6ef5`. La compilación 3 comprobada se conserva en `build/anteriores/ReproductorPersonal-compilacion-3.ipa`.
 
-Incluye búsqueda por texto, resultados seleccionables, vista de video, pausa/reanudación, manejo de respuestas tardías y errores, y configuración de audio en segundo plano. La extracción consulta YouTube desde el dispositivo. No requiere pegar enlaces.
+Xcode conserva advertencias de extracción de metadatos sin AppIntents y de orientaciones para iPad. No hubo errores de compilación ni fallos de tests. Esta entrega se prepara para el iPhone indicado por el usuario; no se ha realizado validación física en iPad.
 
-El hito físico inicial de la compilación 3 está confirmado por el usuario: reproducción, audio al salir y bloquear, sin anuncios observados en esa prueba. Cola, controles y biblioteca están implementados en el código posterior y pendientes de entrega y validación física; la cuenta de YouTube pertenece a otra etapa. La primera etapa completa todavía no está validada.
+## Revisión y decisiones
 
-## Evidencias
+La revisión independiente de todo el cambio desde `11e4fa9` hasta `690096f` encontró un defecto importante: los controles nativos cambiaban el reproductor sin actualizar la intención de reproducción. Se reprodujo con tres tests que fallaron en [38739434464](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38739434464) y se corrigió en `562ed5b`. La suite completa del nuevo código pasó. No hubo observaciones menores diferidas; no se solicitó una segunda revisión.
 
-| Comprobación | Evidencia | Estado |
-| --- | --- | --- |
-| Configuración, mapeo y primer IPA | [38630421307](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38630421307) | 6/6 tests y paquete comprobados |
-| Búsqueda y reproductor nativo | [38635023595](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38635023595) | 19 casos pasaron; los 3 de cliente fallaron por IDs de fixture inválidos |
-| RED válido del adaptador y regresiones | [38637144094](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38637144094) | Fallos reproducidos con IDs válidos; pruebas corregidas |
-| Suite completa y IPA del prototipo | [38638945973](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38638945973) | 25/25 tests, Release e IPA correctos |
-| Instalación y búsqueda | iPhone 13, iOS 26.2, compilación 2 | Instalación confirmada y resultado seleccionado en la captura del usuario |
-| Primera reproducción real | «Frankie Ruíz - Tú Con Él (Visualizer)» y otro resultado | Fallan con contenido no disponible en la compilación 2 |
-| Regresión del fallo SABR | [38675597787](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38675597787) | 28 tests: los 2 caminos positivos nuevos fallan con `unavailable`; los 26 restantes pasan |
-| Ruta HLS alternativa, suite y compilación 3 | [38676199279](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38676199279) | 28/28 tests, Release e IPA correctos |
-| Reproducción real con la actualización, anuncios y bloqueo | iPhone 13, iOS 26.2, compilación 3 | Usuario confirma reproducción, continuidad en Inicio y bloqueo; sin anuncios observados en la muestra |
+Decisiones vigentes:
 
-La revisión independiente del código encontró el bloqueo de flujos directos por otros cifrados y las preparaciones duplicadas. Ambas correcciones tienen pruebas de regresión RED→GREEN y la suite completa pasó. No quedan sugerencias menores diferidas después de reclasificar la preparación duplicada como un problema de comportamiento.
+- Mantener los controles nativos de AVKit/PiP y reconocer sus cambios de intención, distinguiendo pausas internas, interrupciones y final de elemento.
+- Las opciones de favorito, lista y cola se presentan en una hoja nativa desde el botón de tres puntos, tras reproducir un fallo intermitente del menú emergente en la prueba de interfaz.
+- Un fallo al preparar el siguiente elemento se muestra al llegar a él; no se interrumpe la canción actual ni se salta silenciosamente el error.
+- Conservar listas locales y referencias, sin adelantar autenticación, sincronización ni descargas.
+- Compilar una copia pública de código autorizada por el usuario, después del bloqueo de cuota/facturación del repositorio privado. La copia tiene historial nuevo y excluye conversaciones, capturas, registros y archivos de cuenta.
+- Trabajar en la carpeta y rama aprobadas, usando PowerShell para el registro de tareas en Windows. Las interfaces vacías usadas para demostrar RED ya fueron reemplazadas.
+- Considerar la evidencia física por separado de CI. Los resultados de la compilación 3 no validan automáticamente la compilación 4.
 
-El IPA local está en `build/ReproductorPersonal.ipa`. Se comprobaron CRC del ZIP, ejecutable Mach-O arm64, identificador `personal.reproductor.ios`, versión 0.1.0/3, iOS mínimo 16.0 y `UIBackgroundModes: [audio]`. Tamaño: 1.579.073 bytes. SHA-256: `15951c7f3b1995244e7bd6afe63391816870e0b274475d3cb26a5c8f44c89a64`. La compilación 2 se conserva en `build/anteriores/`. La captura del simulador no sustituye pruebas de video real, modo oscuro o accesibilidad en el dispositivo.
+La revisión anterior del prototipo corrigió selección de formatos y preparación duplicada con regresiones. La ruta HLS alternativa pasó [38676199279](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38676199279), con 28 pruebas y el IPA de la compilación 3. El usuario confirmó en esa versión imagen/sonido, continuidad al salir y bloquear y ausencia de anuncios en la muestra probada.
 
-El diagnóstico de red en Windows confirmó SABR sin HLS ni MP4 combinado en la petición IOS para dos videos públicos. El perfil VISIONOS 1.02 con visitante anónimo, documentado en [yt-dlp](https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/extractor/youtube/_base.py), devolvió HLS y fragmentos de video H.264 y audio HTTP 200. Se comprobó también reutilizar el visitante de búsqueda y leer los fragmentos sin cabeceras especiales. Esta evidencia no confirma por sí sola reproducción en el teléfono. La revisión independiente `d12c330..586a761` no encontró defectos que requieran cambios; mantuvo expresamente pendientes la reproducción física, el segundo plano y anuncios. La compatibilidad con otros contenidos requiere pruebas; cola y biblioteca conservan su hito previo.
+## Pruebas físicas abiertas
 
-El log de Xcode incluye advertencias de metadatos AppIntents sin esa dependencia, de orientaciones para iPad y de destinos equivalentes del simulador. No hubo errores de compilación ni fallos de tests. La entrega es un IPA sin firmar para firma personal con AltServer.
+La primera etapa sigue pendiente de comprobar esta actualización en el iPhone: tres canciones, dos videos (uno de al menos quince minutos), quince minutos de audio bloqueado, cola, controles del sistema, auriculares/interrupciones, biblioteca, conservación durante una actualización, fallos de conexión y accesibilidad. No se promete cobertura del catálogo ni ausencia universal de anuncios.
 
-## Decisiones registradas
-
-- Código en la carpeta aprobada, sobre una rama de desarrollo. Si hubiera que aislarlo físicamente, se trasladaría el checkout antes de continuar.
-- Registro y extracción de tareas con PowerShell en Windows: el auxiliar Bash fallaba con las rutas del entorno. Si fuese necesario, los briefs y el registro se regenerarían desde el plan y Git.
-- Interfaces vacías para permitir fallos de XCTest en afirmaciones, antes de implementar comportamiento. Son reemplazadas por el código comprobado.
-- Petición de reproducción iOS del paquete y fallback HLS nativo al detectar SABR. Se conserva el visitante anónimo de la búsqueda; si falta, se lee del HTML sin ejecutar el reproductor web. HTML/JavaScript del paquete solo se usa para descifrar los formatos que lo necesitan. Una incompatibilidad real exige repetir la prueba del teléfono.
-- IDs sintéticos del plan en los proveedores de prueba; IDs válidos en las pruebas del adaptador. Se corrigieron las fixtures en lugar de relajar el validador real.
-- Cola, controles y biblioteca se implementaron después de superar el hito físico inicial. Siguen pendientes de verificación integrada y entrega; el IPA de la compilación 3 carece de ellas.
-- Firma, instalación y reproducción de la compilación 3 están confirmadas por el usuario. La muestra probada continúa al salir y bloquear y no presentó anuncios. La escucha prolongada y el resto del catálogo siguen sin validar.
-- El resultado de CI se registra después de leer la salida; una ejecución iniciada o un código revisado no equivalen a una compilación verificada.
-
-Para instalar, sigue [instalacion-iphone.md](instalacion-iphone.md) y registra las observaciones en [verificacion-iphone.md](verificacion-iphone.md).
+La instalación requiere participación del usuario porque esta sesión no tiene control del iPhone. Sigue [instalacion-iphone.md](instalacion-iphone.md) y registra las observaciones en [verificacion-iphone.md](verificacion-iphone.md). El registro y la rama se conservan para continuar con esos resultados.

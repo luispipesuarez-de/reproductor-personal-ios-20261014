@@ -1,14 +1,18 @@
 # Reproductor personal para iPhone
 
-Proyecto personal en SwiftUI, desarrollado desde Windows y compilado con Xcode en GitHub Actions. La primera entrega prepara búsqueda interna de contenido público y reproducción mediante AVQueuePlayer, con audio en segundo plano. La resolución se realiza desde el iPhone, sin servidor de extracción propio.
+App personal en SwiftUI con búsqueda interna de videos y canciones, reproducción nativa, cola, favoritos, listas y recientes. La búsqueda y la preparación del contenido se realizan desde el iPhone, sin servidor de extracción propio. No requiere pegar enlaces.
 
-Última entrega comprobada: prototipo 0.1.0, compilación 3, con 28 pruebas automatizadas correctas y un IPA Release comprobado. El usuario confirmó reproducción en su iPhone 13, continuidad al salir y bloquear la pantalla y ausencia de anuncios en la muestra probada. La actualización añade una ruta HLS para la respuesta SABR que fallaba en la compilación 2. La cuenta de YouTube pertenece a una etapa posterior.
+Entrega: versión 0.1.0, compilación 4. La verificación automática pasó 69 pruebas unitarias y 4 de interfaz; se generó y comprobó el IPA Release. La compilación 3 ya reprodujo contenido en el iPhone 13 del usuario, con continuidad al salir y bloquear y sin anuncios observados en esa muestra. La nueva versión necesita las pruebas físicas de cola, controles, biblioteca y escucha prolongada.
 
-La ampliación con cola, controles, favoritos, listas y recientes está escrita, pero aún no tiene un IPA comprobado. En `9ef14b3` pasan 69 pruebas unitarias y 3 de las 4 pruebas de interfaz; queda el recorrido para añadir a una lista. El cambio posterior `b6eb12f` usa una hoja de opciones nativa para ese recorrido. [Su ejecución](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38749396947) no llegó a iniciarse por el bloqueo de facturación/cuota de GitHub. `build/ReproductorPersonal.ipa` sigue siendo la compilación 3.
+## Instalar y usar
+
+El archivo local es `build/ReproductorPersonal.ipa`. Se firma e instala desde Windows con AltServer. Sigue [la guía de instalación y uso](docs/instalacion-iphone.md) para actualizar la app existente y empezar con favoritos, listas y cola. La biblioteca se guarda en el almacenamiento privado de la app; la escucha necesita conexión.
+
+La [ejecución 38753161729](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38753161729), commit público `a16da8f` (mismo código que `0b391ba` del repositorio privado), contiene el artefacto ReproductorPersonal-2. [Estado y evidencia técnica](docs/estado-implementacion.md). [Resultados y pruebas pendientes en el iPhone](docs/verificacion-iphone.md).
 
 ## Código y compilación
 
-Dependencia: [b5i/YouTubeKit](https://github.com/b5i/YouTubeKit), fijada a la revisión `6532af39da4c1612b0a1af603792419d8fb0e67f`. XcodeGen genera el proyecto a partir de `project.yml`.
+Desarrollado desde Windows y compilado con Xcode en GitHub Actions. Dependencia: [b5i/YouTubeKit](https://github.com/b5i/YouTubeKit), fijada a `6532af39da4c1612b0a1af603792419d8fb0e67f`. XcodeGen genera el proyecto desde `project.yml`.
 
 En macOS con Xcode y XcodeGen:
 
@@ -17,16 +21,10 @@ bash scripts/ci.sh test
 bash scripts/ci.sh ipa
 ```
 
-Desde Windows, abre [el workflow privado](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/workflows/ios.yml), elige la rama `feat/reproductor-ios` y activa la opción para generar IPA. Los tests no consultan YouTube: prueban datos controlados y reproducción nativa de un WAV local. El IPA usa el proveedor real.
+Desde Windows, abre [el workflow de compilación](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/workflows/ios.yml), elige `codex/public-build` y activa la opción para generar IPA. Los tests utilizan respuestas controladas y un WAV local; Release usa el proveedor real y excluye el modo de pruebas de interfaz.
 
-La compilación genera un IPA sin firmar. Sigue [la guía de instalación](docs/instalacion-iphone.md) para firmarlo con AltStore Classic en tu equipo.
+## Alcance
 
-Entrega comprobada: [ejecución 38676199279](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38676199279), commit `586a761`. Archivo local: `build/ReproductorPersonal.ipa`, compilación 3. [Estado y decisiones de implementación](docs/estado-implementacion.md).
+La app usa HLS o MP4 combinado compatible. Cuando la respuesta inicial solo ofrece SABR, solicita HLS con un perfil nativo y un identificador anónimo de visitante. El contenido restringido o incompatible muestra un error. No se garantiza compatibilidad con todo el catálogo ni se eliminan anuncios que el creador haya incluido dentro del propio video.
 
-## Alcance y comprobación
-
-La app prepara HLS o formatos MP4 combinados compatibles cuando YouTube los ofrece. Si la petición inicial solo devuelve SABR, solicita HLS mediante el perfil nativo VISIONOS con un identificador anónimo obtenido en la búsqueda o la página del video. Todas las peticiones se realizan en el dispositivo. Los datos SABR y las pistas de audio/video separadas no se entregan a AVPlayer como si fueran reproducibles. El contenido restringido o incompatible muestra un error; no se añade una extracción remota.
-
-La compatibilidad actual con YouTube y el audio con pantalla bloqueada requieren comprobación física. [verificacion-iphone.md](docs/verificacion-iphone.md) distingue los resultados observados de las pruebas pendientes. No se garantiza compatibilidad con todos los videos ni la ausencia de anuncios incluidos por el creador dentro de su propio contenido.
-
-El diseño y el plan aprobados están en `docs/superpowers/`. La app requiere iOS 16 o posterior; el dispositivo informado es un iPhone 13 con iOS 26.2.
+Esta etapa conserva listas locales. La integración con la cuenta de YouTube pertenece a una etapa posterior. El diseño y el plan aprobados están en `docs/superpowers/`. Requiere iOS 16 o posterior; el dispositivo del usuario es un iPhone 13 con iOS 26.2.

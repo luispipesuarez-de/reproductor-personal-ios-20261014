@@ -56,4 +56,17 @@ final class AudioInterruptionTests: PlaybackTestCase {
         let url = try audioURL()
         return PlaybackController(source: StubYouTubeProvider(onResolve: { _ in PlaybackResource(url: url, expiresAt: nil) }))
     }
+
+    func testPauseImmediatelyAfterInterruptionEndPreventsQueuedResume() async throws {
+        let controller = try makeController()
+        await controller.play(videoA)
+        await eventually(timeout: 30) { controller.state.isPlaying }
+        controller.handleInterruption(ended: false, shouldResume: false)
+        controller.handleInterruption(ended: true, shouldResume: true)
+        controller.pause()
+        try await Task.sleep(nanoseconds: 100_000_000)
+        XCTAssertEqual(controller.state, .paused(videoA))
+        XCTAssertEqual(controller.player.rate, 0)
+        controller.pause()
+    }
 }

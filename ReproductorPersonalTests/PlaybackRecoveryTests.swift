@@ -61,6 +61,24 @@ final class PlaybackRecoveryTests: PlaybackTestCase {
         XCTAssertTrue(recorded.isEmpty)
     }
 
+    func testExplicitRetryResolvesAFailedEntryAgain() async throws {
+        let url = try audioURL()
+        let requests = QueryRecorder()
+        let controller = PlaybackController(source: StubYouTubeProvider(onResolve: { id in
+            await requests.append(id)
+            return PlaybackResource(url: url, expiresAt: nil)
+        }))
+        await controller.play(videoA)
+        let entry = try XCTUnwrap(controller.queue.current)
+        await controller.handlePlaybackFailure(entryID: entry.id, progressSeconds: 0)
+        guard case .failed = controller.state else { return XCTFail("The failure must remain visible") }
+        await controller.resume()
+        controller.pause()
+        let recorded = await requests.queries
+        XCTAssertEqual(recorded, [videoA.id, videoA.id])
+        XCTAssertEqual(controller.queue.current?.id, entry.id)
+    }
+
     func testRestoredProgressIsUsedWhenTheUserResumes() async throws {
         let url = try audioURL()
         let controller = PlaybackController(source: StubYouTubeProvider(onResolve: { _ in PlaybackResource(url: url, expiresAt: nil) }))

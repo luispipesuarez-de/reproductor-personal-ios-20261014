@@ -1,6 +1,6 @@
 # Comprobación en el iPhone
 
-Estado: compilación 3 instalada y probada en el iPhone el 14 de octubre de 2026, con reproducción, continuidad al salir/bloquear y sin anuncios observados en esa muestra. En la compilación 4, el usuario confirmó la prueba guiada de una cola de tres canciones que avanza automáticamente con la pantalla bloqueada. En la compilación 5, el usuario confirmó que la prueba guiada de reproducción desde Favoritos después de reabrir ya funciona. También confirmó los cuatro controles de iOS con pantalla bloqueada: pausa, reanudación, siguiente y anterior. La validación física es parcial y las demás comprobaciones siguen abiertas.
+Estado: compilación 3 instalada y probada en el iPhone el 14 de octubre de 2026, con reproducción, continuidad al salir/bloquear y sin anuncios observados en esa muestra. En la compilación 4, el usuario confirmó la prueba guiada de una cola de tres canciones que avanza automáticamente con la pantalla bloqueada. En la compilación 5, el usuario confirmó que la prueba guiada de reproducción desde Favoritos después de reabrir ya funciona. También confirmó los cuatro controles de iOS con pantalla bloqueada: pausa, reanudación, siguiente y anterior. También confirmó la escucha guiada de quince minutos con pantalla bloqueada, cambios automáticos de canción y ausencia de cortes y anuncios en esa muestra. La validación física es parcial y las demás comprobaciones siguen abiertas.
 
 Incidencia posterior de la compilación 4: los datos del favorito, lista y cola se conservan tras pausar/cerrar/reabrir, según la respuesta «Sí» a esa prueba guiada. Sin embargo, el usuario corrigió el alcance de esa confirmación: al intentar reproducir desde Favoritos después de reabrir aparece «No se pudo preparar este contenido. Intenta de nuevo». La captura muestra «Rata Blanca - Talisman (AUDIO)», de «Lo Mejor del Rock Argentino». Buscar la misma canción y reproducirla hace que después también funcione desde Favoritos, confirmado explícitamente por el usuario. La persistencia de datos y la reproducción posterior son comprobaciones distintas.
 
@@ -26,7 +26,7 @@ La instalación de esta compilación se completó mediante AltServer → Shift +
 
 Diagnóstico del 14 de octubre: al repetir en Windows la petición IOS de la dependencia, el video público `QEYGxzEGwaM` (coincidencia de título de la captura) y `aqz-KE-bpKQ` responden `playabilityStatus: OK`, con SABR y sin HLS ni formatos combinados. El prototipo rechaza ese formato. Una petición VISIONOS con identificador anónimo de visitante devuelve HLS: se comprobaron HTTP 200 en el manifiesto, una variante H.264 y fragmentos de audio y video de ambos contenidos. No se usaron credenciales ni cookies de cuenta. Esta prueba de red en Windows no demuestra todavía reproducción en el iPhone.
 
-Hito 1 superado con la confirmación del usuario. Cola, controles del sistema y biblioteca están implementados en la compilación 4. La prueba guiada de tres canciones en cola con pantalla bloqueada está confirmada. Siguen pendientes dos videos (uno largo), escucha bloqueada de quince minutos medidos, controles, auriculares, persistencia y actualización.
+Hito 1 superado con la confirmación del usuario. Cola, controles del sistema y biblioteca están implementados en la compilación 4. La prueba guiada de tres canciones en cola con pantalla bloqueada está confirmada. El estado actual de los demás criterios y de las comprobaciones de la compilación 5 figura en la tabla siguiente.
 
 ## Hitos 2 y 3 — pruebas de la entrega integrada
 
@@ -38,12 +38,12 @@ Entrega anterior del 15 de octubre: el IPA 0.1.0/4 se instaló desde `build/Repr
 | --- | --- | --- |
 | Buscar y escuchar tres canciones públicas | Pasó según el usuario | Confirmó la guía de tres canciones; títulos no indicados |
 | Ver dos videos públicos, uno de al menos quince minutos | No probado | Títulos, imagen/sonido y duración |
-| Escuchar quince minutos con el teléfono bloqueado | No probado | Duración observada, cortes o errores |
+| Escuchar quince minutos con el teléfono bloqueado | Pasó en 5 según el usuario | Después de pedir una cola suficiente, anotar la hora y escuchar quince minutos bloqueado, respondió «Sí, sin problemas y sin anuncios». Duración de la prueba guiada confirmada por el usuario, no cronometrada por el agente |
 | Cambiar entre apps con la nueva versión | No probado | Continuidad del audio |
 | Pasar automáticamente por una cola de tres elementos con pantalla bloqueada | Pasó según el usuario | Confirmó continuidad y paso automático a la segunda y tercera tras la guía; duración no medida |
 | Pausar, reanudar, siguiente y anterior desde el sistema | Pasó en 5 según el usuario | Tras pedirle una cola de tres elementos y probar los cuatro controles con el iPhone bloqueado, respondió «Sí, guarda» |
 | Desconectar auriculares e interrumpir el audio | No probado | Pausa y reanudación según la intención del usuario |
-| Anuncios insertados en la prueba ampliada | No probado | Presencia o ausencia observada en esa muestra |
+| Anuncios insertados en la prueba ampliada | Ninguno observado en la muestra de 5 | Usuario: «Sí, sin problemas y sin anuncios» tras la escucha guiada de quince minutos; no se extrapola a todo el catálogo |
 | Crear, renombrar y borrar una lista; añadir y quitar elementos | Parcial | Crear «Mi música», añadir una canción y conservarla al reabrir confirmados; faltan renombrar, quitar y borrar |
 | Guardar y quitar favoritos sin duplicados | Parcial | Guardar y conservar el favorito confirmados; faltan quitar y comprobar duplicados |
 | Cerrar/abrir y recuperar listas, favoritos, recientes y cola en pausa | Parcial | Favorito, lista y cola conservados y reproducción en pausa confirmados; Recientes no comprobado |
@@ -67,3 +67,7 @@ Resultado físico del 15 de octubre de 2026: después de la guía de actualizaci
 ## Controles del sistema — confirmación del usuario
 
 El 15 de octubre de 2026, después de la guía de reproducir una canción, añadir otras dos a la cola, bloquear el iPhone y probar pausa, reanudación, siguiente y anterior desde iOS, el usuario respondió «Sí, guarda» a «¿Funcionan los cuatro?». Se registran los cuatro comandos como pasados según el usuario en la compilación 5. Esta confirmación no aporta duración medida de escucha, resultados de auriculares/interrupciones ni conservación completa durante una actualización.
+
+## Escucha prolongada — confirmación del usuario
+
+El 15 de octubre de 2026 se pidió preparar una cola de más de quince minutos, anotar la hora de inicio y escuchar quince minutos con el iPhone bloqueado, comprobando continuidad, avance automático, anuncios y errores. El usuario respondió «Sí, sin problemas y sin anuncios». Se registra la prueba guiada como pasada según el usuario en la compilación 5: sin cortes ni errores informados, cambios automáticos y ningún anuncio observado en esa muestra. No se proporcionaron títulos ni horas de inicio/final; el agente no midió la duración ni observó directamente el teléfono. Esta muestra no acredita todos los videos, accesorios ni la conservación completa de la biblioteca.

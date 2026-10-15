@@ -1,6 +1,6 @@
 # Instalar y usar Reproductor desde Windows
 
-Dispositivo del usuario: iPhone 13 con iOS 26.2. La app requiere iOS 16 o posterior. Entrega: versión 0.1.0, compilación 5, comprobada en [38813838217](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38813838217): 71 pruebas unitarias, 4 de interfaz y compilación Release correctas. Falta probar esta actualización en el teléfono.
+Dispositivo del usuario: iPhone 13 con iOS 26.2. La app requiere iOS 16 o posterior. Entrega: versión 0.1.0, compilación 5, comprobada en [38813838217](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38813838217): 71 pruebas unitarias, 4 de interfaz y compilación Release correctas. La prueba guiada de reproducción desde Favoritos tras reabrir pasó según el usuario; la validación física completa sigue pendiente.
 
 ## Actualizar la app que ya tienes
 
@@ -40,7 +40,7 @@ La biblioteca y la cola se guardan en el almacenamiento privado de la app. La es
 3. Abre Reproductor de nuevo y entra directamente en **Biblioteca → Favoritos**, sin entrar antes en Buscar.
 4. Toca **Rata Blanca - Talisman (AUDIO)**. Comprueba que comienza a sonar. Repite el cierre y la apertura una segunda vez para confirmar el resultado.
 
-Esta actualización prepara el contexto anónimo necesario para reproducir un elemento guardado desde el inicio. La regresión automática pasó; falta esta comprobación del contenido real en el teléfono. Anota si la biblioteca se conservó durante la instalación y si el favorito reproduce después de reiniciar.
+Esta actualización prepara el contexto anónimo necesario para reproducir un elemento guardado desde el inicio. La regresión automática pasó y el usuario confirmó el 15 de octubre que la prueba guiada ya reproduce desde Favoritos después de reabrir. Este recorrido queda como referencia para futuras actualizaciones. Anota si la biblioteca se conservó durante la instalación y si el favorito reproduce después de reiniciar.
 
 ## Otras comprobaciones en el iPhone
 

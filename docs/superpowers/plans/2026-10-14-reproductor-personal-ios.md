@@ -196,7 +196,7 @@ Verificación automatizada: 51/51 pruebas correctas en [38680277405](https://git
 - Produces: `@MainActor LibraryStore: ObservableObject`, `init(fileURL: URL)`, `private(set) var snapshot: LibrarySnapshot`, `func load() throws`, `func setFavorite(_ video: Video, enabled: Bool) throws`.
 - Produces: `func createPlaylist(name: String) throws -> UUID`, `func renamePlaylist(id: UUID, name: String) throws`, `func deletePlaylist(id: UUID) throws`, `func add(_ video: Video, to playlistID: UUID) throws`, `func remove(at index: Int, from playlistID: UUID) throws`, `func recordRecent(_ video: Video) throws`, `func saveQueue(_ queue: QueueSnapshot) throws`.
 
-- [ ] **Step 1: Escribir pruebas fallidas con archivos temporales.** Guardar/cargar listas, favoritos, recientes y cola; añadir dos veces el mismo favorito no duplica; una reproducción reciente mueve el contenido al inicio; quitar una posición de una lista no borra otras ocurrencias. Nombres se recortan y el nombre vacío se rechaza. Simular un archivo JSON inválido, `schemaVersion = 2` y escritura fallida utilizando una URL sin directorio escribible. Afirmaciones:
+- [x] **Step 1: Escribir pruebas fallidas con archivos temporales.** Guardar/cargar listas, favoritos, recientes y cola; añadir dos veces el mismo favorito no duplica; una reproducción reciente mueve el contenido al inicio; quitar una posición de una lista no borra otras ocurrencias. Nombres se recortan y el nombre vacío se rechaza. Simular un archivo JSON inválido, `schemaVersion = 2` y escritura fallida utilizando una URL sin directorio escribible. Afirmaciones:
 
 ```swift
 // testRoundTripPreservesLibraryAndQueue
@@ -209,10 +209,12 @@ XCTAssertEqual(try Data(contentsOf: fileURL), originalBytes)
 XCTAssertEqual(store.snapshot, previousSnapshot)
 ```
 
-- [ ] **Step 2: Confirmar RED.** Ejecutar `bash scripts/ci.sh test`; faltan los modelos y las operaciones de almacenamiento.
-- [ ] **Step 3: Implementar Codable y guardado atómico.** Usar Application Support y `library.json`. Serializar operaciones en MainActor; preparar una copia de la siguiente biblioteca, escribir con `.atomic` y publicar la copia solamente después de éxito. Al cargar una biblioteca inválida o de una versión no soportada, conservar el archivo y bloquear escrituras sobre él hasta una recuperación explícita; no reinicializarlo silenciosamente. No incluir PlaybackResource en el esquema persistente.
-- [ ] **Step 4: Confirmar GREEN y comprobar orden de operaciones.** Ejecutar tests, incluidas dos modificaciones consecutivas que deben conservar ambos resultados. Verificar bytes previos y estado previo cuando falla una escritura.
-- [ ] **Step 5: Commit.** Mensaje `feat: persist personal library and playback references`.
+- [x] **Step 2: Confirmar RED.** Ejecutar `bash scripts/ci.sh test`; faltan los modelos y las operaciones de almacenamiento.
+- [x] **Step 3: Implementar Codable y guardado atómico.** Usar Application Support y `library.json`. Serializar operaciones en MainActor; preparar una copia de la siguiente biblioteca, escribir con `.atomic` y publicar la copia solamente después de éxito. Al cargar una biblioteca inválida o de una versión no soportada, conservar el archivo y bloquear escrituras sobre él hasta una recuperación explícita; no reinicializarlo silenciosamente. No incluir PlaybackResource en el esquema persistente.
+- [x] **Step 4: Confirmar GREEN y comprobar orden de operaciones.** Ejecutar tests, incluidas dos modificaciones consecutivas que deben conservar ambos resultados. Verificar bytes previos y estado previo cuando falla una escritura.
+- [x] **Step 5: Commit.** Mensaje `feat: persist personal library and playback references`.
+
+Verificación: 63/63 pruebas correctas en [38681395231](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38681395231), commit `e17f2f2`.
 
 ## Task 5: Buscar y Biblioteca como una sola experiencia
 
@@ -229,7 +231,7 @@ XCTAssertEqual(store.snapshot, previousSnapshot)
 - Produces: `RootView(search: SearchViewModel, playback: PlaybackController, library: LibraryStore)` y vistas que reciben esas mismas instancias; no recrean reproductores.
 - Produces: el modo `--ui-testing` solamente en Debug, que usa respuestas controladas y una biblioteca temporal. El IPA Release conserva siempre la integración real.
 
-- [ ] **Step 1: Escribir pruebas de flujo fallidas.** Añadir identificadores accesibles `searchField`, `searchSubmit`, `result-<videoID>`, `miniPlayer`, `libraryTab`, `favoritesList`, `favorite-<videoID>` y `playlistNameField`. Buscar el contenido de prueba, seleccionar un resultado, guardarlo como favorito, crear una lista, añadir el resultado y volver a Buscar conservando el reproductor compacto. El estado vacío mantiene el buscador disponible; el estado de error añade Reintentar. Afirmaciones:
+- [x] **Step 1: Escribir pruebas de flujo fallidas.** Añadir identificadores accesibles `searchField`, `searchSubmit`, `result-<videoID>`, `miniPlayer`, `libraryTab`, `favoritesList`, `favorite-<videoID>` y `playlistNameField`. Buscar el contenido de prueba, seleccionar un resultado, guardarlo como favorito, crear una lista, añadir el resultado y volver a Buscar conservando el reproductor compacto. El estado vacío mantiene el buscador disponible; el estado de error añade Reintentar. Afirmaciones:
 
 ```swift
 // testSearchToFavoriteAndPlaylist
@@ -241,10 +243,10 @@ XCTAssertTrue(app.buttons["Reintentar"].exists)
 XCTAssertTrue(app.textFields["searchField"].isEnabled)
 ```
 
-- [ ] **Step 2: Confirmar RED.** Ejecutar `bash scripts/ci.sh test` incluyendo el target UI; el flujo falla porque aún falta la biblioteca integrada.
-- [ ] **Step 3: Implementar las pantallas y conectar datos.** Dos pestañas: Buscar y Biblioteca. Biblioteca contiene Favoritos, Listas y Recientes. Añadir acciones de favorito, lista y cola a resultados y reproducción actual. La raíz carga la biblioteca, restaura la cola sin iniciar audio y guarda referencias al cambiar de cola o pausar; guardar el progreso en esas transiciones y al pasar la app a segundo plano, evitando escribir cada segundo. Al confirmar que un elemento empezó a reproducirse, registrarlo en Recientes. Mostrar errores de guardado, red y reproducción en español con acciones aplicables.
+- [x] **Step 2: Confirmar RED.** Ejecutar `bash scripts/ci.sh test` incluyendo el target UI; el flujo falla porque aún falta la biblioteca integrada.
+- [x] **Step 3: Implementar las pantallas y conectar datos.** Dos pestañas: Buscar y Biblioteca. Biblioteca contiene Favoritos, Listas y Recientes. Añadir acciones de favorito, lista y cola a resultados y reproducción actual. La raíz carga la biblioteca, restaura la cola sin iniciar audio y guarda referencias al cambiar de cola o pausar; guardar el progreso en esas transiciones y al pasar la app a segundo plano, evitando escribir cada segundo. Al confirmar que un elemento empezó a reproducirse, registrarlo en Recientes. Mostrar errores de guardado, red y reproducción en español con acciones aplicables.
 - [ ] **Step 4: Confirmar GREEN y revisar accesibilidad.** Ejecutar pruebas unitarias/UI. Verificar manualmente tamaños de letra grandes, etiquetas VoiceOver, teclado y controles con una mano; asegurar que títulos largos y listas vacías siguen siendo utilizables. Mostrar solo estados y datos obtenidos: no anunciar éxito ni contenido reproducible por el hecho de haberlo encontrado en la búsqueda.
-- [ ] **Step 5: Commit.** Mensaje `feat: connect search playback and personal library`.
+- [x] **Step 5: Commit.** Mensaje `feat: connect search playback and personal library`.
 
 ## Task 6: Entrega instalable y pruebas reales de la primera etapa
 

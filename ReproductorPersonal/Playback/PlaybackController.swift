@@ -102,7 +102,7 @@ final class PlaybackController: ObservableObject {
 
     func resume() async {
         guard let entry = queue.current else { return }
-        if activeEntryID != entry.id || player.currentItem == nil || player.currentItem?.status == .failed || isExpired(activeResource) {
+        if isFailed || activeEntryID != entry.id || player.currentItem == nil || player.currentItem?.status == .failed || isExpired(activeResource) {
             recoveredEntries.remove(entry.id) // Explicit user retry has its own bounded recovery.
             clearNativeItems()
             await startCurrent(progress: elapsed)
@@ -151,8 +151,12 @@ final class PlaybackController: ObservableObject {
         await startCurrent(progress: 0, usePrepared: true)
     }
 
-    // Task 5 queue-selection contract, before its RED run.
-    func playQueueEntry(id: UUID) async {}
+    func playQueueEntry(id: UUID) async {
+        guard queue.entries.contains(where: { $0.id == id }) else { return }
+        if case .loading = state, queue.current?.id == id { return }
+        queue.select(id: id)
+        await startCurrent(progress: 0, usePrepared: true)
+    }
 
     func previous() async {
         guard queue.previous() != nil else { seek(to: 0); return }
@@ -204,7 +208,13 @@ final class PlaybackController: ObservableObject {
         } else {
             let resume = shouldResume && resumeAfterInterruption && wantsPlayback
             resumeAfterInterruption = false
-            if resume { Task { await self.resume() } }
+            if resume {
+                let interruptionRequest = requestID
+                Task { [weak self] in
+                    guard let self, self.wantsPlayback, self.requestID == interruptionRequest else { return }
+                    await self.resume()
+                }
+            }
             else { wantsPlayback = false }
         }
     }

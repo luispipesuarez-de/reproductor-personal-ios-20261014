@@ -40,6 +40,11 @@ struct PlaybackQueue: Equatable {
         return current
     }
 
+    mutating func select(id: UUID) {
+        guard let index = entries.firstIndex(where: { $0.id == id }) else { return }
+        currentIndex = index
+    }
+
     mutating func previous() -> QueueEntry? {
         guard let index = currentIndex, index > 0 else { return nil }
         currentIndex = index - 1

@@ -5,21 +5,30 @@ import SwiftUI
 struct ReproductorPersonalApp: App {
     @StateObject private var search: SearchViewModel
     @StateObject private var playback: PlaybackController
+    @StateObject private var library: LibraryStore
 
     init() {
         let source: any YouTubeProviding
+        var fileURL = LibraryStore.defaultFileURL
 #if DEBUG
-        source = ProcessInfo.processInfo.arguments.contains("--ui-testing") ? UITestYouTubeProvider() : YouTubeClient()
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing") {
+            source = UITestYouTubeProvider()
+            fileURL = FileManager.default.temporaryDirectory.appendingPathComponent("ui-testing-library.json")
+            if ProcessInfo.processInfo.arguments.contains("--ui-reset-library") {
+                try? FileManager.default.removeItem(at: fileURL)
+            }
+        } else { source = YouTubeClient() }
 #else
         source = YouTubeClient()
 #endif
         _search = StateObject(wrappedValue: SearchViewModel(source: source))
         _playback = StateObject(wrappedValue: PlaybackController(source: source))
+        _library = StateObject(wrappedValue: LibraryStore(fileURL: fileURL))
     }
 
     var body: some Scene {
         WindowGroup {
-            SearchView(search: search, playback: playback)
+            RootView(search: search, playback: playback, library: library)
 #if DEBUG
                 .modifier(UITestAppearance())
 #endif

@@ -4,69 +4,55 @@ import SwiftUI
 struct SearchView: View {
     @ObservedObject var search: SearchViewModel
     @ObservedObject var playback: PlaybackController
+    @ObservedObject var library: LibraryStore
+    let onPlay: () -> Void
     @State private var query = ""
-    @State private var showPlayer = false
     @State private var showLicense = false
     @FocusState private var fieldFocused: Bool
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                HStack(spacing: 12) {
-                    TextField("Videos, canciones o artistas", text: $query)
-                        .textFieldStyle(.roundedBorder)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .submitLabel(.search)
-                        .focused($fieldFocused)
-                        .onSubmit(submit)
-                        .accessibilityLabel("Buscar videos y música")
-                        .accessibilityIdentifier("searchField")
-                    Button("Buscar", action: submit)
-                        .frame(minHeight: 44)
-                        .disabled(query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                        .accessibilityIdentifier("searchSubmit")
-                }
-                .padding(.horizontal)
-                .padding(.bottom, 12)
+                searchControls.padding(.horizontal).padding(.bottom, 12)
                 content
             }
-            .navigationTitle("Reproductor")
+            .navigationTitle("Buscar")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button { showLicense = true } label: { Image(systemName: "info.circle") }
+                    Button { showLicense = true } label: { Image(systemName: "info.circle").frame(minWidth: 44, minHeight: 44) }
                         .accessibilityLabel("Licencia de YouTubeKit")
                 }
             }
-            .safeAreaInset(edge: .bottom) {
-                if let video = playback.state.video {
-                    HStack(spacing: 16) {
-                        Button { showPlayer = true } label: {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(video.title).font(.headline).lineLimit(2)
-                                Text(playbackCaption).font(.caption).foregroundStyle(.secondary)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .frame(minHeight: 44)
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityHint("Abre el video y sus controles")
-                        playbackButton
-                    }
-                    .padding(.horizontal)
-                    .padding(.vertical, 10)
-                    .background(.regularMaterial)
-                    .accessibilityIdentifier("miniPlayer")
-                }
-            }
-            .sheet(isPresented: $showPlayer) { playerSheet }
             .sheet(isPresented: $showLicense) { licenseSheet }
         }
     }
 
-    @ViewBuilder
-    private var content: some View {
+    @ViewBuilder private var searchControls: some View {
+        if typeSize.isAccessibilitySize {
+            VStack(alignment: .leading, spacing: 8) { searchField; submitButton }
+        } else { HStack(spacing: 12) { searchField; submitButton } }
+    }
+
+    private var searchField: some View {
+        TextField("Videos, canciones o artistas", text: $query)
+            .textFieldStyle(.roundedBorder)
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+            .submitLabel(.search)
+            .focused($fieldFocused)
+            .onSubmit(submit)
+            .accessibilityLabel("Buscar videos y música")
+            .accessibilityIdentifier("searchField")
+    }
+
+    private var submitButton: some View {
+        Button("Buscar", action: submit).frame(minHeight: 44)
+            .disabled(query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            .accessibilityIdentifier("searchSubmit")
+    }
+
+    @ViewBuilder private var content: some View {
         switch search.state {
         case .idle:
             message(title: "Busca algo para escuchar", detail: "Escribe el título de un video, una canción o un artista.", symbol: "magnifyingglass")
@@ -75,21 +61,23 @@ struct SearchView: View {
                 Text("Buscando «\(query)»…").foregroundStyle(.secondary)
                 ForEach(0..<3) { _ in
                     VideoRow(video: Video(id: "", title: "Buscando contenido", author: "Autor"))
-                        .redacted(reason: .placeholder)
-                        .accessibilityHidden(true)
+                        .redacted(reason: .placeholder).accessibilityHidden(true)
                 }
             }.listStyle(.plain)
         case .results(_, let videos):
             List {
                 ForEach(Array(videos.enumerated()), id: \.offset) { _, video in
-                    Button {
-                        fieldFocused = false
-                        showPlayer = true
-                        Task { await playback.play(video) }
-                    } label: { VideoRow(video: video) }
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("result-\(video.id)")
-                    .accessibilityHint("Reproduce este contenido")
+                    HStack {
+                        Button {
+                            fieldFocused = false
+                            onPlay()
+                            Task { await playback.play(video) }
+                        } label: { VideoRow(video: video) }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("result-\(video.id)")
+                        .accessibilityHint("Reproduce este contenido")
+                        VideoActionsMenu(video: video, library: library, playback: playback)
+                    }
                 }
             }.listStyle(.plain)
         case .empty(let query):
@@ -98,8 +86,7 @@ struct SearchView: View {
             VStack(spacing: 16) {
                 message(title: "No se pudo buscar", detail: error, symbol: "wifi.exclamationmark")
                 Button("Reintentar") { Task { await search.submit(query: query) } }
-                    .buttonStyle(.borderedProminent)
-                    .frame(minHeight: 44)
+                    .buttonStyle(.borderedProminent).frame(minHeight: 44)
                 Spacer()
             }
         }
@@ -117,67 +104,8 @@ struct SearchView: View {
             Text(title).font(.title2).fontWeight(.semibold)
             Text(detail).foregroundStyle(.secondary)
         }
-        .multilineTextAlignment(.center)
-        .padding(24)
+        .multilineTextAlignment(.center).padding(24)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private var playbackCaption: String {
-        switch playback.state {
-        case .loading: return "Preparando…"
-        case .playing: return "Reproduciendo"
-        case .paused: return "Pausado"
-        case .failed: return "No se pudo reproducir"
-        case .idle: return ""
-        }
-    }
-
-    @ViewBuilder
-    private var playbackButton: some View {
-        if case .failed(let video, _) = playback.state {
-            Button {
-                if let video { Task { await playback.play(video) } }
-            } label: { Image(systemName: "arrow.clockwise").font(.title2).frame(width: 44, height: 44) }
-                .accessibilityLabel("Reintentar reproducción")
-        } else {
-            let canPause: Bool = {
-                if case .loading = playback.state { return true }
-                return playback.state.isPlaying
-            }()
-            Button {
-                if canPause { playback.pause() }
-                else { Task { await playback.resume() } }
-            } label: { Image(systemName: canPause ? "pause.fill" : "play.fill").font(.title2).frame(width: 44, height: 44) }
-                .accessibilityLabel(canPause ? "Pausar" : "Reanudar")
-        }
-    }
-
-    private var playerSheet: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    PlayerView(player: playback.player).aspectRatio(16 / 9, contentMode: .fit)
-                        .background(Color.black)
-                    if let video = playback.state.video {
-                        Text(video.title).font(.title2).fontWeight(.semibold)
-                        Text(video.author).foregroundStyle(.secondary)
-                    }
-                    HStack(spacing: 16) {
-                        playbackButton
-                        Text(playbackCaption)
-                        if case .loading = playback.state { ProgressView().accessibilityLabel("Preparando contenido") }
-                    }
-                    if case .failed(_, let message) = playback.state {
-                        Text(message).foregroundStyle(.secondary).accessibilityIdentifier("playbackError")
-                    }
-                }.padding()
-            }
-            .navigationTitle("Ahora suena")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) { Button("Cerrar") { showPlayer = false }.accessibilityIdentifier("closePlayer") }
-            }
-        }
     }
 
     private var licenseSheet: some View {
@@ -202,7 +130,7 @@ struct SearchView: View {
     }
 }
 
-private struct VideoRow: View {
+struct VideoRow: View {
     let video: Video
     @Environment(\.dynamicTypeSize) private var typeSize
 

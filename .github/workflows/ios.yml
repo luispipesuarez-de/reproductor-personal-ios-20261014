@@ -27,6 +27,14 @@ jobs:
           xcodegen --version
       - name: XCTest en iPhone simulado
         run: bash scripts/ci.sh test
+      - name: Exportar capturas de interfaz
+        if: always()
+        continue-on-error: true
+        run: |
+          result=$(python3 -c 'from pathlib import Path; print(next(iter(sorted(Path("build").glob("Tests-*.xcresult"), reverse=True)), ""))')
+          if [ -n "$result" ]; then
+            xcrun xcresulttool export attachments --path "$result" --output-path build/ui-screenshots
+          fi
       - name: Empaquetar para firma personal
         if: inputs.package_ipa
         run: bash scripts/ci.sh ipa
@@ -46,4 +54,5 @@ jobs:
             build/*.ipa
             build/*.log
             build/*.png
+            build/ui-screenshots/
           if-no-files-found: warn

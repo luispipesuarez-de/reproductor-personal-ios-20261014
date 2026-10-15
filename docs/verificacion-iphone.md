@@ -25,3 +25,25 @@ La instalación de esta compilación se completó mediante AltServer → Shift +
 Diagnóstico del 14 de octubre: al repetir en Windows la petición IOS de la dependencia, el video público `QEYGxzEGwaM` (coincidencia de título de la captura) y `aqz-KE-bpKQ` responden `playabilityStatus: OK`, con SABR y sin HLS ni formatos combinados. El prototipo rechaza ese formato. Una petición VISIONOS con identificador anónimo de visitante devuelve HLS: se comprobaron HTTP 200 en el manifiesto, una variante H.264 y fragmentos de audio y video de ambos contenidos. No se usaron credenciales ni cookies de cuenta. Esta prueba de red en Windows no demuestra todavía reproducción en el iPhone.
 
 Hito 1 superado con la confirmación del usuario. Se inicia la implementación de cola, controles del sistema y biblioteca del plan aprobado. Las pruebas de tres canciones, dos videos (uno largo), escucha bloqueada de quince minutos, cola, controles, auriculares, persistencia y actualización siguen pendientes.
+
+## Hitos 2 y 3 — pruebas de la entrega integrada
+
+Estos criterios requieren el iPhone real y la versión que integre la biblioteca. No se deducen de la compilación 3 ni de los tests del simulador.
+
+| Criterio | Estado físico | Evidencia que falta |
+| --- | --- | --- |
+| Buscar y escuchar tres canciones públicas | No probado | Títulos, resultado y versión instalada |
+| Ver dos videos públicos, uno de al menos quince minutos | No probado | Títulos, imagen/sonido y duración |
+| Escuchar quince minutos con el teléfono bloqueado | No probado | Duración observada, cortes o errores |
+| Cambiar entre apps con la nueva versión | No probado | Continuidad del audio |
+| Pasar automáticamente por una cola de tres elementos con pantalla bloqueada | No probado | Orden y transición entre los tres |
+| Pausar, reanudar, siguiente y anterior desde el sistema | No probado | Resultado de cada comando disponible |
+| Desconectar auriculares e interrumpir el audio | No probado | Pausa y reanudación según la intención del usuario |
+| Anuncios insertados en la prueba ampliada | No probado | Presencia o ausencia observada en esa muestra |
+| Crear, renombrar y borrar una lista; añadir y quitar elementos | No probado | Resultado en la nueva interfaz |
+| Guardar y quitar favoritos sin duplicados | No probado | Resultado y conservación de otras entradas |
+| Cerrar/abrir y recuperar listas, favoritos, recientes y cola en pausa | No probado | Datos conservados y ausencia de inicio automático |
+| Actualizar con el mismo identificador conservando la biblioteca | No probado | Instalación de una actualización posterior con datos previos |
+| Búsqueda vacía, contenido no disponible y pérdida de conexión | No probado | Mensajes y posibilidad de continuar usando la biblioteca |
+
+Verificación automática de cola y controles: [38680277405](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38680277405), commit `73fb437`, 51/51 pruebas correctas. Incluye tres transiciones con un WAV local, recuperación de progreso, restauración en pausa, eventos de ruta/interrupción y metadatos. Es evidencia del comportamiento programado en el simulador; no verifica accesorios ni controles físicos del iPhone.

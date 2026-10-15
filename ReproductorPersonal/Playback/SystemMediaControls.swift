@@ -15,10 +15,13 @@ final class SystemMediaControls {
             }
             handlers.append((command, token))
         }
-        register(center.playCommand) { await $0.resume() }
+        register(center.playCommand) {
+            if case .loading = $0.state { return }
+            await $0.resume()
+        }
         register(center.pauseCommand) { $0.pause() }
         register(center.togglePlayPauseCommand) {
-            if $0.state.isPlaying { $0.pause() } else { await $0.resume() }
+            if $0.state.canPause { $0.pause() } else { await $0.resume() }
         }
         register(center.nextTrackCommand) { await $0.next() }
         register(center.previousTrackCommand) { await $0.previous() }

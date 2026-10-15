@@ -2,7 +2,7 @@
 
 Proyecto personal en SwiftUI, desarrollado desde Windows y compilado con Xcode en GitHub Actions. La primera entrega prepara búsqueda interna de contenido público y reproducción mediante AVQueuePlayer, con audio en segundo plano. La resolución se realiza desde el iPhone, sin servidor de extracción propio.
 
-Estado actual: prototipo 0.1.0, compilación 3, con 28 pruebas automatizadas correctas y un IPA Release comprobado. La primera prueba del iPhone detectó un fallo de reproducción en la compilación 2; esta actualización añade una ruta HLS para la respuesta SABR observada. Falta instalar y probar la actualización en el teléfono. La biblioteca, la cola y la integración con la cuenta de YouTube están sujetas a los hitos de la especificación; no son funciones disponibles todavía.
+Estado actual: prototipo 0.1.0, compilación 3, con 28 pruebas automatizadas correctas y un IPA Release comprobado. El usuario confirmó reproducción en su iPhone 13, continuidad al salir y bloquear la pantalla y ausencia de anuncios en la muestra probada. La actualización añade una ruta HLS para la respuesta SABR que fallaba en la compilación 2. Continúa el plan de cola, controles y biblioteca, todavía no disponibles en esta entrega. La cuenta de YouTube pertenece a una etapa posterior.
 
 ## Código y compilación
 

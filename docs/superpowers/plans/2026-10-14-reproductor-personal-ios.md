@@ -246,6 +246,8 @@ XCTAssertTrue(app.textFields["searchField"].isEnabled)
 - [x] **Step 2: Confirmar RED.** Ejecutar `bash scripts/ci.sh test` incluyendo el target UI; el flujo falla porque aún falta la biblioteca integrada.
 - [x] **Step 3: Implementar las pantallas y conectar datos.** Dos pestañas: Buscar y Biblioteca. Biblioteca contiene Favoritos, Listas y Recientes. Añadir acciones de favorito, lista y cola a resultados y reproducción actual. La raíz carga la biblioteca, restaura la cola sin iniciar audio y guarda referencias al cambiar de cola o pausar; guardar el progreso en esas transiciones y al pasar la app a segundo plano, evitando escribir cada segundo. Al confirmar que un elemento empezó a reproducirse, registrarlo en Recientes. Mostrar errores de guardado, red y reproducción en español con acciones aplicables.
 - [ ] **Step 4: Confirmar GREEN y revisar accesibilidad.** Ejecutar pruebas unitarias/UI. Verificar manualmente tamaños de letra grandes, etiquetas VoiceOver, teclado y controles con una mano; asegurar que títulos largos y listas vacías siguen siendo utilizables. Mostrar solo estados y datos obtenidos: no anunciar éxito ni contenido reproducible por el hecho de haberlo encontrado en la búsqueda.
+
+  Progreso del 15 de octubre: `9ef14b3` pasa 69/69 unitarias y 3/4 de interfaz; falla abrir el selector para añadir a una lista. La corrección `b6eb12f` usa una hoja de opciones nativa; su ejecución no inició pasos por facturación/cuota de GitHub. GREEN integrado y comprobación física de accesibilidad pendientes. El paso permanece abierto.
 - [x] **Step 5: Commit.** Mensaje `feat: connect search playback and personal library`.
 
 ## Task 6: Entrega instalable y pruebas reales de la primera etapa

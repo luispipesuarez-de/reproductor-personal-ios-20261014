@@ -6,6 +6,8 @@ Dispositivo indicado por el usuario: iPhone 13, iOS 26.2. La app requiere iOS 16
 
 La entrega comprobada está en `build/ReproductorPersonal.ipa` dentro de la carpeta de este proyecto: versión 0.1.0, compilación 3. Su [ejecución de origen](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38676199279) contiene las 28 pruebas correctas y el mismo IPA. Puedes seleccionarlo directamente desde AltServer con la ruta USB indicada más abajo.
 
+La ampliación con Biblioteca y cola aún no tiene un IPA verificado. La compilación de su último cambio quedó bloqueada por facturación/cuota en GitHub antes de iniciarse. El archivo de esta guía conserva la versión 3 que ya funcionó en el teléfono; no instala todavía las funciones nuevas. Consulta [el estado actual](estado-implementacion.md).
+
 1. Abre [las ejecuciones privadas del proyecto](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/workflows/ios.yml) con tu cuenta de GitHub.
 2. Elige la ejecución 38676199279 y descarga su artefacto ReproductorPersonal-10, o una entrega posterior comprobada que haya generado IPA.
 3. Extrae el ZIP y busca ReproductorPersonal.ipa. Transfiérelo a Archivos en el iPhone, por ejemplo mediante iCloud Drive.

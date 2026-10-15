@@ -2,7 +2,9 @@
 
 Proyecto personal en SwiftUI, desarrollado desde Windows y compilado con Xcode en GitHub Actions. La primera entrega prepara búsqueda interna de contenido público y reproducción mediante AVQueuePlayer, con audio en segundo plano. La resolución se realiza desde el iPhone, sin servidor de extracción propio.
 
-Estado actual: prototipo 0.1.0, compilación 3, con 28 pruebas automatizadas correctas y un IPA Release comprobado. El usuario confirmó reproducción en su iPhone 13, continuidad al salir y bloquear la pantalla y ausencia de anuncios en la muestra probada. La actualización añade una ruta HLS para la respuesta SABR que fallaba en la compilación 2. Continúa el plan de cola, controles y biblioteca, todavía no disponibles en esta entrega. La cuenta de YouTube pertenece a una etapa posterior.
+Última entrega comprobada: prototipo 0.1.0, compilación 3, con 28 pruebas automatizadas correctas y un IPA Release comprobado. El usuario confirmó reproducción en su iPhone 13, continuidad al salir y bloquear la pantalla y ausencia de anuncios en la muestra probada. La actualización añade una ruta HLS para la respuesta SABR que fallaba en la compilación 2. La cuenta de YouTube pertenece a una etapa posterior.
+
+La ampliación con cola, controles, favoritos, listas y recientes está escrita, pero aún no tiene un IPA comprobado. En `9ef14b3` pasan 69 pruebas unitarias y 3 de las 4 pruebas de interfaz; queda el recorrido para añadir a una lista. El cambio posterior `b6eb12f` usa una hoja de opciones nativa para ese recorrido. [Su ejecución](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38749396947) no llegó a iniciarse por el bloqueo de facturación/cuota de GitHub. `build/ReproductorPersonal.ipa` sigue siendo la compilación 3.
 
 ## Código y compilación
 

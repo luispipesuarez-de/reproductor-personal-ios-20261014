@@ -30,6 +30,8 @@ Hito 1 superado con la confirmación del usuario. Se inicia la implementación d
 
 Estos criterios requieren el iPhone real y la versión que integre la biblioteca. No se deducen de la compilación 3 ni de los tests del simulador.
 
+Actualización del 15 de octubre: el código integrado llega a `b6eb12f`, pero todavía no se generó un IPA comprobado. La última ejecución no inició los tests por un bloqueo de facturación/cuota de GitHub. La compilación 3 sigue siendo la instalada; los criterios de la tabla conservan su estado «No probado».
+
 | Criterio | Estado físico | Evidencia que falta |
 | --- | --- | --- |
 | Buscar y escuchar tres canciones públicas | No probado | Títulos, resultado y versión instalada |
@@ -45,5 +47,6 @@ Estos criterios requieren el iPhone real y la versión que integre la biblioteca
 | Cerrar/abrir y recuperar listas, favoritos, recientes y cola en pausa | No probado | Datos conservados y ausencia de inicio automático |
 | Actualizar con el mismo identificador conservando la biblioteca | No probado | Instalación de una actualización posterior con datos previos |
 | Búsqueda vacía, contenido no disponible y pérdida de conexión | No probado | Mensajes y posibilidad de continuar usando la biblioteca |
+| Texto grande, VoiceOver, teclado y uso con una mano en el teléfono | No probado | La navegación con texto grande y modo oscuro pasó en simulador; falta la comprobación física |
 
 Verificación automática de cola y controles: [38680277405](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38680277405), commit `73fb437`, 51/51 pruebas correctas. Incluye tres transiciones con un WAV local, recuperación de progreso, restauración en pausa, eventos de ruta/interrupción y metadatos. Es evidencia del comportamiento programado en el simulador; no verifica accesorios ni controles físicos del iPhone.

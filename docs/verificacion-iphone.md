@@ -1,6 +1,6 @@
 # Comprobación en el iPhone
 
-Estado: compilación 3 instalada y probada en el iPhone el 14 de octubre de 2026, con reproducción, continuidad al salir/bloquear y sin anuncios observados en esa muestra. En la compilación 4, el usuario confirmó la prueba guiada de una cola de tres canciones que avanza automáticamente con la pantalla bloqueada. En la compilación 5, el usuario confirmó que la prueba guiada de reproducción desde Favoritos después de reabrir ya funciona. También confirmó los cuatro controles de iOS con pantalla bloqueada: pausa, reanudación, siguiente y anterior. También confirmó la escucha guiada de quince minutos con pantalla bloqueada, cambios automáticos de canción y ausencia de cortes y anuncios en esa muestra. La validación física es parcial y las demás comprobaciones siguen abiertas.
+Estado corregido el 15 de octubre de 2026: la instalación de la compilación 5 no está confirmada. Después de las respuestas positivas anteriores, el usuario repitió cerrar/reabrir y volvió a encontrar el fallo de Favoritos; indicó que quizá no había instalado o probado antes la actualización. La captura del nuevo intento muestra que AltServer no pudo instalar el IPA por un error de autenticación HTTP 503. Se conservan las observaciones anteriores como reportes del usuario, pero se retira su atribución a la compilación 5. La lectura posterior por USB confirmó CFBundleVersion=4. Debe instalarse la compilación 5 y verificarse ese número antes de validar la corrección.
 
 Incidencia posterior de la compilación 4: los datos del favorito, lista y cola se conservan tras pausar/cerrar/reabrir, según la respuesta «Sí» a esa prueba guiada. Sin embargo, el usuario corrigió el alcance de esa confirmación: al intentar reproducir desde Favoritos después de reabrir aparece «No se pudo preparar este contenido. Intenta de nuevo». La captura muestra «Rata Blanca - Talisman (AUDIO)», de «Lo Mejor del Rock Argentino». Buscar la misma canción y reproducirla hace que después también funcione desde Favoritos, confirmado explícitamente por el usuario. La persistencia de datos y la reproducción posterior son comprobaciones distintas.
 
@@ -38,16 +38,16 @@ Entrega anterior del 15 de octubre: el IPA 0.1.0/4 se instaló desde `build/Repr
 | --- | --- | --- |
 | Buscar y escuchar tres canciones públicas | Pasó según el usuario | Confirmó la guía de tres canciones; títulos no indicados |
 | Ver dos videos públicos, uno de al menos quince minutos | No probado | Títulos, imagen/sonido y duración |
-| Escuchar quince minutos con el teléfono bloqueado | Pasó en 5 según el usuario | Después de pedir una cola suficiente, anotar la hora y escuchar quince minutos bloqueado, respondió «Sí, sin problemas y sin anuncios». Duración de la prueba guiada confirmada por el usuario, no cronometrada por el agente |
-| Cambiar entre apps con la nueva versión | Pasó en 5 según el usuario | Respondió «Sí» a si la música continúa sin interrupciones tras abrir Notas durante un minuto y volver a Reproductor |
+| Escuchar quince minutos con el teléfono bloqueado | Reportado como correcto; compilación sin confirmar | Después de pedir una cola suficiente, anotar la hora y escuchar quince minutos bloqueado, respondió «Sí, sin problemas y sin anuncios». Duración de la prueba guiada confirmada por el usuario, no cronometrada por el agente |
+| Cambiar entre apps con la nueva versión | Reportado como correcto; compilación sin confirmar | Respondió «Sí» a si la música continúa sin interrupciones tras abrir Notas durante un minuto y volver a Reproductor |
 | Pasar automáticamente por una cola de tres elementos con pantalla bloqueada | Pasó según el usuario | Confirmó continuidad y paso automático a la segunda y tercera tras la guía; duración no medida |
-| Pausar, reanudar, siguiente y anterior desde el sistema | Pasó en 5 según el usuario | Tras pedirle una cola de tres elementos y probar los cuatro controles con el iPhone bloqueado, respondió «Sí, guarda» |
+| Pausar, reanudar, siguiente y anterior desde el sistema | Reportado como correcto; compilación sin confirmar | Tras pedirle una cola de tres elementos y probar los cuatro controles con el iPhone bloqueado, respondió «Sí, guarda» |
 | Desconectar auriculares e interrumpir el audio | No probado | Pausa y reanudación según la intención del usuario |
-| Anuncios insertados en la prueba ampliada | Ninguno observado en la muestra de 5 | Usuario: «Sí, sin problemas y sin anuncios» tras la escucha guiada de quince minutos; no se extrapola a todo el catálogo |
+| Anuncios insertados en la prueba ampliada | Ninguno reportado en la muestra; compilación sin confirmar | Usuario: «Sí, sin problemas y sin anuncios» tras la escucha guiada de quince minutos; no se extrapola a todo el catálogo |
 | Crear, renombrar y borrar una lista; añadir y quitar elementos | Parcial | Crear «Mi música», añadir una canción y conservarla al reabrir confirmados; faltan renombrar, quitar y borrar |
 | Guardar y quitar favoritos sin duplicados | Parcial | Guardar y conservar el favorito confirmados; faltan quitar y comprobar duplicados |
 | Cerrar/abrir y recuperar listas, favoritos, recientes y cola en pausa | Parcial | Favorito, lista y cola conservados y reproducción en pausa confirmados; Recientes no comprobado |
-| Reproducir un favorito inmediatamente después de reabrir | Pasó en 5 según el usuario; falló en 4 | Tras la guía de actualizar, cerrar/reabrir y reproducir desde Favoritos sin pasar por Buscar: «Ahora si se deja». No se indicó número de repeticiones |
+| Reproducir un favorito inmediatamente después de reabrir | Falló en la versión actual 4; 5 pendiente de instalación/prueba | El usuario corrigió la confirmación previa y la lectura por USB confirmó compilación 4. El intento de instalar 5 falló con HTTP 503 |
 | Actualizar con el mismo identificador conservando la biblioteca | No probado | Instalación de una actualización posterior con datos previos |
 | Búsqueda vacía, contenido no disponible y pérdida de conexión | No probado | Mensajes y posibilidad de continuar usando la biblioteca |
 | Texto grande, VoiceOver, teclado y uso con una mano en el teléfono | No probado | La navegación con texto grande y modo oscuro pasó en simulador; falta la comprobación física |
@@ -58,7 +58,7 @@ Verificación integrada de la compilación 4: [38753161729](https://github.com/l
 
 Diagnóstico del favorito en frío: en Windows, sin cookies ni credenciales, la petición nativa inicial para el video `2tkT5Divh0A` devuelve SABR y la página `/watch` devuelve HTTP 429. La API de búsqueda sí devuelve HTTP 200 y un visitante anónimo; con él se obtiene HLS y su manifiesto HTTP 200. Consultar la API con el identificador guardado, sin búsqueda manual, también funciona. En otra petición fría el perfil inicial devolvió `LOGIN_REQUIRED` antes de inicializar el contexto; por eso la prueba cubre preparar el visitante antes de la petición del reproductor. Son observaciones de red en Windows, no códigos HTTP medidos en el iPhone. La comparación del usuario confirma que la búsqueda previa cambia el resultado en su teléfono. No se han modificado los favoritos ni guardado URLs temporales para resolverlo.
 
-## Actualización 0.1.0/5 — Favoritos en frío confirmado por el usuario
+## Actualización 0.1.0/5 — confirmación anterior corregida posteriormente
 
 La compilación 5 inicializa el visitante anónimo mediante la API existente antes de solicitar el reproductor. Las dos regresiones nuevas fallaron en [38811681313](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38811681313) antes de la corrección y pasan en [38813838217](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38813838217): 71/71 unitarias, 4/4 de interfaz y Release correctos. El recorrido de interfaz también reproduce un favorito después de relanzar la app, con audio local controlado. Se conservan separados los resultados de red en Windows, simulador y contenido real en el iPhone.
 
@@ -75,3 +75,13 @@ El 15 de octubre de 2026 se pidió preparar una cola de más de quince minutos, 
 ## Cambiar de aplicación — confirmación del usuario
 
 El 15 de octubre de 2026 se pidió reproducir una canción, abrir Notas durante un minuto y volver a Reproductor. El usuario respondió «Sí» a si la música continuaba sin interrupciones. Se registra esa prueba guiada como pasada según el usuario en la compilación 5; no se observó directamente el teléfono ni se midió el intervalo. Las demás pruebas de videos, accesorios, biblioteca, actualización y accesibilidad permanecen abiertas.
+
+## Corrección de la evidencia e instalación pendiente
+
+Después de las confirmaciones anteriores, el usuario repitió la prueba de cerrar/reabrir y comunicó que el favorito no reproduce. Aclaró: «Creo que no lo había subido antes y creo que no lo había probado antes, bien». La captura de AltServer indica que ese intento de instalar ReproductorPersonal.ipa falló con «Apple’s authentication servers returned an error (HTTP 503)». Ese mensaje confirma un intento fallido, no la compilación que ya está instalada ni una caída global de Apple.
+
+Se reabre la prueba física de Favoritos y se retira la atribución de los resultados de controles, escucha prolongada y cambio de app a la compilación 5. Sus respuestas originales se conservan arriba como historial, con esta corrección vigente. El IPA del PC se verificó nuevamente: 0.1.0/5, SHA-256 `d90479b4ea258c7c564515605115ac39c4e3381af1dfd5d2348f87e64b187783`. AltServer instalado en Windows: 1.8.0.0. Primero hay que completar la instalación, confirmar la compilación del dispositivo y repetir el favorito sin buscar previamente.
+
+### Comprobación directa de la compilación instalada
+
+Con el iPhone conectado por USB y desbloqueado, se consultó la información de Reproductor mediante el servicio de instalación de iOS, usando el emparejamiento existente y sin instalar ni borrar aplicaciones. Resultado: nombre Reproductor, versión 0.1.0, compilación 4. El IPA del PC sigue siendo 0.1.0/5. Esto acredita que la corrección nueva todavía no está instalada; el fallo físico observado corresponde a la versión anterior. Después de instalar se repetirá la misma consulta antes de continuar con Favoritos.

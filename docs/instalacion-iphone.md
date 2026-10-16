@@ -1,6 +1,6 @@
 # Instalar y usar Reproductor desde Windows
 
-Dispositivo del usuario: iPhone 13 con iOS 26.2. La app requiere iOS 16 o posterior. Entrega: versión 0.1.0, compilación 5, comprobada en [38813838217](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38813838217): 71 pruebas unitarias, 4 de interfaz y compilación Release correctas. La nueva lectura por USB confirmó que esta versión 0.1.0/5 ya está instalada. Después, la prueba física de Favoritos tras cerrar/reabrir pasó según el usuario. Un intento anterior de actualizar había fallado con HTTP 503, y la lectura de ese momento todavía mostraba la compilación 4.
+Tu iPhone 13 con iOS 26.2 cumple el requisito de iOS 16 o posterior. Entrega disponible: **0.1.0, compilación 6**, comprobada en [38956368533](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38956368533): 130 pruebas unitarias, 13 de interfaz y Release correctos. El archivo del PC ya se verificó como 6; su instalación sigue pendiente. La última lectura por USB confirmó la 5, en la que pasó la prueba física de Favoritos tras cerrar/reabrir.
 
 ## Actualizar la app que ya tienes
 
@@ -16,7 +16,7 @@ C:\Users\Olga Lucia\Documents\Codex\2026-10-14\dime-c-mo-puedo-hacer-para\build\
 4. Elige **Sideload .ipa… → tu iPhone**.
 5. En la ventana **Abrir**, pega la ruta completa anterior en **Nombre de archivo** y pulsa **Abrir**. Usa el archivo del PC: la copia anterior de iCloud Drive no corresponde a esta entrega.
 6. Introduce la misma cuenta de Apple que usaste antes y su contraseña directamente en AltServer. Pulsa **Install** y mantén conectado el teléfono hasta que termine.
-7. Abre **Reproductor** en el iPhone. Deben aparecer las pestañas **Buscar** y **Biblioteca**.
+7. Cuando termine, verificaremos por USB que la versión instalada es **0.1.0/6**. Abre **Reproductor**; deben aparecer las pestañas **Buscar** y **Biblioteca**.
 
 Instala sobre la app existente para comprobar la conservación de sus datos. La actualización conserva el identificador de la app; la conservación de la biblioteca durante una actualización posterior sigue siendo una prueba física pendiente.
 
@@ -24,14 +24,26 @@ Si tu iPhone no aparece, vuelve a conectarlo desbloqueado y abre su pantalla Res
 
 ## Usar la biblioteca y la cola
 
-- **Buscar:** escribe un título o artista y toca un resultado. Cerrar «Ahora suena» deja el reproductor compacto disponible al navegar.
+- **Buscar:** escribe al menos dos caracteres de un título o artista. Los resultados aparecen mientras escribes, sin pulsar Buscar. Toca uno para reproducirlo; cerrar «Ahora suena» deja el reproductor compacto disponible al navegar.
 - **Favoritos:** abre los tres puntos del resultado o de «Ahora suena» y elige «Guardar en Favoritos». Los encontrarás en Biblioteca → Favoritos; el mismo menú permite quitarlos.
 - **Listas:** Biblioteca → + pide el nombre. Para guardar un video, abre sus tres puntos → Añadir a una lista → elige la lista. Dentro de ella, «Reproducir lista» sigue su orden. «Editar» permite quitar posiciones; los tres puntos de la lista permiten renombrarla o eliminarla.
-- **Cola:** reproduce el primer elemento y usa los tres puntos de otros resultados → Añadir a la cola. En Ahora suena → Ver cola puedes elegir una entrada o usar Editar para quitarla. Tocar otro resultado para reproducirlo inicia una cola nueva con ese contenido.
+- **Cola:** reproduce el primer elemento y usa los tres puntos de otros resultados → Añadir a la cola. Tus elecciones quedan antes de las sugerencias y se identifican como «Añadida por ti». En Ahora suena → Ver cola puedes elegir una entrada o usar el botón Edit para quitarla. Tocar otro resultado para reproducirlo inicia una cola nueva desde ese contenido.
 - **Controles:** Ahora suena ofrece pausa/reanudación, anterior/siguiente, saltos de quince segundos y una barra de progreso cuando el flujo la admite. La app publica también los controles del sistema; su comportamiento físico se registra en la guía de verificación.
-- **Recientes:** Biblioteca → Recientes se actualiza cuando el reproductor confirma que empezó a reproducirse el contenido.
+- **Historial:** Biblioteca → Historial muestra lo que empezó a reproducirse. Toca una entrada para volver a escucharla.
+- **Aleatorio:** «Mezclar mi música» reúne favoritos, listas e historial. También puedes mezclar favoritos, una lista o la cola. «Mezclar cola» conserva la canción actual y su progreso, y mantiene primero tus elecciones manuales. Anterior/Siguiente recorren el orden resultante.
 
 La biblioteca y la cola se guardan en el almacenamiento privado de la app. La escucha necesita conexión; los registros locales contienen referencias y metadatos. Al abrir de nuevo, la cola se restaura en pausa y la app obtiene el flujo de YouTube al reanudar.
+
+## Radio y recomendaciones dentro de Buscar
+
+- **Por género:** deja vacío el campo de Buscar y toca Salsa, Rock, Pop, Bachata, Merengue o Vallenato. «Otro género» permite escribir uno distinto. La app prepara una selección y solicita más canciones al avanzar.
+- **Desde una canción:** reproduce un resultado con «Continuar automáticamente» activado para seguir con canciones relacionadas. También puedes abrir los tres puntos de un resultado → «Iniciar radio».
+- **Tus elecciones primero:** añade una canción a la cola; queda antes de las sugerencias. «Ver cola» distingue «Añadida por ti» y «Sugerida».
+- **Desactivar las sugerencias:** apaga «Continuar automáticamente» en Ahora suena o Ver cola. La canción actual continúa y se retiran las sugerencias futuras; tus elecciones manuales se conservan.
+- **Para ti / Por descubrir:** escucha o guarda canciones y luego vacía el campo de Buscar. Desliza para ver las recomendaciones y usa «Actualizar recomendaciones» para renovarlas. «Por descubrir» omite las referencias del historial local; no significa que sean lanzamientos recientes.
+- **Imagen de la canción:** la app envía la miniatura disponible a la pantalla bloqueada y al Centro de control y la cambia al seleccionar otra canción. La comprobación en el teléfono está pendiente.
+
+La afinidad de género procede de los metadatos y sugerencias disponibles. Hay que escuchar Salsa y Rock en el iPhone para comprobar la selección real. Las recomendaciones no requieren iniciar sesión en YouTube.
 
 ## Repetir la prueba de Favoritos después de actualizar
 
@@ -40,7 +52,7 @@ La biblioteca y la cola se guardan en el almacenamiento privado de la app. La es
 3. Abre Reproductor de nuevo y entra directamente en **Biblioteca → Favoritos**, sin entrar antes en Buscar.
 4. Toca **Rata Blanca - Talisman (AUDIO)**. Comprueba que comienza a sonar. Repite el cierre y la apertura una segunda vez para confirmar el resultado.
 
-Esta actualización prepara el contexto anónimo necesario para reproducir un elemento guardado desde el inicio. La regresión automática pasó. La confirmación física anterior fue corregida después por el usuario y la lectura por USB confirmó que todavía tenía la compilación 4. Tras verificar por USB la instalación de la 5, el usuario repitió el recorrido y respondió «La canción se reproduce». Esto confirma una reproducción del favorito previo después de cerrar y reabrir; no confirma por separado varias repeticiones ni toda la biblioteca conservada durante la actualización.
+La compilación 5 corrigió la preparación del contexto anónimo al reabrir. Después de comprobar por USB esa instalación, el usuario respondió «La canción se reproduce» al probar el favorito. La regresión sigue pasando en la 6; el recorrido físico y la conservación de la biblioteca deben repetirse después de actualizar.
 
 ## Otras comprobaciones en el iPhone
 
@@ -61,4 +73,4 @@ Las apps gestionadas desde **AltStore → My Apps** pueden renovarse con **Refre
 
 En un Windows nuevo, sigue [la instalación oficial de AltStore Classic](https://faq.altstore.io/altstore-classic/how-to-install-altstore-windows) para iTunes, iCloud y AltServer. Conecta el iPhone, acepta confiar en el equipo y activa la sincronización Wi-Fi en iTunes. El perfil de desarrollador y Modo de desarrollador ya se habilitaron en el iPhone del usuario.
 
-Puedes descargar el ZIP **ReproductorPersonal-4** de [la ejecución 38813838217](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38813838217), extraerlo y seleccionar **ReproductorPersonal.ipa**. El IPA no está firmado: AltServer realiza la firma personal durante la instalación.
+Puedes descargar el ZIP **ReproductorPersonal-21** de [la ejecución 38956368533](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38956368533), extraerlo y seleccionar **ReproductorPersonal.ipa**. El IPA no está firmado: AltServer realiza la firma personal durante la instalación. La copia anterior del PC se conserva en `build/anteriores/ReproductorPersonal-compilacion-5.ipa`.

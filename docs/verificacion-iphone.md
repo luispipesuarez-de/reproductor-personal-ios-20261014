@@ -1,12 +1,30 @@
 # Comprobación en el iPhone
 
-Estado actual del 15 de octubre de 2026: la nueva lectura por USB confirma versión 0.1.0, compilación 5 instalada en el iPhone. Después de esa comprobación, el usuario repitió la prueba de Favoritos tras cerrar/reabrir sin pasar por Buscar y respondió «La canción se reproduce». Este recorrido pasa según el usuario en la nueva compilación verificada. Antes de esta instalación, el usuario había vuelto a encontrar el fallo; un intento había fallado por autenticación HTTP 503 y la lectura de ese momento confirmó CFBundleVersion=4. Las demás observaciones anteriores se conservan sin atribuirlas retrospectivamente a la compilación 5.
+Última instalación verificada, del 15 de octubre de 2026: la lectura por USB confirmó versión 0.1.0, compilación 5. Después, el usuario repitió la prueba de Favoritos tras cerrar/reabrir sin pasar por Buscar y respondió «La canción se reproduce». Antes de esa instalación, un intento había fallado por autenticación HTTP 503 y la lectura de ese momento confirmó CFBundleVersion=4. Las observaciones anteriores se conservan sin atribuirlas retrospectivamente a otra compilación. El 16 de octubre se preparó y verificó el IPA 6; instalarlo y comprobarlo en el teléfono sigue pendiente.
 
 Incidencia posterior de la compilación 4: los datos del favorito, lista y cola se conservan tras pausar/cerrar/reabrir, según la respuesta «Sí» a esa prueba guiada. Sin embargo, el usuario corrigió el alcance de esa confirmación: al intentar reproducir desde Favoritos después de reabrir aparece «No se pudo preparar este contenido. Intenta de nuevo». La captura muestra «Rata Blanca - Talisman (AUDIO)», de «Lo Mejor del Rock Argentino». Buscar la misma canción y reproducirla hace que después también funcione desde Favoritos, confirmado explícitamente por el usuario. La persistencia de datos y la reproducción posterior son comprobaciones distintas.
 
 Dispositivo: iPhone 13. iOS: 26.2 (información del usuario).
 
 Prototipo de la primera prueba: versión 0.1.0/2, commit `6c619ac`. Versión que funcionó en el teléfono: 0.1.0/3, commit `586a761`, [CI 38676199279](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014/actions/runs/38676199279). Actualización instalada por USB: 0.1.0/5, commit público `9850a39`, mismo código que `65d54fc` del repositorio privado. [CI 38813838217](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38813838217): 71/71 pruebas unitarias, 4/4 de interfaz y Release/IPA correctos. Los tests usan respuestas controladas y un WAV local; no demuestran reproducción real de YouTube en el iPhone.
+
+## Compilación 6 disponible: comprobaciones físicas pendientes
+
+La [ejecución 38956368533](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38956368533) pasó 130 unitarias, 13 pruebas de interfaz y Release. El IPA local de `build/ReproductorPersonal.ipa` se verificó como 0.1.0/6, con SHA-256 `6e4c11ee33b45a298e242f9042d3872ac439ee9385b3204349d76d6071a8506f`. Se inspeccionaron ocho capturas del simulador. Esta evidencia no acredita los recorridos físicos de historial, imagen, búsqueda, descubrimiento y radio. La 6 aún no está instalada ni comprobada en el teléfono; antes de comenzar debe leerse por USB `CFBundleVersion=6`.
+
+| Función | Recorrido que comprobar | Estado físico |
+| --- | --- | --- |
+| Conservación de biblioteca | Tras actualizar sobre la app existente, revisar favorito, lista, Historial y cola previos; reabrir en pausa | Pendiente |
+| Favorito en frío | Pausar, cerrar desde el selector y reproducir directamente desde Favoritos sin Buscar; repetir | Pendiente |
+| Imagen en iOS | Reproducir, bloquear y abrir el Centro de control; cambiar de canción y comprobar que cambia su imagen | Pendiente |
+| Aleatorio y regreso | Mezclar próximos elementos mientras suena una canción; comprobar que conserva su posición y que Anterior/Siguiente recorren la cola | Pendiente |
+| Resultados al escribir | Escribir «Tú con él» sin pulsar Buscar; cambiar y borrar rápidamente la consulta y comprobar los resultados vigentes | Pendiente |
+| Para ti / Por descubrir | Después de escuchar y guardar canciones, vaciar Buscar; revisar recomendaciones y que Por descubrir omite lo escuchado | Pendiente |
+| Radio por género | Iniciar Salsa y después Rock; comprobar afinidad, varias transiciones con pantalla bloqueada y un avance natural | Pendiente |
+| Radio desde canción | Iniciar radio desde los tres puntos; avanzar más de diez posiciones desde los controles bloqueados, dejando empezar cada canción, para superar el lote inicial | Pendiente |
+| Prioridad y desactivación | Añadir una canción a una radio y comprobar que sigue antes de las sugeridas; desactivar Continuar automáticamente y comprobar que se retiran las futuras sugerencias | Pendiente |
+
+Registrar títulos, resultado y versión instalada de cada recorrido. Los fallos de conexión o candidatos no disponibles deben conservar la biblioteca y permitir reintentar. Las pruebas con WAV en simulador y las consultas de metadatos en Windows se documentan por separado.
 
 ## Hito 1 — antes de ampliar la biblioteca
 

@@ -1,4 +1,53 @@
-# Estado de la primera etapa
+# Estado de Reproductor — entrega 0.1.0/6
+
+El IPA de la compilación 6 está verificado y disponible en `build/ReproductorPersonal.ipa`. **Instalación y pruebas físicas pendientes**: la última versión confirmada por USB en el iPhone es la 5. La rama de esta ampliación es `codex/descubrimiento-radio`; se conserva la entrega anterior.
+
+## Funciones integradas, de menor a mayor dificultad
+
+| Función | Comportamiento implementado |
+| --- | --- |
+| Historial | Biblioteca → Historial permite volver a escuchar; se actualiza cuando empieza la reproducción |
+| Imagen en los controles de iOS | Miniatura asíncrona con caché y protección frente a imágenes de una selección anterior |
+| Aleatorio y volver atrás | Mezclar mi música, favoritos, listas y cola; la mezcla de la cola conserva canción/progreso y prioridad manual |
+| Resultados al escribir | Búsqueda a partir de dos caracteres, espera de 400 ms y descarte de respuestas antiguas |
+| Para ti | Recomendaciones dentro de Buscar basadas en historial/favoritos locales |
+| Por descubrir | Candidatos que no figuran en el historial local; no implica lanzamientos recientes |
+| Radio continua | Desde una canción o un género, incluidos géneros personalizados; nuevos lotes, prioridad manual y opción de desactivar sugerencias |
+
+El controlador mantiene radio y persistencia fuera de las vistas. La biblioteca y la cola se restauran en pausa. Se reutilizan SwiftUI, AVFoundation, MediaPlayer y la dependencia fijada existente, sin añadir dependencias ni servidor propio. La afinidad musical procede de metadatos y debe comprobarse escuchando en el iPhone.
+
+## Evidencia de la compilación 6
+
+[38956368533](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38956368533) terminó correctamente sobre el commit público `343a545ff8789e1837af78fe3ee8d078df468bac`, con los mismos 62 archivos de compilación que el commit privado `8df75f7627e75ec028f53564cc38aab7d781ead2`.
+
+| Comprobación | Resultado |
+| --- | --- |
+| Suite completa | 130/130 unitarias y 13/13 de interfaz; cero fallos; TEST SUCCEEDED |
+| Release | BUILD SUCCEEDED; artefacto ReproductorPersonal-21 |
+| ZIP del artefacto | SHA-256 coincide con el digest publicado por GitHub antes de extraer |
+| IPA | CRC correcto, aplicación única, identificador `personal.reproductor.ios`, versión 0.1.0/6, Mach-O arm64, iOS mínimo 16.0, audio en segundo plano |
+| Exclusión de pruebas | Proveedor, audio, recursos y argumentos de pruebas de interfaz ausentes de Release |
+| Capturas | Ocho capturas inspeccionadas: Buscar/recomendaciones, biblioteca, radio, prioridad manual y texto grande/modo oscuro en Buscar, reproductor y cola |
+| Copia anterior | Compilación 5 conservada y hash verificado en `build/anteriores/ReproductorPersonal-compilacion-5.ipa` |
+| iPhone real | Pendiente instalar, leer versión por USB y repetir los recorridos físicos |
+
+IPA sin firmar, **1.993.999 bytes**. SHA-256: `6e4c11ee33b45a298e242f9042d3872ac439ee9385b3204349d76d6071a8506f`. El archivo canónico se sustituyó después de verificar el artefacto; su copia volvió a pasar la comprobación. AltServer realizará la firma personal durante la instalación.
+
+Xcode 26.6 (17F113), XcodeGen 2.46.0, simulador iPhone 17 Pro. Las pruebas usan metadatos controlados y WAV local. Las consultas anónimas de metadatos realizadas desde Windows y las capturas no demuestran reproducción del catálogo ni controles físicos en el iPhone.
+
+Xcode conserva advertencias de AppIntents, orientaciones de iPad y conversión Sendable del setter usado por el Binding de RadioControls. No hubo errores de compilación. No se ha ejecutado esta entrega en iOS 16, iPad ni todas las orientaciones.
+
+## Revisión y pruebas pendientes
+
+Una revisión independiente del cambio completo encontró cuatro problemas importantes. Todos se reprodujeron con tests que fallaron en [38950354247](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38950354247) y pasaron en la suite final: conservar una elección manual durante el inicio de radio por género; cancelar un Siguiente pendiente al pulsar Anterior en la primera canción; permitir reintentar un elemento sugerido elegido explícitamente; y aplicar realmente el tamaño de texto de accesibilidad a ambas hojas en la prueba de interfaz. Esta última corrección mejora la cobertura de pruebas; la accesibilidad con ajustes reales del teléfono sigue pendiente.
+
+Se conserva como detalle menor diferido el botón nativo **Edit** en inglés dentro de Cola. Las correcciones importantes se verificaron en una sola pasada, sin una segunda revisión.
+
+Falta instalar sobre la app existente con la misma cuenta de Apple, confirmar por USB la compilación 6 y observar biblioteca/favorito en frío, imagen en pantalla bloqueada y Centro de control, radio por género y desde canción con varios cambios bloqueados, mezcla/anterior y prioridad manual. [Guía de uso e instalación](instalacion-iphone.md). [Tabla de pruebas físicas](verificacion-iphone.md). El registro de ejecución se conserva mientras esos criterios permanezcan abiertos.
+
+## Entrega anterior 0.1.0/5 — evidencia histórica
+
+Las secciones siguientes conservan el estado y las observaciones anteriores; no acreditan la instalación ni las pruebas físicas de la 6.
 
 Entrega instalada: versión 0.1.0, compilación 5, código `65d54fc`, rama `feat/reproductor-ios` del [repositorio privado](https://github.com/luispipesuarez-de/reproductor-personal-ios-20261014). El IPA del PC está comprobado para firma personal. Después de seleccionar ese archivo en AltServer y de que el usuario completara la autenticación, una nueva lectura por USB confirmó CFBundleShortVersionString=0.1.0 y CFBundleVersion=5. La lectura anterior había confirmado la compilación 4, en la que seguía fallando Favoritos; un intento previo de actualizar había fallado por HTTP 503. Los resultados físicos anteriores se conservan como observaciones del usuario, pero no acreditan la compilación 5.
 

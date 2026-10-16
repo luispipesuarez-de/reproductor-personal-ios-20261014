@@ -1,6 +1,6 @@
 # Instalar y usar Reproductor desde Windows
 
-Dispositivo del usuario: iPhone 13 con iOS 26.2. La app requiere iOS 16 o posterior. Entrega: versión 0.1.0, compilación 5, comprobada en [38813838217](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38813838217): 71 pruebas unitarias, 4 de interfaz y compilación Release correctas. La lectura por USB confirmó que el iPhone conserva la compilación 4. La actualización a la 5 y la prueba física de Favoritos quedan pendientes: el usuario corrigió su confirmación previa y mostró un intento fallido con HTTP 503 de autenticación en AltServer.
+Dispositivo del usuario: iPhone 13 con iOS 26.2. La app requiere iOS 16 o posterior. Entrega: versión 0.1.0, compilación 5, comprobada en [38813838217](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38813838217): 71 pruebas unitarias, 4 de interfaz y compilación Release correctas. La nueva lectura por USB confirmó que esta versión 0.1.0/5 ya está instalada. La prueba física de Favoritos tras cerrar/reabrir está pendiente. Un intento anterior de actualizar había fallado con HTTP 503, y la lectura de ese momento todavía mostraba la compilación 4.
 
 ## Actualizar la app que ya tienes
 
@@ -40,7 +40,7 @@ La biblioteca y la cola se guardan en el almacenamiento privado de la app. La es
 3. Abre Reproductor de nuevo y entra directamente en **Biblioteca → Favoritos**, sin entrar antes en Buscar.
 4. Toca **Rata Blanca - Talisman (AUDIO)**. Comprueba que comienza a sonar. Repite el cierre y la apertura una segunda vez para confirmar el resultado.
 
-Esta actualización prepara el contexto anónimo necesario para reproducir un elemento guardado desde el inicio. La regresión automática pasó. La confirmación física anterior fue corregida después por el usuario: quizá la actualización no se había instalado y el favorito vuelve a fallar. Este recorrido debe repetirse tras verificar la instalación de la compilación 5. Anota si la biblioteca se conservó durante la instalación y si el favorito reproduce después de reiniciar.
+Esta actualización prepara el contexto anónimo necesario para reproducir un elemento guardado desde el inicio. La regresión automática pasó. La confirmación física anterior fue corregida después por el usuario y la lectura por USB confirmó que todavía tenía la compilación 4. Ahora que la nueva lectura acredita la instalación de la 5, este recorrido está pendiente de repetirse. Anota si la biblioteca se conservó durante la instalación y si el favorito reproduce después de reiniciar.
 
 ## Otras comprobaciones en el iPhone
 

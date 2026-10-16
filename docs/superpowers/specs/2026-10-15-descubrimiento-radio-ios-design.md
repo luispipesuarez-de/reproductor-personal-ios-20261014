@@ -2,7 +2,7 @@
 
 Fecha: 15 de octubre de 2026.
 
-Estado: diseño conversacional aprobado por el usuario con «Apruebo con recomendaciones dentro de Buscar». Esta especificación escrita está pendiente de su revisión. El plan detallado y el código se prepararán después de las revisiones correspondientes.
+Estado: diseño conversacional aprobado con «Apruebo con recomendaciones dentro de Buscar». Tras presentar este documento para revisión, el usuario respondió «aprobado todo el plan. ejecutalo». La especificación queda aprobada y la ejecución se solicita en esta conversación. El plan técnico desarrolla este alcance sin añadir funciones.
 
 ## 1. Objetivo y base comprobada
 

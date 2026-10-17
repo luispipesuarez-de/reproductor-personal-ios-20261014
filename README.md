@@ -2,17 +2,19 @@
 
 App personal en SwiftUI con búsqueda interna de videos y canciones, reproducción nativa, radio continua, recomendaciones, cola y biblioteca local. La búsqueda y la preparación del contenido se realizan desde el iPhone, sin servidor de extracción propio. No requiere pegar enlaces.
 
-Entrega disponible: **0.1.0, compilación 6**, verificada el 16 de octubre de 2026: **130 pruebas unitarias, 13 de interfaz y Release correctos**. El IPA local ya es la 6 y está preparado para firma personal. Su instalación y las pruebas físicas están pendientes; la última versión confirmada por USB en el iPhone es la 5.
+Entrega disponible: **0.1.0, compilación 7**, verificada el 16 de octubre de 2026: **147 pruebas unitarias, 16 de interfaz y Release correctos**. El IPA local ya es la 7 y está preparado para firma personal. Su instalación y las pruebas físicas están pendientes; la última versión confirmada por USB es la 5 y el usuario informó después de otra actualización sin completar su lectura por USB.
+
+Esta actualización prioriza canciones de 3–10 minutos en Buscar, recomendaciones y radio; sustituye Merengue por Blues y conserva los géneros añadidos. Deslizar el reproductor inferior en pausa a cualquier lado cierra la reproducción y vacía la cola, conservando favoritos, listas e historial. [Cambios, evidencia y pruebas físicas de la 7](docs/cambios-compilacion-7.md).
 
 La actualización integra historial, imagen en los controles del sistema, mezcla de música, resultados al escribir, «Para ti», «Por descubrir» y radio tanto desde una canción como desde un género. Las recomendaciones están dentro de Buscar. Las elecciones manuales van antes de las sugerencias; se puede desactivar la continuación automática.
 
-En la 5 verificada, el usuario confirmó que «Rata Blanca - Talisman (AUDIO)» reproduce desde Favoritos después de cerrar/reabrir sin pasar por Buscar. Ese resultado y las observaciones de versiones anteriores se conservan por separado en la guía de verificación y deben repetirse al instalar la 6.
+En la 5 verificada, el usuario confirmó que «Rata Blanca - Talisman (AUDIO)» reproduce desde Favoritos después de cerrar/reabrir sin pasar por Buscar. Ese resultado y las observaciones de versiones anteriores se conservan por separado en la guía de verificación y deben repetirse al instalar la 7.
 
 ## Instalar y usar
 
 El archivo local es `build/ReproductorPersonal.ipa`. Se firma e instala desde Windows con AltServer, sobre la app existente y con la misma cuenta de Apple. Sigue [la guía de instalación y uso](docs/instalacion-iphone.md). Después de actualizar, comprueba la biblioteca, pausa y cierra la app desde el selector; al reabrir entra directamente en Biblioteca → Favoritos y reproduce, sin pasar antes por Buscar.
 
-La [ejecución 38956368533](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38956368533), commit público `343a545` (mismo código de compilación que `8df75f7` del repositorio privado), contiene el artefacto **ReproductorPersonal-21**. [Estado y evidencia técnica](docs/estado-implementacion.md). [Resultados y pruebas pendientes en el iPhone](docs/verificacion-iphone.md).
+La [ejecución 38997159679](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38997159679), commit público `5de4cd3` (mismos 64 archivos de compilación que `93e9410` del repositorio privado), contiene el artefacto **ReproductorPersonal-27**. El ZIP y el IPA local se verificaron antes de sustituir la copia de instalación; se conserva el IPA 6 anterior. [Estado y evidencia técnica](docs/estado-implementacion.md). [Resultados y pruebas pendientes en el iPhone](docs/verificacion-iphone.md).
 
 ## Código y compilación
 

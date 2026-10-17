@@ -1,6 +1,20 @@
-# Estado de Reproductor — entrega 0.1.0/6
+# Estado de Reproductor — entrega 0.1.0/7
 
-El IPA de la compilación 6 está verificado y disponible en `build/ReproductorPersonal.ipa`. **Instalación y pruebas físicas pendientes**: la última versión confirmada por USB en el iPhone es la 5. La rama de esta ampliación es `codex/descubrimiento-radio`; se conserva la entrega anterior.
+Disponible `build/ReproductorPersonal.ipa`, verificado como **0.1.0/7**, sin firma personal todavía. Implementa prioridad a canciones de 3–10 minutos en Buscar, recomendaciones y radio; Blues en los géneros iniciales; géneros personalizados persistentes; y cierre de la cola al deslizar el reproductor inferior en pausa a cualquiera de los dos lados. Conserva favoritos, listas e historial. Rama `codex/canciones-generos-cierre`.
+
+La [ejecución 38997159679](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/38997159679) pasó **147 unitarias y 16 de interfaz, cero fallos**, y Release compiló correctamente. El artefacto **ReproductorPersonal-27**, ZIP de 11.170.606 bytes, tiene SHA-256 `265f8642643df9c4882ceee63b0e35cc2c3f0fa28e869e711362bc9cb7c3707c`, verificado antes de extraer. Los 64 archivos de compilación públicos de `5de4cd3` coinciden con los privados de `93e9410`.
+
+IPA de **2.012.432 bytes**, SHA-256 `ba32cf9626f986e25f40f3af76ce2ace0352ea1473b8dbebabf10c147a2972c6`: CRC correcto, una app `personal.reproductor.ios`, Mach-O arm64, iOS mínimo 16.0, audio en segundo plano y sin proveedor, audio ni argumentos de pruebas en Release. La copia canónica se verificó después de sustituirla. La 6 queda conservada y verificada en `build/anteriores/ReproductorPersonal-compilacion-6.ipa`.
+
+Se inspeccionaron cuatro de las once capturas exportadas: Radio Blues, Jazz conservado al reabrir, favorito conservado sin reproductor inferior y géneros con texto grande/modo oscuro. Los recorridos nuevos y la prioridad manual pasan. Se conservan las advertencias previas de RadioControls/Sendable, AppIntents y orientaciones de iPad.
+
+Una revisión independiente del cambio encontró cero problemas críticos, importantes o menores; la verificación posterior de interfaz detectó y corrigió la competencia entre arrastre y botón. También se corrigieron dos precondiciones de tests: pausar mediante un control visible y detener el WAV durante la inspección de prioridad manual. Un runner falló antes de inicializar interfaz por un timeout de accesibilidad; la ejecución final pasó sin cambiar código. [Detalle y evidencia](cambios-compilacion-7.md).
+
+**Pendiente instalar y comprobar en el iPhone.** La última lectura por USB confirmó la 5. El usuario informó de una actualización posterior; su lectura por USB se interrumpió por batería. Los resultados anteriores no se atribuyen a la 7. [Guía de instalación](instalacion-iphone.md) y [pruebas físicas](verificacion-iphone.md).
+
+## Entrega anterior 0.1.0/6 — evidencia histórica
+
+El IPA de la compilación 6 quedó verificado y ahora se conserva en `build/anteriores/ReproductorPersonal-compilacion-6.ipa`. Las comprobaciones físicas de esta entrega se registran como pendientes de confirmación de versión: la última lectura por USB fue la 5. Su rama es `codex/descubrimiento-radio`.
 
 ## Funciones integradas, de menor a mayor dificultad
 

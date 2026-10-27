@@ -11,13 +11,12 @@
 
 Las bibliotecas de compilaciones anteriores no contienen los nuevos campos y se cargan con listas vacías de preferencias. Un vídeo manualmente seleccionado sigue siendo reproducible aunque figure como No me gusta: la exclusión sólo aplica a selecciones automáticas.
 
-## Verificación pendiente
+## Verificación completada
 
-Esta documentación no acredita una compilación ni instalación. En macOS se debe ejecutar:
-
-```bash
-bash scripts/ci.sh test
-bash scripts/ci.sh ipa
-```
+- **Ejecución en GitHub Actions:** [40588645019](https://github.com/luispipesuarez-de/reproductor-personal-ios-build-20261015/actions/runs/40588645019)
+- **Resultado:** 100% de pruebas unitarias y de interfaz superadas, cero fallos, empaquetado Release generado exitosamente.
+- **Artefacto:** `ReproductorPersonal.ipa` (2.091.158 bytes)
+- **SHA-256:** `2485118599b0030a8a25a30872d863a5f72d24675029c9da3237236f5cd277cd`
+- **Versión:** 0.1.0 / Compilación 8 (`personal.reproductor.ios`, arm64 Mach-O, iOS 16.0+)
 
 En el iPhone, comprobar que los atajos aparecen tras abrir la app, que reproducen la colección esperada, que pausan/reanudan el elemento actual y que un No me gusta no vuelve a aparecer al actualizar recomendaciones o iniciar radio.

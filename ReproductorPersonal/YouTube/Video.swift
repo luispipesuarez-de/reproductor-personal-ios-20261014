@@ -36,7 +36,7 @@ struct Video: Identifiable, Codable, Equatable, Sendable {
         return seconds >= 3600 ? 2 : 1
     }
 
-    private var durationSeconds: Int? {
+    var durationSeconds: Int? {
         guard let parts = durationText?.split(separator: ":", omittingEmptySubsequences: false),
               (2...3).contains(parts.count) else { return nil }
         var seconds = 0

@@ -27,6 +27,20 @@ final class DiscoveryViewModelTests: XCTestCase {
         XCTAssertEqual(Set(recommended.map(\.id)), Set([videoA.id, same.id, videoB.id, different.id]))
     }
 
+    func testRecommendationsPrioritizeOfficialChannelsWithinPreferredSongs() async {
+        let regular = Video(id: "ccccccccccc", title: "C", author: "Canal de fans", durationText: "3:30")
+        let official = Video(id: "ddddddddddd", title: "D", author: "Artista - Topic", durationText: "3:30", officialChannel: true)
+        let model = DiscoveryViewModel(source: StubYouTubeProvider(onRecommendations: { _, _ in
+            RecommendationPage(videos: [regular, official], continuation: nil)
+        }))
+
+        await model.refresh(favorites: [videoA], recent: [])
+
+        guard case .ready(let recommended, let discover) = model.state else { return XCTFail("Expected recommendations") }
+        XCTAssertEqual(recommended.map(\.id), [official.id, regular.id])
+        XCTAssertEqual(discover.map(\.id), [official.id, regular.id])
+    }
+
     func testEmptyInitialPageCanContinueToUnheardSongs() async {
         let model = DiscoveryViewModel(source: StubYouTubeProvider(onRecommendations: { _, cursor in
             RecommendationPage(videos: cursor == nil ? [] : [videoA, videoB], continuation: cursor == nil ? "next" : nil)

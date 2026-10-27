@@ -2,7 +2,9 @@
 
 App personal en SwiftUI con búsqueda interna de videos y canciones, reproducción nativa, radio continua, recomendaciones, cola y biblioteca local. La búsqueda y la preparación del contenido se realizan desde el iPhone, sin servidor de extracción propio. No requiere pegar enlaces.
 
-Entrega disponible: **0.1.0, compilación 7**, verificada el 16 de octubre de 2026: **147 pruebas unitarias, 16 de interfaz y Release correctos**. El IPA local ya es la 7 y está preparado para firma personal. Su instalación y las pruebas físicas están pendientes; la última versión confirmada por USB es la 5 y el usuario informó después de otra actualización sin completar su lectura por USB.
+Entrega en preparación: **0.1.0, compilación 8**. Añade preferencias locales de «Me gusta» y «No me gusta», aprendizaje para recomendaciones y radio, y atajos de Siri para Favoritos, pausar/reanudar y reproducir mi música. Requiere aún la ejecución de CI/Xcode, la creación del IPA y la comprobación física en iPhone. [Alcance de la compilación 8](docs/cambios-compilacion-8.md).
+
+La entrega anterior **0.1.0, compilación 7** fue verificada el 16 de octubre de 2026 con **147 pruebas unitarias, 16 de interfaz y Release correctos**. El IPA local actual sigue siendo la 7 hasta que la compilación 8 complete sus verificaciones.
 
 Esta actualización prioriza canciones de 3–10 minutos en Buscar, recomendaciones y radio; sustituye Merengue por Blues y conserva los géneros añadidos. Deslizar el reproductor inferior en pausa a cualquier lado cierra la reproducción y vacía la cola, conservando favoritos, listas e historial. [Cambios, evidencia y pruebas físicas de la 7](docs/cambios-compilacion-7.md).
 

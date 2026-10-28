@@ -13,3 +13,10 @@ En la Compilación 8, la configuración de `AVQueuePlayer.automaticallyWaitsToMi
 3. **Pruebas Unitarias y Versión**:
    - `PlaybackControllerTests` valida que `automaticallyWaitsToMinimizeStalling == true`.
    - `project.yml` incrementa `CURRENT_PROJECT_VERSION` a `9`.
+
+## Verificación y Entrega
+- Artifact: ReproductorPersonal-35
+- Run CI: 40614315730 (100% exitoso en 25m 46s)
+- SHA-256: 104621bde3e80a5f184313bbf2a67c48f5cdf790c0a58137a5e113d29d82a825
+- Tamaño: 2,091,157 bytes
+- Entregado en: Desktop/ReproductorPersonal.ipa

@@ -172,10 +172,8 @@ final class PlaybackController: ObservableObject {
         state = .paused(video)
     }
 
-    func dismissPlayback() {
-        if state.isPlaying || state.canPause {
-            pause()
-        }
+    func dismissPausedPlayback() {
+        guard case .paused = state else { return }
         navigationID = UUID()
         clearNativeItems()
         resetRadio(seed: nil)
@@ -188,8 +186,11 @@ final class PlaybackController: ObservableObject {
         state = .idle
     }
 
-    func dismissPausedPlayback() {
-        dismissPlayback()
+    func dismissPlayback() {
+        if state.isPlaying || state.canPause {
+            pause()
+        }
+        dismissPausedPlayback()
     }
 
     func resume(allowAutomaticSkip: Bool = false) async {

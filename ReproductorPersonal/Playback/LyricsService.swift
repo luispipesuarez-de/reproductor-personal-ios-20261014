@@ -128,18 +128,16 @@ actor LyricsService {
             clean = String(clean.dropFirst(artistPrefix.count))
         }
 
-        let noisePatterns = [
-            "(Video Oficial)", "(Official Video)", "(Official Music Video)",
-            "[Video Oficial]", "[Official Video]", "(Audio Oficial)",
-            "(Official Audio)", "[Audio Oficial]", "[Official Audio]",
-            "(Letra)", "(Lyrics)", "[Letra]", "[Lyrics]",
-            "(Lyric Video)", "[Lyric Video]", "(En Vivo)", "(Live)",
-            "(Remastered)", "[Remastered]", "(HD)", "[HD]",
-            "Video Oficial", "Official Video", "Audio Oficial", "Official Audio"
+        let regexPatterns = [
+            #"\s*\([^)]*(?:video|audio|oficial|official|letra|lyrics|remaster|en vivo|live|hd)[^)]*\)"#,
+            #"\s*\[[^\]]*(?:video|audio|oficial|official|letra|lyrics|remaster|en vivo|live|hd)[^\]]*\]"#,
+            #"(?i)\s*(?:video oficial|official video|audio oficial|official audio)"#
         ]
 
-        for pattern in noisePatterns {
-            clean = clean.replacingOccurrences(of: pattern, with: "", options: .caseInsensitive)
+        for pattern in regexPatterns {
+            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) {
+                clean = regex.stringByReplacingMatches(in: clean, range: NSRange(clean.startIndex..., in: clean), withTemplate: "")
+            }
         }
 
         clean = clean.trimmingCharacters(in: .whitespacesAndNewlines)

@@ -16,8 +16,11 @@ struct SearchView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                searchControls.padding(.horizontal).padding(.bottom, 12)
-                if search.showsDurationFilter { durationFilter.padding(.horizontal).padding(.bottom, 8) }
+                searchControls.padding(.horizontal).padding(.bottom, 8)
+                if search.showsCategoryFilter { categoryChips.padding(.bottom, 8) }
+                if search.showsDurationFilter && search.categoryFilter != .artists && search.categoryFilter != .albums {
+                    durationFilter.padding(.horizontal).padding(.bottom, 8)
+                }
                 content
             }
             .navigationTitle("Buscar")
@@ -67,6 +70,29 @@ struct SearchView: View {
             .accessibilityIdentifier("searchSubmit")
     }
 
+    private var categoryChips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(SearchCategoryFilter.allCases) { filter in
+                    Button {
+                        search.setCategoryFilter(filter)
+                    } label: {
+                        Text(filter.title)
+                            .font(.subheadline)
+                            .fontWeight(search.categoryFilter == filter ? .semibold : .regular)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 6)
+                            .background(search.categoryFilter == filter ? Color.accentColor : Color.secondary.opacity(0.12))
+                            .foregroundStyle(search.categoryFilter == filter ? Color.white : Color.primary)
+                            .clipShape(Capsule())
+                    }
+                    .accessibilityIdentifier("categoryFilter-\(filter.rawValue)")
+                }
+            }
+            .padding(.horizontal)
+        }
+    }
+
     private var durationFilter: some View {
         Picker("Duración", selection: Binding(get: { search.durationFilter }, set: search.setDurationFilter)) {
             ForEach(SearchDurationFilter.allCases) { filter in Text(filter.title).tag(filter) }
@@ -95,21 +121,104 @@ struct SearchView: View {
                 }
             }.listStyle(.plain).scrollDismissesKeyboard(.interactively)
         case .results(_, let videos):
-            List {
-                ForEach(Array(videos.enumerated()), id: \.offset) { _, video in
-                    HStack {
-                        Button {
-                            fieldFocused = false
-                            onPlay()
-                            Task { await playback.play(video) }
-                        } label: { VideoRow(video: video) }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("result-\(video.id)")
-                        .accessibilityHint("Reproduce este contenido")
-                        VideoActionsMenu(video: video, library: library, playback: playback)
+            if search.categoryFilter == .artists {
+                List {
+                    ForEach(search.filteredArtists) { artist in
+                        NavigationLink {
+                            ArtistDetailView(artistName: artist.name, initialVideos: artist.sampleVideos, source: search.source, playback: playback, library: library, onPlay: {
+                                fieldFocused = false
+                                onPlay()
+                            })
+                        } label: {
+                            HStack(spacing: 12) {
+                                AsyncImage(url: artist.thumbnailURL) { image in
+                                    image.resizable().scaledToFill()
+                                } placeholder: {
+                                    Circle().fill(Color.secondary.opacity(0.2))
+                                        .overlay(Image(systemName: "music.mic").foregroundStyle(.secondary))
+                                }
+                                .frame(width: 48, height: 48)
+                                .clipShape(Circle())
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(artist.name).font(.headline)
+                                    Text(artist.isOfficial ? "Artista oficial · \(artist.sampleVideos.count) canciones" : "\(artist.sampleVideos.count) canciones")
+                                        .font(.caption).foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                        .accessibilityIdentifier("artist-\(artist.id)")
                     }
-                }
-            }.listStyle(.plain).scrollDismissesKeyboard(.interactively)
+                }.listStyle(.plain).scrollDismissesKeyboard(.interactively)
+            } else if search.categoryFilter == .albums {
+                List {
+                    ForEach(search.filteredAlbums) { album in
+                        NavigationLink {
+                            AlbumDetailView(album: album, source: search.source, playback: playback, library: library, onPlay: {
+                                fieldFocused = false
+                                onPlay()
+                            })
+                        } label: {
+                            HStack(spacing: 12) {
+                                AsyncImage(url: album.thumbnailURL) { image in
+                                    image.resizable().scaledToFill()
+                                } placeholder: {
+                                    Rectangle().fill(Color.secondary.opacity(0.15))
+                                        .overlay(Image(systemName: "opticaldisc").foregroundStyle(.secondary))
+                                }
+                                .frame(width: 48, height: 48)
+                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(album.title).font(.headline).lineLimit(2)
+                                    Text(album.artistName).font(.subheadline).foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                        .accessibilityIdentifier("album-\(album.id)")
+                    }
+                }.listStyle(.plain).scrollDismissesKeyboard(.interactively)
+            } else {
+                List {
+                    if search.categoryFilter == .all, let artist = search.filteredArtists.first, !artist.name.isEmpty {
+                        Section {
+                            NavigationLink {
+                                ArtistDetailView(artistName: artist.name, initialVideos: artist.sampleVideos, source: search.source, playback: playback, library: library, onPlay: {
+                                    fieldFocused = false
+                                    onPlay()
+                                })
+                            } label: {
+                                HStack(spacing: 12) {
+                                    AsyncImage(url: artist.thumbnailURL) { image in
+                                        image.resizable().scaledToFill()
+                                    } placeholder: {
+                                        Circle().fill(Color.secondary.opacity(0.2))
+                                            .overlay(Image(systemName: "music.mic").foregroundStyle(.secondary))
+                                    }
+                                    .frame(width: 44, height: 44)
+                                    .clipShape(Circle())
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(artist.name).font(.subheadline).fontWeight(.semibold)
+                                        Text("Ver artista y álbumes").font(.caption).foregroundStyle(.secondary)
+                                    }
+                                }
+                            }
+                            .accessibilityIdentifier("topArtist-\(artist.id)")
+                        }
+                    }
+                    ForEach(Array(videos.enumerated()), id: \.offset) { _, video in
+                        HStack {
+                            Button {
+                                fieldFocused = false
+                                onPlay()
+                                Task { await playback.play(video) }
+                            } label: { VideoRow(video: video) }
+                            .buttonStyle(.plain)
+                            .accessibilityIdentifier("result-\(video.id)")
+                            .accessibilityHint("Reproduce este contenido")
+                            VideoActionsMenu(video: video, library: library, playback: playback)
+                        }
+                    }
+                }.listStyle(.plain).scrollDismissesKeyboard(.interactively)
+            }
         case .empty(let query):
             message(title: "No encontramos resultados", detail: "Prueba otro título o artista en lugar de «\(query)».", symbol: "magnifyingglass")
         case .failed(let query, let error):

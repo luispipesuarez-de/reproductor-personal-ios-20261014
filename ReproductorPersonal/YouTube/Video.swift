@@ -58,6 +58,172 @@ struct Video: Identifiable, Codable, Equatable, Sendable {
     private static func normalizedCatalogText(_ text: String) -> String {
         text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "en_US_POSIX"))
     }
+
+    var canonicalArtistName: String {
+        var clean = author
+        let removePatterns = [
+            " - Topic", "- Topic", " Topic", "VEVO", "Vevo",
+            "Official", "Oficial", "Canal Oficial", "Official Channel",
+            "✓", "✔", "☑", "♪", "♫", "♬"
+        ]
+        for pattern in removePatterns {
+            clean = clean.replacingOccurrences(of: pattern, with: "", options: .caseInsensitive)
+        }
+        clean = clean.trimmingCharacters(in: .whitespacesAndNewlines)
+        if clean.hasSuffix("-") {
+            clean = clean.dropLast().trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        return clean.isEmpty ? author : clean
+    }
+
+    var isLikelyFullAlbumOrCompilation: Bool {
+        let lower = title.lowercased()
+        let albumKeywords = ["album", "álbum", "disco completo", "full album", " ep ", " ep)"]
+        if albumKeywords.contains(where: { lower.contains($0) }) { return true }
+        guard let seconds = durationSeconds else { return false }
+        return seconds >= 900 && seconds <= 7200
+    }
+
+    var inferredAlbumTitle: String {
+        let lower = title.lowercased()
+        if let range = lower.range(of: "album:") ?? lower.range(of: "álbum:") {
+            let extracted = String(title[range.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
+            if !extracted.isEmpty { return extracted }
+        }
+        if let open = title.firstIndex(of: "("), let close = title[open...].firstIndex(of: ")") {
+            let inside = String(title[title.index(after: open)..<close]).trimmingCharacters(in: .whitespacesAndNewlines)
+            if inside.lowercased().contains("album") || inside.lowercased().contains("álbum") || inside.lowercased().contains("disco") {
+                return inside
+            }
+        }
+        return title
+    }
+}
+
+struct ArtistSummary: Identifiable, Equatable, Sendable {
+    var id: String { normalizedName }
+    let name: String
+    let normalizedName: String
+    let thumbnailURL: URL?
+    let isOfficial: Bool
+    let sampleVideos: [Video]
+}
+
+struct AlbumSummary: Identifiable, Equatable, Sendable {
+    let id: String
+    let title: String
+    let artistName: String
+    let thumbnailURL: URL?
+    let tracks: [Video]
+}
+
+struct ArtistCatalog: Equatable, Sendable {
+    let artistName: String
+    let thumbnailURL: URL?
+    let songs: [Video]
+    let albums: [AlbumSummary]
+}
+
+extension Array where Element == Video {
+    func groupedArtists(matching query: String? = nil) -> [ArtistSummary] {
+        var map: [String: [Video]] = [:]
+        var order: [String] = []
+        for video in self {
+            let canonical = video.canonicalArtistName
+            let norm = canonical.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+            if map[norm] == nil {
+                order.append(norm)
+                map[norm] = []
+            }
+            map[norm]?.append(video)
+        }
+
+        let summaries = order.compactMap { norm -> ArtistSummary? in
+            guard let videos = map[norm], let first = videos.first else { return nil }
+            let name = first.canonicalArtistName
+            let thumb = videos.compactMap(\.thumbnailURL).first
+            let isOfficial = videos.contains(where: \.isOfficialChannel)
+            return ArtistSummary(
+                name: name,
+                normalizedName: norm,
+                thumbnailURL: thumb,
+                isOfficial: isOfficial,
+                sampleVideos: videos
+            )
+        }
+
+        if let query = query?.trimmingCharacters(in: .whitespacesAndNewlines), !query.isEmpty {
+            let normQuery = query.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+            return summaries.sorted { a, b in
+                let aExact = a.normalizedName == normQuery
+                let bExact = b.normalizedName == normQuery
+                if aExact != bExact { return aExact }
+                let aStarts = a.normalizedName.hasPrefix(normQuery)
+                let bStarts = b.normalizedName.hasPrefix(normQuery)
+                if aStarts != bStarts { return aStarts }
+                if a.isOfficial != b.isOfficial { return a.isOfficial }
+                return a.sampleVideos.count > b.sampleVideos.count
+            }
+        }
+        return summaries
+    }
+
+    func groupedAlbums(forArtist artistName: String? = nil) -> [AlbumSummary] {
+        var albums: [AlbumSummary] = []
+        var seenIDs: Set<String> = []
+
+        let filtered = artistName != nil ? filter {
+            let normArtist = artistName!.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+            let normAuthor = $0.canonicalArtistName.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+            return normAuthor == normArtist || normAuthor.contains(normArtist) || normArtist.contains(normAuthor)
+        } : self
+
+        let fullAlbums = filtered.filter(\.isLikelyFullAlbumOrCompilation)
+        for video in fullAlbums where seenIDs.insert(video.id).inserted {
+            albums.append(AlbumSummary(
+                id: video.id,
+                title: video.inferredAlbumTitle,
+                artistName: video.canonicalArtistName,
+                thumbnailURL: video.thumbnailURL,
+                tracks: [video]
+            ))
+        }
+
+        let nonFull = filtered.filter { !$0.isLikelyFullAlbumOrCompilation }
+        var byAlbumName: [String: [Video]] = [:]
+        for video in nonFull {
+            let albumTitle = video.inferredAlbumTitle
+            if albumTitle != video.title {
+                byAlbumName[albumTitle, default: []].append(video)
+            }
+        }
+
+        for (albumTitle, tracks) in byAlbumName where tracks.count >= 2 {
+            let albumID = "album-\(tracks.first?.id ?? UUID().uuidString)"
+            if seenIDs.insert(albumID).inserted {
+                albums.append(AlbumSummary(
+                    id: albumID,
+                    title: albumTitle,
+                    artistName: tracks.first?.canonicalArtistName ?? (artistName ?? ""),
+                    thumbnailURL: tracks.first?.thumbnailURL,
+                    tracks: tracks
+                ))
+            }
+        }
+
+        if albums.isEmpty && !filtered.isEmpty {
+            let artist = artistName ?? filtered.first?.canonicalArtistName ?? "Artista"
+            albums.append(AlbumSummary(
+                id: "collection-\(artist)",
+                title: "Éxitos de \(artist)",
+                artistName: artist,
+                thumbnailURL: filtered.first?.thumbnailURL,
+                tracks: Array(filtered.prefix(12))
+            ))
+        }
+
+        return albums
+    }
 }
 
 extension Array where Element == Video {

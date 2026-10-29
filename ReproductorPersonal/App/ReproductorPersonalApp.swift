@@ -30,7 +30,7 @@ struct ReproductorPersonalApp: App {
         _playback = StateObject(wrappedValue: playback)
         _library = StateObject(wrappedValue: library)
         _persistence = StateObject(wrappedValue: PlaybackLibraryPersistence(library: library, playback: playback))
-        SiriPlaybackBridge.shared.configure(library: library, playback: playback)
+        SiriPlaybackBridge.shared.configure(library: library, playback: playback, source: source)
         if #available(iOS 16.0, *) { ReproductorAppShortcuts.updateAppShortcutParameters() }
     }
 

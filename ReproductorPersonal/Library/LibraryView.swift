@@ -31,6 +31,11 @@ struct LibraryView: View {
                         LibraryVideosView(kind: .recent, library: library, playback: playback, onPlay: onPlay)
                     } label: { Label("Historial", systemImage: "clock") }
                     .accessibilityLabel("Historial")
+                    NavigationLink {
+                        LibraryArtistsView(library: library, playback: playback, onPlay: onPlay)
+                    } label: { Label("Artistas", systemImage: "music.mic") }
+                    .accessibilityLabel("Artistas")
+                    .accessibilityIdentifier("openLibraryArtists")
                 }
                 Section("Listas") {
                     if library.snapshot.playlists.isEmpty {
@@ -118,6 +123,58 @@ private struct LibraryVideosView: View {
         }
         .accessibilityIdentifier(kind == .favorites ? "favoritesList" : "recentList")
         .navigationTitle(kind == .favorites ? "Favoritos" : "Historial")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+@MainActor
+private struct LibraryArtistsView: View {
+    @ObservedObject var library: LibraryStore
+    @ObservedObject var playback: PlaybackController
+    let onPlay: () -> Void
+
+    private var artists: [ArtistSummary] {
+        library.allMusic.groupedArtists()
+    }
+
+    var body: some View {
+        List {
+            if artists.isEmpty {
+                Text("Aquí aparecerán los artistas según la música que guardes en favoritos, listas o historial.")
+                    .foregroundStyle(.secondary)
+            }
+            ForEach(artists) { artist in
+                NavigationLink {
+                    ArtistDetailView(
+                        artistName: artist.name,
+                        initialVideos: artist.sampleVideos,
+                        source: playback.source,
+                        playback: playback,
+                        library: library,
+                        onPlay: onPlay
+                    )
+                } label: {
+                    HStack(spacing: 12) {
+                        AsyncImage(url: artist.thumbnailURL) { image in
+                            image.resizable().scaledToFill()
+                        } placeholder: {
+                            Circle().fill(Color.secondary.opacity(0.2))
+                                .overlay(Image(systemName: "music.mic").foregroundStyle(.secondary))
+                        }
+                        .frame(width: 48, height: 48)
+                        .clipShape(Circle())
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(artist.name).font(.headline)
+                            Text("\(artist.sampleVideos.count) canciones guardadas")
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                .accessibilityIdentifier("libraryArtist-\(artist.id)")
+            }
+        }
+        .accessibilityIdentifier("libraryArtistsList")
+        .navigationTitle("Artistas")
         .navigationBarTitleDisplayMode(.inline)
     }
 }

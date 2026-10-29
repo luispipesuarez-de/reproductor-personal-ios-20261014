@@ -14,8 +14,13 @@ struct UITestYouTubeProvider: YouTubeProviding {
     func search(query: String) async throws -> [Video] {
         if query == "vacio" { return [] }
         if query == "error" { throw AppError.offline }
-        return [Video(id: "aaaaaaaaaaa", title: "Canción A", author: "Autor A", durationText: "1:00"),
-                Video(id: "bbbbbbbbbbb", title: "Video B con un título largo para comprobar la lectura", author: "Autor B")]
+        let videoA = Video(id: "aaaaaaaaaaa", title: "Canción A", author: "Autor A", durationText: "1:00")
+        let videoB = Video(id: "bbbbbbbbbbb", title: "Video B con un título largo para comprobar la lectura", author: "Autor B")
+        let albumVideo = Video(id: "cccccccccca", title: "Álbum Completo Autor A", author: "Autor A", durationText: "25:00")
+        if query.lowercased().contains("álbum") || query.lowercased().contains("album") {
+            return [albumVideo, videoA]
+        }
+        return [videoA, videoB]
     }
 
     func resolve(videoID: String) async throws -> PlaybackResource {

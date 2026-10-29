@@ -53,6 +53,60 @@ final class SiriPlaybackServiceTests: XCTestCase {
         }
     }
 
+    func testPlayArtistSearchesSourceAndPlaysVideos() async throws {
+        let library = LibraryStore(fileURL: try libraryURL())
+        let playback = SiriPlaybackControllerSpy(state: .idle)
+        let artistVideo = Video(id: "art00000001", title: "Canción del Artista", author: "Artista Estrella")
+        let source = StubYouTubeProvider(onSearch: { query in
+            if query.contains("Artista Estrella") { return [artistVideo] }
+            return []
+        })
+        let service = SiriPlaybackService(library: library, playback: playback, source: source)
+
+        try await service.playArtist("Artista Estrella")
+
+        XCTAssertEqual(playback.playedVideos, [artistVideo])
+    }
+
+    func testPlayArtistFallsBackToLocalLibraryWhenOffline() async throws {
+        let library = LibraryStore(fileURL: try libraryURL())
+        let artistVideo = Video(id: "art00000002", title: "Tema Local", author: "Artista Local - Topic")
+        try library.setFavorite(artistVideo, enabled: true)
+        let playback = SiriPlaybackControllerSpy(state: .idle)
+        let source = StubYouTubeProvider(onSearch: { _ in throw AppError.offline })
+        let service = SiriPlaybackService(library: library, playback: playback, source: source)
+
+        try await service.playArtist("Artista Local")
+
+        XCTAssertEqual(playback.playedVideos, [artistVideo])
+    }
+
+    func testPlaySongSearchesCombinedQueryAndPlaysVideos() async throws {
+        let library = LibraryStore(fileURL: try libraryURL())
+        let playback = SiriPlaybackControllerSpy(state: .idle)
+        let songVideo = Video(id: "sng00000001", title: "Bachata Rosa", author: "Juan Luis Guerra")
+        let source = StubYouTubeProvider(onSearch: { query in
+            if query.contains("Bachata Rosa") { return [songVideo] }
+            return []
+        })
+        let service = SiriPlaybackService(library: library, playback: playback, source: source)
+
+        try await service.playSong("Bachata Rosa", artist: "Juan Luis Guerra")
+
+        XCTAssertEqual(playback.playedVideos, [songVideo])
+    }
+
+    func testPlayArtistRejectsEmptyQuery() async throws {
+        let service = SiriPlaybackService(library: LibraryStore(fileURL: try libraryURL()),
+                                          playback: SiriPlaybackControllerSpy(state: .idle))
+        do {
+            try await service.playArtist("  ")
+            XCTFail("Expected empty query error")
+        } catch {
+            XCTAssertEqual(error as? SiriPlaybackError, .emptyQuery)
+        }
+    }
+
     private func libraryURL() throws -> URL {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         addTeardownBlock { try? FileManager.default.removeItem(at: directory) }

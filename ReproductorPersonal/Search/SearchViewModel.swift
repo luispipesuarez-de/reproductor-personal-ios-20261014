@@ -37,11 +37,31 @@ enum SearchDurationFilter: String, CaseIterable, Identifiable {
     }
 }
 
+enum SearchCategoryFilter: String, CaseIterable, Identifiable {
+    case all
+    case songs
+    case artists
+    case albums
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .all: return "Todo"
+        case .songs: return "Canciones"
+        case .artists: return "Artistas"
+        case .albums: return "Álbumes"
+        }
+    }
+}
+
 @MainActor
 final class SearchViewModel: ObservableObject {
     @Published private(set) var state: SearchState = .idle
     @Published private(set) var durationFilter: SearchDurationFilter = .all
-    private let source: any YouTubeProviding
+    @Published private(set) var categoryFilter: SearchCategoryFilter = .all
+    private(set) var lastQuery: String = ""
+    let source: any YouTubeProviding
     private var originalResults: [Video] = []
     private var requestID = UUID()
     private let debounceNanoseconds: UInt64
@@ -55,6 +75,15 @@ final class SearchViewModel: ObservableObject {
     deinit { debounceTask?.cancel() }
 
     var showsDurationFilter: Bool { !originalResults.isEmpty }
+    var showsCategoryFilter: Bool { !originalResults.isEmpty }
+
+    var filteredArtists: [ArtistSummary] {
+        originalResults.groupedArtists(matching: lastQuery)
+    }
+
+    var filteredAlbums: [AlbumSummary] {
+        originalResults.groupedAlbums(forArtist: lastQuery)
+    }
 
     func setDurationFilter(_ filter: SearchDurationFilter) {
         durationFilter = filter
@@ -64,11 +93,28 @@ final class SearchViewModel: ObservableObject {
         }
     }
 
+    func setCategoryFilter(_ filter: SearchCategoryFilter) {
+        categoryFilter = filter
+        switch state {
+        case .results(let query, _), .empty(let query): publishResults(query: query)
+        default: break
+        }
+    }
+
+    func loadArtistCatalog(for artistName: String) async throws -> ArtistCatalog {
+        try await source.artistCatalog(for: artistName)
+    }
+
+    func loadAlbumTracks(for album: AlbumSummary) async throws -> [Video] {
+        try await source.albumTracks(for: album)
+    }
+
     func queryChanged(_ query: String) {
         debounceTask?.cancel()
         requestID = UUID()
         let token = requestID
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        lastQuery = trimmed
         guard trimmed.count >= 2 else { originalResults = []; state = .idle; return }
         originalResults = []
         state = .loading(query: trimmed)
@@ -86,6 +132,7 @@ final class SearchViewModel: ObservableObject {
         let currentRequest = UUID()
         requestID = currentRequest
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        lastQuery = trimmed
         guard !trimmed.isEmpty else { originalResults = []; state = .idle; return }
         originalResults = []
         state = .loading(query: trimmed)
@@ -107,7 +154,8 @@ final class SearchViewModel: ObservableObject {
     }
 
     private func publishResults(query: String) {
-        let filtered = originalResults.filter(durationFilter.includes)
+        let base = (categoryFilter == .songs) ? originalResults.filter { !$0.isLongVideo } : originalResults
+        let filtered = base.filter(durationFilter.includes)
         state = filtered.isEmpty ? .empty(query: query) : .results(query: query, videos: filtered)
     }
 }

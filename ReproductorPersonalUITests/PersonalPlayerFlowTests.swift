@@ -472,4 +472,24 @@ final class PersonalPlayerFlowTests: XCTestCase {
         attachment.lifetime = .keepAlways
         add(attachment)
     }
+
+    func testArtistFilterShowsArtistSongsAndAlbums() {
+        app.launch()
+        search("cancion")
+        let artistsChip = app.buttons["categoryFilter-artists"]
+        XCTAssertTrue(artistsChip.waitForExistence(timeout: 5))
+        artistsChip.tap()
+
+        let artistItem = app.buttons["artist-autor a"]
+        XCTAssertTrue(artistItem.waitForExistence(timeout: 5))
+        artistItem.tap()
+
+        XCTAssertTrue(app.navigationBars["Autor A"].waitForExistence(timeout: 5))
+        let playAll = app.buttons["playArtistAll"]
+        XCTAssertTrue(playAll.waitForExistence(timeout: 5))
+        playAll.tap()
+
+        XCTAssertTrue(app.staticTexts["Reproduciendo"].firstMatch.waitForExistence(timeout: 30))
+        closePlayer()
+    }
 }

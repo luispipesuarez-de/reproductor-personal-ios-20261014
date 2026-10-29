@@ -130,4 +130,44 @@ final class SearchViewModelTests: XCTestCase {
         await oldTask.value
         XCTAssertEqual(search.state, .idle)
     }
+
+    func testCategoryFilterExtractsArtistsAndNormalizedNames() async {
+        let topic = Video(id: "art01", title: "Tema A", author: "Artista Estrella - Topic")
+        let vevo = Video(id: "art02", title: "Tema B", author: "Artista Estrella VEVO")
+        let other = Video(id: "art03", title: "Tema C", author: "Otro Autor")
+        let source = StubYouTubeProvider(onSearch: { _ in [topic, vevo, other] })
+        let search = SearchViewModel(source: source)
+
+        await search.submit(query: "estrella")
+
+        XCTAssertEqual(search.filteredArtists.count, 2)
+        XCTAssertEqual(search.filteredArtists.first?.name, "Artista Estrella")
+        XCTAssertEqual(search.filteredArtists.first?.sampleVideos.count, 2)
+    }
+
+    func testCategoryFilterSongsExcludesLongVideos() async {
+        let song = Video(id: "sng01", title: "Canción corta", author: "A", durationText: "3:30")
+        let longAlbum = Video(id: "alb01", title: "Disco Completo En Vivo", author: "A", durationText: "45:00")
+        let source = StubYouTubeProvider(onSearch: { _ in [song, longAlbum] })
+        let search = SearchViewModel(source: source)
+
+        await search.submit(query: "musica")
+        search.setCategoryFilter(.songs)
+
+        XCTAssertEqual(search.state, .results(query: "musica", videos: [song]))
+    }
+
+    func testLoadArtistCatalogDelegatesToSource() async throws {
+        let sample = Video(id: "cat01", title: "Gran Éxito", author: "Grupo Niche")
+        let source = StubYouTubeProvider(onSearch: { query in
+            if query.contains("Grupo Niche") { return [sample] }
+            return []
+        })
+        let search = SearchViewModel(source: source)
+
+        let catalog = try await search.loadArtistCatalog(for: "Grupo Niche")
+
+        XCTAssertEqual(catalog.artistName, "Grupo Niche")
+        XCTAssertFalse(catalog.songs.isEmpty)
+    }
 }

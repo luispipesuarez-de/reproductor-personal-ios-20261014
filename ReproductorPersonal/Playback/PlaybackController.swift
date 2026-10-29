@@ -40,7 +40,7 @@ final class PlaybackController: ObservableObject {
     @Published private(set) var autoplayEnabled = true { didSet { onPlaybackChange?() } }
     @Published private(set) var radioSeed: RecommendationSeed? { didSet { onPlaybackChange?() } }
     @Published private(set) var radioStatus: RadioStatus = .idle
-    private let source: any YouTubeProviding
+    let source: any YouTubeProviding
     private let dislikedIDs: () -> Set<String>
     private let resourceCache: PlaybackResourceCache
     private let radio: RadioSession

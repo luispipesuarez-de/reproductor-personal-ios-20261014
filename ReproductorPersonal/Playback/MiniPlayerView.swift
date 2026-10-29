@@ -68,22 +68,37 @@ struct MiniPlayerView: View {
         DragGesture(minimumDistance: 10)
             .onChanged { value in
                 guard abs(value.translation.width) > abs(value.translation.height) * 1.5 else { return }
-                if isPaused {
-                    horizontalOffset = value.translation.width
-                }
+                horizontalOffset = value.translation.width
             }
             .onEnded { value in
                 guard abs(value.translation.width) > abs(value.translation.height) * 1.5 else { return }
-                guard isPaused, abs(value.translation.width) >= 70 else {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) { horizontalOffset = 0 }
-                    return
-                }
-                let direction: CGFloat = value.translation.width < 0 ? -1 : 1
-                withAnimation(.easeOut(duration: 0.18)) { horizontalOffset = direction * 500 }
-                Task { @MainActor in
-                    try? await Task.sleep(nanoseconds: 180_000_000)
-                    guard !Task.isCancelled else { return }
-                    playback.dismissPausedPlayback()
+                let width = value.translation.width
+                if isPaused {
+                    guard abs(width) >= 70 else {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) { horizontalOffset = 0 }
+                        return
+                    }
+                    let direction: CGFloat = width < 0 ? -1 : 1
+                    withAnimation(.easeOut(duration: 0.18)) { horizontalOffset = direction * 500 }
+                    Task { @MainActor in
+                        try? await Task.sleep(nanoseconds: 180_000_000)
+                        guard !Task.isCancelled else { return }
+                        playback.dismissPlayback()
+                    }
+                } else {
+                    if width >= 140 {
+                        playback.pause()
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) { horizontalOffset = 0 }
+                    } else if width <= -140 {
+                        withAnimation(.easeOut(duration: 0.18)) { horizontalOffset = -500 }
+                        Task { @MainActor in
+                            try? await Task.sleep(nanoseconds: 180_000_000)
+                            guard !Task.isCancelled else { return }
+                            playback.dismissPlayback()
+                        }
+                    } else {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) { horizontalOffset = 0 }
+                    }
                 }
             }
     }

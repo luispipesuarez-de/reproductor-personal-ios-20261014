@@ -72,6 +72,7 @@ final class SystemMediaControls {
         }
         register(center.nextTrackCommand) { await $0.next() }
         register(center.previousTrackCommand) { await $0.previous() }
+        register(center.stopCommand) { $0.dismissPlayback() }
         center.changePlaybackPositionCommand.isEnabled = true
         let seek = center.changePlaybackPositionCommand.addTarget { [weak controller] event in
             guard let controller, let event = event as? MPChangePlaybackPositionCommandEvent else { return .commandFailed }

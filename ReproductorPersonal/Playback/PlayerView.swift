@@ -30,6 +30,7 @@ struct NowPlayingView: View {
     let retryStorage: () -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var showQueue = false
+    @State private var showLyrics = false
     @State private var seeking = false
     @State private var seekValue: Double = 0
     @State private var preferenceError: String?
@@ -40,7 +41,14 @@ struct NowPlayingView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     if let storageError { StorageWarning(message: storageError, retry: retryStorage) }
                     if let video = playback.state.video {
-                        PlayerView(player: playback.player).aspectRatio(16 / 9, contentMode: .fit).background(Color.black)
+                        if showLyrics {
+                            LyricsView(video: video, playback: playback)
+                                .frame(height: 300)
+                                .background(Color.secondary.opacity(0.08))
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                        } else {
+                            PlayerView(player: playback.player).aspectRatio(16 / 9, contentMode: .fit).background(Color.black)
+                        }
                         Text(video.title).font(.title2).fontWeight(.semibold).fixedSize(horizontal: false, vertical: true)
                         Text(video.author).foregroundStyle(.secondary)
                         HStack(spacing: 12) {
@@ -60,12 +68,32 @@ struct NowPlayingView: View {
                     .accessibilityIdentifier("openQueue")
                 }.padding()
             }
+            .gesture(
+                DragGesture(minimumDistance: 35)
+                    .onEnded { value in
+                        if value.translation.width < -60 {
+                            Task { await playback.next() }
+                        } else if value.translation.width > 60 {
+                            Task { await playback.previous() }
+                        }
+                    }
+            )
             .navigationTitle("Ahora suena")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     if let video = playback.state.video {
                         VideoActionsMenu(video: video, library: library, playback: playback, identifier: "currentActions")
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if playback.state.video != nil {
+                        Button { showLyrics.toggle() } label: {
+                            Image(systemName: showLyrics ? "quote.bubble.fill" : "quote.bubble")
+                                .frame(minWidth: 44, minHeight: 44)
+                        }
+                        .accessibilityLabel(showLyrics ? "Ocultar letra" : "Ver letra")
+                        .accessibilityIdentifier("toggleLyricsToolbar")
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
@@ -103,12 +131,21 @@ struct NowPlayingView: View {
                     Image(systemName: "goforward.15").font(.title2).frame(minWidth: 44, minHeight: 44)
                 }.accessibilityLabel("Avanzar 15 segundos")
             }.frame(maxWidth: .infinity)
-            Button(action: playback.shuffleUpcoming) {
-                Label("Mezclar cola", systemImage: "shuffle").frame(minHeight: 44)
+            HStack(spacing: 12) {
+                Button(action: playback.shuffleUpcoming) {
+                    Label("Mezclar cola", systemImage: "shuffle").frame(minHeight: 44)
+                }
+                .buttonStyle(.bordered)
+                .disabled(playback.queue.upcomingCount < 2)
+                .accessibilityIdentifier("shuffleQueue")
+
+                Button { showLyrics.toggle() } label: {
+                    Label(showLyrics ? "Ocultar letra" : "Letra", systemImage: showLyrics ? "quote.bubble.fill" : "quote.bubble")
+                        .frame(minHeight: 44)
+                }
+                .buttonStyle(.bordered)
+                .accessibilityIdentifier("toggleLyrics")
             }
-            .buttonStyle(.bordered)
-            .disabled(playback.queue.upcomingCount < 2)
-            .accessibilityIdentifier("shuffleQueue")
             if let video = playback.state.video {
                 HStack(spacing: 16) {
                     Button { setLiked(video) } label: {

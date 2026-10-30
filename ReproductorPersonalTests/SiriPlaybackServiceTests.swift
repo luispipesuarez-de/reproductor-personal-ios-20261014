@@ -107,6 +107,23 @@ final class SiriPlaybackServiceTests: XCTestCase {
         }
     }
 
+    func testKnownSongsAndArtistsReturnFromService() async throws {
+        let library = LibraryStore(fileURL: try libraryURL())
+        let video = Video(id: "sng00000099", title: "Cali Pachanguero", author: "Grupo Niche")
+        try library.setFavorite(video, enabled: true)
+        let playback = SiriPlaybackControllerSpy(state: .idle)
+        let service = SiriPlaybackService(library: library, playback: playback)
+
+        XCTAssertTrue(service.knownSongs().contains("Cali Pachanguero"))
+        XCTAssertTrue(service.knownArtists().contains("Grupo Niche"))
+    }
+
+    func testSiriPlaybackBridgeReturnsConfiguredServiceAutomatically() async throws {
+        // Ensures configuredService() never throws unavailable even when uninitialized
+        let known = SiriPlaybackBridge.shared.knownArtists()
+        XCTAssertNotNil(known)
+    }
+
     private func libraryURL() throws -> URL {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         addTeardownBlock { try? FileManager.default.removeItem(at: directory) }

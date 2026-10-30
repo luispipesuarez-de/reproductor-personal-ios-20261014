@@ -50,6 +50,35 @@ actor YouTubeClient: YouTubeProviding {
         }
     }
 
+    func searchDeep(query: String, maxPages: Int = 3) async throws -> [Video] {
+        do {
+            let initial = try await SearchResponse.sendThrowingRequest(
+                youtubeModel: model, data: [.query: query], useCookies: false
+            )
+            if let visitor = initial.visitorData, !visitor.isEmpty { model.visitorData = visitor }
+            var results = YouTubeMapping.videos(from: initial)
+            var nextToken = initial.continuationToken
+            var pagesFetched = 1
+            while let token = nextToken, pagesFetched < maxPages {
+                do {
+                    let nextPage = try await SearchResponse.Continuation.sendThrowingRequest(
+                        youtubeModel: model, data: [.continuation: token], useCookies: false
+                    )
+                    let newVideos = YouTubeMapping.videos(from: nextPage.results, candidatesOnly: false)
+                    if newVideos.isEmpty { break }
+                    results.append(contentsOf: newVideos)
+                    nextToken = nextPage.continuationToken
+                    pagesFetched += 1
+                } catch {
+                    break
+                }
+            }
+            return results
+        } catch {
+            throw AppError.classify(error)
+        }
+    }
+
     func resolve(videoID: String) async throws -> PlaybackResource {
         do {
             _ = try await anonymousVisitor(videoID: videoID)

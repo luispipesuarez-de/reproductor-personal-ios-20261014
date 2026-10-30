@@ -120,6 +120,11 @@ final class SiriPlaybackService {
         return library.allMusic.groupedArtists().map(\.name)
     }
 
+    func knownSongs() -> [String] {
+        try? library.load()
+        return library.allMusic.map(\.title)
+    }
+
     func pauseOrResume() async {
         if playback.state.isPlaying { playback.pause() }
         else { await playback.resume() }
@@ -140,16 +145,23 @@ final class SiriPlaybackBridge {
     func playArtist(_ artistName: String) async throws { try await configuredService().playArtist(artistName) }
     func playSong(_ query: String, artist: String? = nil) async throws { try await configuredService().playSong(query, artist: artist) }
     func knownArtists() -> [String] {
-        service?.knownArtists() ?? []
+        configuredService().knownArtists()
+    }
+    func knownSongs() -> [String] {
+        configuredService().knownSongs()
     }
     func pauseOrResume() async throws {
-        guard let service else { throw SiriPlaybackError.unavailable }
-        await service.pauseOrResume()
+        await configuredService().pauseOrResume()
     }
 
-    private func configuredService() throws -> SiriPlaybackService {
-        guard let service else { throw SiriPlaybackError.unavailable }
-        return service
+    private func configuredService() -> SiriPlaybackService {
+        if let service { return service }
+        let library = LibraryStore()
+        let source = YouTubeClient()
+        let playback = PlaybackController(source: source, dislikedIDs: { Set(library.snapshot.disliked.map(\.id)) })
+        let newService = SiriPlaybackService(library: library, playback: playback, source: source)
+        self.service = newService
+        return newService
     }
 }
 
@@ -174,7 +186,63 @@ struct ArtistEntityQuery: EntityStringQuery {
     }
     func suggestedEntities() async throws -> [ArtistAppEntity] {
         let saved = await MainActor.run { SiriPlaybackBridge.shared.knownArtists() }
-        return saved.map { ArtistAppEntity(id: $0, name: $0) }
+        let seeded = [
+            "Juan Luis Guerra", "Grupo Niche", "Shakira", "Carlos Vives",
+            "Marc Anthony", "Soda Stereo", "Maná", "Bad Bunny", "Karol G"
+        ]
+        let combined = Array(NSOrderedSet(array: saved + seeded)).compactMap { $0 as? String }
+        return combined.map { ArtistAppEntity(id: $0, name: $0) }
+    }
+}
+
+@available(iOS 16.0, *)
+struct SongAppEntity: AppEntity {
+    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Canción")
+    static var defaultQuery = SongEntityQuery()
+    let id: String
+    let title: String
+    let artist: String?
+    var displayRepresentation: DisplayRepresentation {
+        if let artist, !artist.isEmpty {
+            return DisplayRepresentation(title: "\(title)", subtitle: "\(artist)")
+        }
+        return DisplayRepresentation(title: "\(title)")
+    }
+}
+
+@available(iOS 16.0, *)
+struct SongEntityQuery: EntityStringQuery {
+    func entities(for identifiers: [String]) async throws -> [SongAppEntity] {
+        identifiers.map { SongAppEntity(id: $0, title: $0, artist: nil) }
+    }
+    func entities(matching string: String) async throws -> [SongAppEntity] {
+        let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return try await suggestedEntities() }
+        return [SongAppEntity(id: trimmed, title: trimmed, artist: nil)]
+    }
+    func suggestedEntities() async throws -> [SongAppEntity] {
+        let saved = await MainActor.run { SiriPlaybackBridge.shared.knownSongs() }
+        let seeded = [
+            "Bachata Rosa", "La Bilirrubina", "Cali Pachanguero", "Despacito",
+            "La Bicicleta", "Vivir Mi Vida", "De Música Ligera", "Rayando el Sol"
+        ]
+        let combined = Array(NSOrderedSet(array: saved + seeded)).compactMap { $0 as? String }
+        return combined.map { SongAppEntity(id: $0, title: $0, artist: nil) }
+    }
+}
+
+@available(iOS 16.0, *)
+struct PlaySongEntityIntent: AppIntent {
+    static var title: LocalizedStringResource = "Reproducir canción"
+    static var description = IntentDescription("Reproduce una canción específica con Siri.")
+    static var openAppWhenRun = true
+
+    @Parameter(title: "Canción")
+    var song: SongAppEntity
+
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        try await SiriPlaybackBridge.shared.playSong(song.title, artist: song.artist)
+        return .result(dialog: "Reproduciendo \(song.title)")
     }
 }
 

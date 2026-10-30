@@ -78,6 +78,34 @@ final class YouTubeMappingTests: XCTestCase {
         XCTAssertEqual(resource.url, url)
     }
 
+    func testArtistCatalogCombinesDeepSearches() async throws {
+        struct DeepProvider: YouTubeProviding {
+            func search(query: String) async throws -> [Video] { [] }
+            func resolve(videoID: String) async throws -> PlaybackResource { throw AppError.unavailable }
+            func recommendations(seed: RecommendationSeed, continuation: String?) async throws -> RecommendationPage {
+                RecommendationPage(videos: [], continuation: nil)
+            }
+            func searchDeep(query: String, maxPages: Int) async throws -> [Video] {
+                if query.contains("canciones oficiales") {
+                    return [
+                        Video(id: "v1111111111", title: "Canción 1", author: "Artista Prueba"),
+                        Video(id: "v2222222222", title: "Canción 2", author: "Artista Prueba")
+                    ]
+                } else if query.contains("grandes exitos") {
+                    return [
+                        Video(id: "v2222222222", title: "Canción 2", author: "Artista Prueba"),
+                        Video(id: "v3333333333", title: "Canción 3", author: "Artista Prueba")
+                    ]
+                }
+                return []
+            }
+        }
+        let provider = DeepProvider()
+        let catalog = try await provider.artistCatalog(for: "Artista Prueba")
+        XCTAssertEqual(catalog.songs.count, 3)
+        XCTAssertEqual(catalog.songs.map(\.id), ["v1111111111", "v2222222222", "v3333333333"])
+    }
+
     private func fixture(_ name: String) throws -> Data {
         let url = try XCTUnwrap(Bundle(for: Self.self).url(forResource: name, withExtension: "json", subdirectory: "Fixtures"))
         return try Data(contentsOf: url)

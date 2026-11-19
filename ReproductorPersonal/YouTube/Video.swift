@@ -70,8 +70,14 @@ struct Video: Identifiable, Codable, Equatable, Sendable {
         return seconds
     }
 
-    private static func normalizedCatalogText(_ text: String) -> String {
+    static func normalizedCatalogText(_ text: String) -> String {
         text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+    }
+
+    static func hasWholeWordPrefix(_ text: String, prefix: String) -> Bool {
+        guard text.hasPrefix(prefix), text.count > prefix.count else { return false }
+        let next = text[text.index(text.startIndex, offsetBy: prefix.count)]
+        return !next.isLetter && !next.isNumber
     }
 
     var canonicalArtistName: String {
@@ -216,11 +222,18 @@ extension Array where Element == Video {
         var albums: [AlbumSummary] = []
         var seenIDs: Set<String> = []
 
-        let filtered = artistName != nil ? filter {
-            let normArtist = artistName!.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "en_US_POSIX"))
-            let normAuthor = $0.canonicalArtistName.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "en_US_POSIX"))
-            return normAuthor == normArtist || normAuthor.contains(normArtist) || normArtist.contains(normAuthor)
-        } : self
+        let filtered: [Video]
+        if let artistName, !artistName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            let normArtist = Video.normalizedCatalogText(artistName).trimmingCharacters(in: .whitespacesAndNewlines)
+            let matches = filter { video in
+                let normAuthor = Video.normalizedCatalogText(video.canonicalArtistName).trimmingCharacters(in: .whitespacesAndNewlines)
+                return normAuthor == normArtist || Video.hasWholeWordPrefix(normAuthor, prefix: normArtist)
+            }
+            // Si la consulta era un título de álbum (no un nombre de artista), agrupamos sin descartar todo.
+            filtered = matches.isEmpty ? self : matches
+        } else {
+            filtered = self
+        }
 
         let fullAlbums = filtered.filter(\.isLikelyFullAlbumOrCompilation)
         for video in fullAlbums where seenIDs.insert(video.id).inserted {

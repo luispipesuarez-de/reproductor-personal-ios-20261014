@@ -1,8 +1,41 @@
 import SwiftUI
 
 @MainActor
+enum CatalogSettings {
+    static let officialOnlyKey = "officialOnlyAutoplay"
+
+    static var officialOnlyAutoplay: Bool {
+        UserDefaults.standard.object(forKey: officialOnlyKey) as? Bool ?? true
+    }
+
+    static func policy(
+        officialOnly: Bool,
+        blockedChannelIDs: @escaping () -> Set<String> = { [] },
+        blockedArtistNames: @escaping () -> Set<String> = { [] }
+    ) -> CandidatePolicy {
+        CandidatePolicy.officialFirst(
+            allowUnknownFallback: { !officialOnly },
+            blockedChannelIDs: blockedChannelIDs,
+            blockedArtistNames: blockedArtistNames
+        )
+    }
+
+    static func livePolicy(
+        blockedChannelIDs: @escaping () -> Set<String> = { [] },
+        blockedArtistNames: @escaping () -> Set<String> = { [] }
+    ) -> CandidatePolicy {
+        CandidatePolicy.officialFirst(
+            allowUnknownFallback: { !officialOnlyAutoplay },
+            blockedChannelIDs: blockedChannelIDs,
+            blockedArtistNames: blockedArtistNames
+        )
+    }
+}
+
+@MainActor
 struct RadioControls: View {
     @ObservedObject var playback: PlaybackController
+    @AppStorage(CatalogSettings.officialOnlyKey) private var officialOnlyAutoplay = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -17,6 +50,9 @@ struct RadioControls: View {
                 .frame(minHeight: 44)
                 .accessibilityIdentifier("autoplayToggle")
             if playback.autoplayEnabled {
+                Toggle("Solo grabaciones oficiales", isOn: $officialOnlyAutoplay)
+                    .frame(minHeight: 44)
+                    .accessibilityIdentifier("officialOnlyAutoplayToggle")
                 switch playback.radioStatus {
                 case .loading: ProgressView("Buscando más canciones…")
                 case .failed(let message):

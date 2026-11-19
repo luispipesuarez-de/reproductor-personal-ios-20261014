@@ -105,6 +105,8 @@ struct DiscoveryView: View {
         await discovery.refresh(favorites: library.snapshot.favorites,
                                 likes: library.snapshot.liked,
                                 dislikedIDs: Set(library.snapshot.disliked.map(\.id)),
-                                recent: library.snapshot.recent)
+                                recent: library.snapshot.recent,
+                                blockedChannelIDs: library.blockedChannelIDs,
+                                blockedArtistNames: library.blockedArtistNames)
     }
 }

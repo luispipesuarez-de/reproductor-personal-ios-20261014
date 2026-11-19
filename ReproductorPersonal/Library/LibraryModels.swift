@@ -12,6 +12,12 @@ struct LocalPlaylist: Identifiable, Codable, Equatable, Sendable {
     }
 }
 
+struct BlockedChannel: Identifiable, Codable, Equatable, Hashable, Sendable {
+    let id: String
+    let name: String
+    let isChannelID: Bool
+}
+
 struct LibrarySnapshot: Codable, Equatable, Sendable {
     var schemaVersion: Int = 1
     var favorites: [Video] = []
@@ -21,8 +27,11 @@ struct LibrarySnapshot: Codable, Equatable, Sendable {
     var recent: [Video] = []
     var queue: QueueSnapshot?
     var customGenres: [String] = []
+    var blockedChannels: [BlockedChannel] = []
 
-    private enum CodingKeys: String, CodingKey { case schemaVersion, favorites, liked, disliked, playlists, recent, queue, customGenres }
+    private enum CodingKeys: String, CodingKey {
+        case schemaVersion, favorites, liked, disliked, playlists, recent, queue, customGenres, blockedChannels
+    }
 }
 
 extension LibrarySnapshot {
@@ -35,6 +44,7 @@ extension LibrarySnapshot {
                   playlists: try values.decode([LocalPlaylist].self, forKey: .playlists),
                   recent: try values.decode([Video].self, forKey: .recent),
                   queue: try values.decodeIfPresent(QueueSnapshot.self, forKey: .queue),
-                  customGenres: try values.decodeIfPresent([String].self, forKey: .customGenres) ?? [])
+                  customGenres: try values.decodeIfPresent([String].self, forKey: .customGenres) ?? [],
+                  blockedChannels: try values.decodeIfPresent([BlockedChannel].self, forKey: .blockedChannels) ?? [])
     }
 }

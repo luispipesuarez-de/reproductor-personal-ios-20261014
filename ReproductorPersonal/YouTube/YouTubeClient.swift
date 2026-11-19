@@ -171,6 +171,10 @@ actor YouTubeClient: YouTubeProviding {
     }
 
     func searchDeep(query: String, maxPages: Int = 3) async throws -> [Video] {
+        try await searchDeepWithStatus(query: query, maxPages: maxPages).videos
+    }
+
+    func searchDeepWithStatus(query: String, maxPages: Int = 3) async throws -> (videos: [Video], isPartial: Bool) {
         do {
             let initial = try await SearchResponse.sendThrowingRequest(
                 youtubeModel: model, data: [.query: query], useCookies: false
@@ -179,6 +183,7 @@ actor YouTubeClient: YouTubeProviding {
             var results = YouTubeMapping.videos(from: initial)
             var nextToken = initial.continuationToken
             var pagesFetched = 1
+            var isPartial = false
             while let token = nextToken, pagesFetched < maxPages {
                 do {
                     let nextPage = try await SearchResponse.Continuation.sendThrowingRequest(
@@ -190,10 +195,11 @@ actor YouTubeClient: YouTubeProviding {
                     nextToken = nextPage.continuationToken
                     pagesFetched += 1
                 } catch {
+                    isPartial = true
                     break
                 }
             }
-            return results
+            return (results, isPartial)
         } catch {
             throw AppError.classify(error)
         }

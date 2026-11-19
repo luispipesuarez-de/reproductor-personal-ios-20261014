@@ -13,6 +13,7 @@ struct VideoActionsMenu: View {
     private var isFavorite: Bool { library.snapshot.favorites.contains { $0.id == video.id } }
     private var isLiked: Bool { library.snapshot.liked.contains { $0.id == video.id } }
     private var isDisliked: Bool { library.snapshot.disliked.contains { $0.id == video.id } }
+    private var isBlockedChannel: Bool { library.isChannelBlocked(video) }
 
     var body: some View {
         Button { showActions = true } label: {
@@ -37,6 +38,10 @@ struct VideoActionsMenu: View {
             } label: { Label(isDisliked ? "Quitar No me gusta" : "No me gusta", systemImage: isDisliked ? "hand.thumbsdown.fill" : "hand.thumbsdown") }
             Button { playback.enqueue(video) } label: { Label("Añadir a la cola", systemImage: "list.bullet") }
             Button { Task { await playback.startRadio(from: video) } } label: { Label("Iniciar radio", systemImage: "radio") }
+            Button(role: isBlockedChannel ? nil : .destructive) {
+                do { try library.setChannelBlocked(for: video, blocked: !isBlockedChannel) }
+                catch { errorMessage = error.localizedDescription }
+            } label: { Label(isBlockedChannel ? "Permitir este canal" : "No reproducir este canal", systemImage: isBlockedChannel ? "checkmark.circle" : "nosign") }
             Button("Cancelar", role: .cancel) {}
         } message: { Text(video.title) }
         .sheet(isPresented: $showPlaylists) { PlaylistPickerView(video: video, library: library) }

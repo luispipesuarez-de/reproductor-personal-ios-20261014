@@ -40,15 +40,30 @@ extension YouTubeProviding {
         throw AppError.unavailable
     }
 
+    func searchDeepWithStatus(query: String, maxPages: Int = 3) async throws -> (videos: [Video], isPartial: Bool) {
+        (try await searchDeep(query: query, maxPages: maxPages), false)
+    }
+
     func artistCatalog(for artistName: String) async throws -> ArtistCatalog {
         let trimmed = artistName.trimmingCharacters(in: .whitespacesAndNewlines)
-        async let topSongs = searchDeep(query: "\(trimmed) canciones oficiales", maxPages: 3)
-        async let hits = searchDeep(query: "\(trimmed) grandes exitos", maxPages: 2)
-        async let albums = searchDeep(query: "\(trimmed) album completo oficial", maxPages: 2)
+        async let topSongs = try? searchDeepWithStatus(query: "\(trimmed) canciones oficiales", maxPages: 3)
+        async let hits = try? searchDeepWithStatus(query: "\(trimmed) grandes exitos", maxPages: 2)
+        async let albums = try? searchDeepWithStatus(query: "\(trimmed) album completo oficial", maxPages: 2)
 
-        let rawTop = (try? await topSongs) ?? []
-        let rawHits = (try? await hits) ?? []
-        let rawAlbums = (try? await albums) ?? []
+        let resTop = await topSongs
+        let resHits = await hits
+        let resAlbums = await albums
+
+        if resTop == nil && resHits == nil && resAlbums == nil {
+            throw AppError.unavailable
+        }
+
+        let rawTop = resTop?.videos ?? []
+        let rawHits = resHits?.videos ?? []
+        let rawAlbums = resAlbums?.videos ?? []
+        let isPartial = (resTop == nil || resTop?.isPartial == true)
+            || (resHits == nil || resHits?.isPartial == true)
+            || (resAlbums == nil || resAlbums?.isPartial == true)
 
         var combined: [Video] = []
         var seenIDs: Set<String> = []
@@ -61,7 +76,7 @@ extension YouTubeProviding {
         let songs = combined.prioritizingSongs()
         let groupedAlbums = combined.groupedAlbums(forArtist: trimmed)
         let thumb = songs.first?.thumbnailURL ?? rawAlbums.first?.thumbnailURL
-        return ArtistCatalog(artistName: trimmed, thumbnailURL: thumb, songs: songs, albums: groupedAlbums)
+        return ArtistCatalog(artistName: trimmed, thumbnailURL: thumb, songs: songs, albums: groupedAlbums, isPartial: isPartial)
     }
 
     func albumTracks(for album: AlbumSummary) async throws -> [Video] {

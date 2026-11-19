@@ -53,6 +53,21 @@ struct LibraryView: View {
                         .accessibilityLabel(playlist.name)
                     }
                 }
+                if !library.snapshot.blockedChannels.isEmpty {
+                    Section("Canales bloqueados") {
+                        ForEach(library.snapshot.blockedChannels) { channel in
+                            HStack {
+                                Text(channel.name)
+                                Spacer()
+                                Button("Permitir") {
+                                    do { try library.unblockChannel(id: channel.id) }
+                                    catch { errorMessage = error.localizedDescription }
+                                }
+                                .buttonStyle(.borderless)
+                            }
+                        }
+                    }
+                }
             }
             .navigationTitle("Biblioteca")
             .toolbar {

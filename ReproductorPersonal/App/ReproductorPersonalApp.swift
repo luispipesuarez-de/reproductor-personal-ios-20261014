@@ -12,9 +12,11 @@ struct ReproductorPersonalApp: App {
     init() {
         let source: any YouTubeProviding
         var fileURL = LibraryStore.defaultFileURL
+        var isUITesting = false
 #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing") {
             source = UITestYouTubeProvider()
+            isUITesting = true
             fileURL = FileManager.default.temporaryDirectory.appendingPathComponent("ui-testing-library.json")
             if ProcessInfo.processInfo.arguments.contains("--ui-reset-library") {
                 try? FileManager.default.removeItem(at: fileURL)
@@ -26,7 +28,17 @@ struct ReproductorPersonalApp: App {
         _search = StateObject(wrappedValue: SearchViewModel(source: source))
         _discovery = StateObject(wrappedValue: DiscoveryViewModel(source: source))
         let library = LibraryStore(fileURL: fileURL)
-        let playback = PlaybackController(source: source, dislikedIDs: { Set(library.snapshot.disliked.map(\.id)) })
+        let policy: CandidatePolicy = isUITesting
+            ? .permissive
+            : CatalogSettings.livePolicy(
+                blockedChannelIDs: { library.blockedChannelIDs },
+                blockedArtistNames: { library.blockedArtistNames }
+            )
+        let playback = PlaybackController(
+            source: source,
+            dislikedIDs: { Set(library.snapshot.disliked.map(\.id)) },
+            policy: policy
+        )
         _playback = StateObject(wrappedValue: playback)
         _library = StateObject(wrappedValue: library)
         _persistence = StateObject(wrappedValue: PlaybackLibraryPersistence(library: library, playback: playback))

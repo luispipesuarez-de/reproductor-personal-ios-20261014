@@ -205,7 +205,11 @@ final class SiriPlaybackBridge {
         if let service { return service }
         let library = LibraryStore(fileURL: LibraryStore.defaultFileURL)
         let source = YouTubeClient()
-        let playback = PlaybackController(source: source, dislikedIDs: { Set(library.snapshot.disliked.map { $0.id }) })
+        let policy = CatalogSettings.livePolicy(
+            blockedChannelIDs: { library.blockedChannelIDs },
+            blockedArtistNames: { library.blockedArtistNames }
+        )
+        let playback = PlaybackController(source: source, dislikedIDs: { Set(library.snapshot.disliked.map { $0.id }) }, policy: policy)
         let newService = SiriPlaybackService(library: library, playback: playback, source: source)
         self.service = newService
         return newService

@@ -1,12 +1,13 @@
 import Foundation
 
 /// Reglas de calidad y duración que aplican la radio y las recomendaciones.
-struct CandidatePolicy: Sendable {
+@MainActor
+struct CandidatePolicy {
     var excludeSuspicious: Bool
-    var allowUnknownFallback: @Sendable () -> Bool
+    var allowUnknownFallback: () -> Bool
     var allowVerifiedShortSongs: Bool
-    var blockedChannelIDs: @Sendable () -> Set<String>
-    var blockedArtistNames: @Sendable () -> Set<String>
+    var blockedChannelIDs: () -> Set<String>
+    var blockedArtistNames: () -> Set<String>
     var minSeconds: Int
     var maxSeconds: Int
 
@@ -24,9 +25,9 @@ struct CandidatePolicy: Sendable {
     /// Política para uso real: prioriza catálogo verificado y canales oficiales, excluye marcadores de IA/imitación
     /// y permite sencillos oficiales de catálogo a partir de 120 s.
     static func officialFirst(
-        allowUnknownFallback: @escaping @Sendable () -> Bool = { false },
-        blockedChannelIDs: @escaping @Sendable () -> Set<String> = { [] },
-        blockedArtistNames: @escaping @Sendable () -> Set<String> = { [] }
+        allowUnknownFallback: @escaping () -> Bool = { false },
+        blockedChannelIDs: @escaping () -> Set<String> = { [] },
+        blockedArtistNames: @escaping () -> Set<String> = { [] }
     ) -> CandidatePolicy {
         CandidatePolicy(
             excludeSuspicious: true,

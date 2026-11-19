@@ -89,6 +89,48 @@ final class LibraryStore: ObservableObject {
         }
     }
 
+    var blockedChannelIDs: Set<String> {
+        Set(snapshot.blockedChannels.filter(\.isChannelID).map(\.id))
+    }
+
+    var blockedArtistNames: Set<String> {
+        Set(snapshot.blockedChannels.filter { !$0.isChannelID }.map(\.id))
+    }
+
+    func isChannelBlocked(_ video: Video) -> Bool {
+        if let key = Self.channelBlockKey(for: video) {
+            return snapshot.blockedChannels.contains { $0.id == key.id }
+        }
+        return false
+    }
+
+    func setChannelBlocked(for video: Video, blocked: Bool) throws {
+        guard let target = Self.channelBlockKey(for: video) else { return }
+        try mutate { snapshot in
+            if blocked {
+                if !snapshot.blockedChannels.contains(where: { $0.id == target.id }) {
+                    snapshot.blockedChannels.append(target)
+                }
+            } else {
+                snapshot.blockedChannels.removeAll { $0.id == target.id }
+            }
+        }
+    }
+
+    func unblockChannel(id: String) throws {
+        try mutate { $0.blockedChannels.removeAll { $0.id == id } }
+    }
+
+    private static func channelBlockKey(for video: Video) -> BlockedChannel? {
+        if let cid = video.channelID ?? video.artistRefs?.first?.browseID, !cid.isEmpty {
+            let name = video.artistRefs?.first?.name ?? video.canonicalArtistName
+            return BlockedChannel(id: cid, name: name, isChannelID: true)
+        }
+        let normalized = Video.normalizedCatalogText(video.canonicalArtistName).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalized.isEmpty, normalized != "autor desconocido" else { return nil }
+        return BlockedChannel(id: normalized, name: video.canonicalArtistName, isChannelID: false)
+    }
+
     func createPlaylist(name: String) throws -> UUID {
         let trimmed = try validName(name)
         let playlist = LocalPlaylist(name: trimmed)

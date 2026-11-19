@@ -125,7 +125,7 @@ struct SearchView: View {
                 List {
                     ForEach(search.filteredArtists) { artist in
                         NavigationLink {
-                            ArtistDetailView(artistName: artist.name, initialVideos: artist.sampleVideos, source: search.source, playback: playback, library: library, onPlay: {
+                            ArtistDetailView(artistName: artist.name, artistID: artist.browseID, initialVideos: artist.sampleVideos, source: search.source, playback: playback, library: library, onPlay: {
                                 fieldFocused = false
                                 onPlay()
                             })
@@ -141,22 +141,23 @@ struct SearchView: View {
                                 .clipShape(Circle())
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(artist.name).font(.headline)
-                                    Text(artist.isOfficial ? "Artista oficial · \(artist.sampleVideos.count) canciones" : "\(artist.sampleVideos.count) canciones")
+                                    let subtitle = artist.browseID != nil
+                                        ? "Artista oficial"
+                                        : (artist.isOfficial ? "Artista oficial · \(artist.sampleVideos.count) canciones" : "\(artist.sampleVideos.count) canciones")
+                                    Text(subtitle)
                                         .font(.caption).foregroundStyle(.secondary)
                                 }
                             }
                         }
                         .accessibilityIdentifier("artist-\(artist.id)")
                     }
+                    loadMoreRow
                 }.listStyle(.plain).scrollDismissesKeyboard(.interactively)
             } else if search.categoryFilter == .albums {
                 List {
                     ForEach(search.filteredAlbums) { album in
                         NavigationLink {
-                            AlbumDetailView(album: album, source: search.source, playback: playback, library: library, onPlay: {
-                                fieldFocused = false
-                                onPlay()
-                            })
+                            AlbumDetailView(album: album, source: search.source, playback: playback, library: library, onPlay: onPlay)
                         } label: {
                             HStack(spacing: 12) {
                                 AsyncImage(url: album.thumbnailURL) { image in
@@ -169,19 +170,22 @@ struct SearchView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 6))
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(album.title).font(.headline).lineLimit(2)
-                                    Text(album.artistName).font(.subheadline).foregroundStyle(.secondary)
+                                    let subtitle = [albumTypeLabel(album.releaseType), album.artistName, album.year]
+                                        .compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
+                                    Text(subtitle).font(.subheadline).foregroundStyle(.secondary)
                                 }
                             }
                         }
                         .accessibilityIdentifier("album-\(album.id)")
                     }
+                    loadMoreRow
                 }.listStyle(.plain).scrollDismissesKeyboard(.interactively)
             } else {
                 List {
                     if search.categoryFilter == .all, let artist = search.filteredArtists.first, !artist.name.isEmpty {
                         Section {
                             NavigationLink {
-                                ArtistDetailView(artistName: artist.name, initialVideos: artist.sampleVideos, source: search.source, playback: playback, library: library, onPlay: {
+                                ArtistDetailView(artistName: artist.name, artistID: artist.browseID, initialVideos: artist.sampleVideos, source: search.source, playback: playback, library: library, onPlay: {
                                     fieldFocused = false
                                     onPlay()
                                 })
@@ -217,6 +221,7 @@ struct SearchView: View {
                             VideoActionsMenu(video: video, library: library, playback: playback)
                         }
                     }
+                    loadMoreRow
                 }.listStyle(.plain).scrollDismissesKeyboard(.interactively)
             }
         case .empty(let query):
@@ -228,6 +233,30 @@ struct SearchView: View {
                     .buttonStyle(.borderedProminent).frame(minHeight: 44)
                 Spacer()
             }
+        }
+    }
+
+    @ViewBuilder private var loadMoreRow: some View {
+        if search.canLoadMore {
+            HStack {
+                Spacer()
+                if search.isLoadingMore {
+                    ProgressView()
+                } else {
+                    Button("Cargar más") { Task { await search.loadMore() } }
+                        .frame(minHeight: 44)
+                }
+                Spacer()
+            }
+        }
+    }
+
+    private func albumTypeLabel(_ type: ReleaseType?) -> String? {
+        switch type {
+        case .album: return "Álbum"
+        case .single: return "Single"
+        case .ep: return "EP"
+        case .other, nil: return nil
         }
     }
 
@@ -289,7 +318,23 @@ struct VideoRow: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(video.title).font(.headline).foregroundStyle(.primary).lineLimit(typeSize.isAccessibilitySize ? nil : 3)
                 Text(video.author).font(.subheadline).foregroundStyle(.secondary)
-                if let duration = video.durationText { Text(duration).font(.caption).foregroundStyle(.secondary) }
+                HStack(spacing: 6) {
+                    if let duration = video.durationText { Text(duration).font(.caption).foregroundStyle(.secondary) }
+                    let tier = TrackAuthenticity.assess(video).tier
+                    if tier <= .officialChannel, video.catalogSource == .youtubeMusic || video.isOfficialChannel {
+                        Text("Oficial")
+                            .font(.caption2.weight(.semibold))
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.accentColor.opacity(0.14))
+                            .foregroundStyle(Color.accentColor)
+                            .clipShape(Capsule())
+                    } else if tier == .suspicious {
+                        Text("Posible versión no oficial")
+                            .font(.caption2)
+                            .foregroundStyle(.orange)
+                    }
+                }
             }.frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.vertical, 6)

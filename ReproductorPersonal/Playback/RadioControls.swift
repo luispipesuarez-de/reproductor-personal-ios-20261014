@@ -9,7 +9,8 @@ struct RadioControls: View {
             if let seed = playback.radioSeed {
                 switch seed {
                 case .genre(let genre): Text("Radio \(genre)").font(.headline)
-                case .video: Text("Radio desde una canción").font(.headline)
+                case .video, .track: Text("Radio desde una canción").font(.headline)
+                case .artist(_, let name, _): Text("Radio de \(name)").font(.headline)
                 }
             }
             Toggle("Continuar automáticamente", isOn: Binding(get: { playback.autoplayEnabled }, set: playback.setAutoplayEnabled))

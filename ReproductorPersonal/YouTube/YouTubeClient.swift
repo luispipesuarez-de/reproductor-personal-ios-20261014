@@ -69,7 +69,17 @@ actor YouTubeClient: YouTubeProviding {
     func recommendations(seed: RecommendationSeed, continuation: String?) async throws -> RecommendationPage {
         do {
             switch seed {
-            case .video(let id):
+            case .video(let id), .track(let id, _, _):
+                if let page = try? await music.radio(
+                    videoID: continuation == nil ? id : nil,
+                    playlistID: continuation == nil ? "RDAMVM\(id)" : nil,
+                    continuation: continuation
+                ) {
+                    let filtered = page.videos.filter { $0.id != id }
+                    if !filtered.isEmpty || page.continuation != nil {
+                        return RecommendationPage(videos: filtered, continuation: page.continuation)
+                    }
+                }
                 _ = try await anonymousVisitor(videoID: id)
                 if let continuation {
                     let page = try await MoreVideoInfosResponse.RecommendedVideosContinuation.sendThrowingRequest(
@@ -81,16 +91,64 @@ actor YouTubeClient: YouTubeProviding {
                     youtubeModel: model, data: [.query: id], useCookies: false
                 )
                 return RecommendationPage(videos: YouTubeMapping.videos(from: page.recommendedVideos, candidatesOnly: true), continuation: page.recommendedVideosContinuationToken)
+
+            case .artist(let channelID, let name, let radioPlaylistID):
+                if let continuation,
+                   let page = try? await music.radio(videoID: nil, playlistID: nil, continuation: continuation),
+                   (!page.videos.isEmpty || page.continuation != nil) {
+                    return page
+                }
+                if continuation == nil {
+                    var targetPlaylistID = radioPlaylistID
+                    var seedVideoID: String?
+                    if targetPlaylistID == nil, !channelID.isEmpty,
+                       let catalog = try? await artistCatalog(artistID: channelID) {
+                        targetPlaylistID = catalog.radioPlaylistID
+                        seedVideoID = catalog.songs.first?.id
+                    }
+                    if let targetPlaylistID,
+                       let page = try? await music.radio(videoID: nil, playlistID: targetPlaylistID, continuation: nil),
+                       (!page.videos.isEmpty || page.continuation != nil) {
+                        return page
+                    }
+                    if let seedVideoID,
+                       let page = try? await music.radio(videoID: seedVideoID, playlistID: "RDAMVM\(seedVideoID)", continuation: nil) {
+                        let filtered = page.videos.filter { $0.id != seedVideoID }
+                        if !filtered.isEmpty || page.continuation != nil {
+                            return RecommendationPage(videos: filtered, continuation: page.continuation)
+                        }
+                    }
+                }
+                let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !trimmed.isEmpty else { return RecommendationPage(videos: [], continuation: nil) }
+                if let continuation {
+                    let page = try await SearchResponse.Continuation.sendThrowingRequest(
+                        youtubeModel: model, data: [.continuation: continuation], useCookies: false
+                    )
+                    return RecommendationPage(videos: YouTubeMapping.videos(from: page.results, candidatesOnly: true), continuation: page.continuationToken)
+                }
+                let page = try await SearchResponse.sendThrowingRequest(
+                    youtubeModel: model, data: [.query: "\(trimmed) canciones oficiales"], useCookies: false
+                )
+                if let visitor = page.visitorData, !visitor.isEmpty { model.visitorData = visitor }
+                return RecommendationPage(videos: YouTubeMapping.videos(from: page.results, candidatesOnly: true), continuation: page.continuationToken)
+
             case .genre(let genre):
-                let excludesSoul = isMerengue(genre)
+                let trimmed = genre.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !trimmed.isEmpty else { return RecommendationPage(videos: [], continuation: nil) }
+                let excludesSoul = isMerengue(trimmed)
+                if let result = try? await music.search(query: Self.genreQuery(for: trimmed), filter: .songs, continuation: continuation) {
+                    let songs = result.songs.filter { !(excludesSoul && $0.containsSoulReference) }
+                    if !songs.isEmpty || result.continuation != nil {
+                        return RecommendationPage(videos: songs, continuation: result.continuation)
+                    }
+                }
                 if let continuation {
                     let page = try await SearchResponse.Continuation.sendThrowingRequest(
                         youtubeModel: model, data: [.continuation: continuation], useCookies: false
                     )
                     return RecommendationPage(videos: YouTubeMapping.videos(from: page.results, candidatesOnly: true, excludingSoul: excludesSoul), continuation: page.continuationToken)
                 }
-                let trimmed = genre.trimmingCharacters(in: .whitespacesAndNewlines)
-                guard !trimmed.isEmpty else { return RecommendationPage(videos: [], continuation: nil) }
                 let page = try await SearchResponse.sendThrowingRequest(
                     youtubeModel: model, data: [.query: Self.genreQuery(for: trimmed)], useCookies: false
                 )

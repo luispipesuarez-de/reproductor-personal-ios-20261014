@@ -5,13 +5,24 @@ import Foundation
 protocol SiriPlaybackControlling: AnyObject {
     var state: PlaybackState { get }
     func play(_ videos: [Video]) async
+    func play(_ videos: [Video], seed: RecommendationSeed?) async
     func pause()
     func resume() async
+}
+
+extension SiriPlaybackControlling {
+    func play(_ videos: [Video], seed: RecommendationSeed?) async {
+        await play(videos)
+    }
 }
 
 extension PlaybackController: SiriPlaybackControlling {
     func play(_ videos: [Video]) async {
         await play(videos, startingAt: 0)
+    }
+
+    func play(_ videos: [Video], seed: RecommendationSeed?) async {
+        await play(videos, startingAt: 0, seed: seed)
     }
 
     func resume() async {
@@ -68,6 +79,23 @@ final class SiriPlaybackService {
         guard !trimmed.isEmpty else { throw SiriPlaybackError.emptyQuery }
 
         if let source {
+            if let search = try? await source.musicSearch(query: trimmed, filter: .artists, continuation: nil) {
+                let target = trimmed.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+                let candidates = [search.topArtist].compactMap { $0 } + search.artists
+                let chosen = candidates.first(where: { $0.normalizedName == target && $0.browseID != nil })
+                    ?? candidates.first(where: { $0.browseID != nil })
+                if let artistID = chosen?.browseID,
+                   let catalog = try? await source.artistCatalog(artistID: artistID),
+                   !catalog.songs.isEmpty {
+                    let seed = RecommendationSeed.artist(
+                        channelID: artistID,
+                        name: catalog.artistName.isEmpty ? trimmed : catalog.artistName,
+                        radioPlaylistID: catalog.radioPlaylistID
+                    )
+                    await playback.play(catalog.songs, seed: seed)
+                    return
+                }
+            }
             let fetched = (try? await source.search(query: "\(trimmed) canciones oficiales").prioritizingSongs()) ?? []
             if !fetched.isEmpty {
                 await playback.play(fetched)
@@ -97,6 +125,25 @@ final class SiriPlaybackService {
         }
 
         if let source {
+            let musicQuery = [trimmedQuery, artist?.trimmingCharacters(in: .whitespacesAndNewlines)]
+                .compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " ")
+            if let search = try? await source.musicSearch(query: musicQuery, filter: .songs, continuation: nil),
+               !search.songs.isEmpty {
+                let expected = artist?.trimmingCharacters(in: .whitespacesAndNewlines)
+                let identity = (expected?.isEmpty == false) ? ArtistIdentity(name: expected!) : nil
+                let nonSuspicious = search.songs.filter { TrackAuthenticity.assess($0, expected: identity).tier != .suspicious }
+                let pool = nonSuspicious.isEmpty ? search.songs : nonSuspicious
+                let chosen = pool.first(where: {
+                    let assessment = TrackAuthenticity.assess($0, expected: identity)
+                    return assessment.tier <= .officialChannel && (identity == nil || assessment.matchesArtist == true)
+                }) ?? pool.first(where: {
+                    identity == nil || TrackAuthenticity.assess($0, expected: identity).matchesArtist != false
+                }) ?? pool.first
+                if let chosen {
+                    await playback.play([chosen])
+                    return
+                }
+            }
             let fetched = (try? await source.search(query: fullQuery).prioritizingSongs()) ?? []
             if !fetched.isEmpty {
                 await playback.play(fetched)

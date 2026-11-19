@@ -78,11 +78,13 @@ final class PlaybackController: ObservableObject {
         }
     }
 
-    init(source: any YouTubeProviding, player: AVQueuePlayer = AVQueuePlayer(), dislikedIDs: @escaping () -> Set<String> = { [] }) {
+    init(source: any YouTubeProviding, player: AVQueuePlayer = AVQueuePlayer(),
+         dislikedIDs: @escaping () -> Set<String> = { [] },
+         policy: CandidatePolicy = .permissive) {
         self.source = source
         self.dislikedIDs = dislikedIDs
         self.resourceCache = PlaybackResourceCache()
-        self.radio = RadioSession(source: source)
+        self.radio = RadioSession(source: source, policy: policy)
         self.player = player
         player.actionAtItemEnd = .pause
         player.automaticallyWaitsToMinimizeStalling = true
@@ -111,8 +113,8 @@ final class PlaybackController: ObservableObject {
         await play([video])
     }
 
-    func play(_ videos: [Video], startingAt index: Int = 0) async {
-        resetRadio(seed: videos.last.map { .video($0.id) })
+    func play(_ videos: [Video], startingAt index: Int = 0, seed: RecommendationSeed? = nil) async {
+        resetRadio(seed: seed ?? videos.last.map { RecommendationSeed.forVideo($0) })
         clearNativeItems()
         queue = PlaybackQueue(entries: videos.map { QueueEntry(video: $0) }, currentIndex: index)
         recoveredEntries.removeAll()
@@ -141,7 +143,7 @@ final class PlaybackController: ObservableObject {
     func setAutoplayEnabled(_ enabled: Bool) {
         guard enabled != autoplayEnabled else { return }
         autoplayEnabled = enabled
-        let seed = radioSeed ?? queue.entries.last.map { .video($0.video.id) }
+        let seed = radioSeed ?? queue.entries.last.map { RecommendationSeed.forVideo($0.video) }
         resetRadio(seed: seed)
         if enabled { requestRadioRefill() }
         else {
@@ -195,7 +197,7 @@ final class PlaybackController: ObservableObject {
         allowsAutomaticFailureSkip = allowAutomaticSkip
         if radioSeed == nil {
             let lastManual = queue.entries.last(where: { !$0.isAutomatic }) ?? entry
-            resetRadio(seed: .video(lastManual.video.id))
+            resetRadio(seed: RecommendationSeed.forVideo(lastManual.video))
         }
         if isFailed { automaticFailures = 0 }
         if isFailed || activeEntryID != entry.id || player.currentItem == nil || player.currentItem?.status == .failed || isExpired(activeResource) {

@@ -20,7 +20,8 @@ final class DiscoveryViewModel: ObservableObject {
         await refresh(favorites: favorites, likes: [], dislikedIDs: [], recent: recent)
     }
 
-    func refresh(favorites: [Video], likes: [Video], dislikedIDs: Set<String>, recent: [Video]) async {
+    func refresh(favorites: [Video], likes: [Video], dislikedIDs: Set<String>, recent: [Video],
+                 blockedChannelIDs: Set<String> = [], blockedArtistNames: Set<String> = []) async {
         requestID = UUID()
         let token = requestID
         var seedIDs: Set<String> = []
@@ -42,14 +43,20 @@ final class DiscoveryViewModel: ObservableObject {
                 for _ in 0..<3 {
                     guard requestID == token, !Task.isCancelled else { return }
                     let page: RecommendationPage
-                    do { page = try await source.recommendations(seed: .video(seed.id), continuation: cursor) }
+                    do { page = try await source.recommendations(seed: RecommendationSeed.forVideo(seed), continuation: cursor) }
                     catch {
                         guard requestID == token, !Task.isCancelled else { return }
                         guard !candidates.isEmpty else { throw error }
                         break
                     }
                     guard requestID == token, !Task.isCancelled else { return }
-                    candidates.append(contentsOf: page.videos.filter { !dislikedIDs.contains($0.id) && seen.insert($0.id).inserted })
+                    let filtered = page.videos.filter { video in
+                        guard !dislikedIDs.contains(video.id),
+                              !isBlocked(video, ids: blockedChannelIDs, names: blockedArtistNames),
+                              TrackAuthenticity.assess(video).tier != .suspicious else { return false }
+                        return seen.insert(video.id).inserted
+                    }
+                    candidates.append(contentsOf: filtered)
                     cursor = page.continuation
                     if cursor == nil || candidates.filter({ $0.isPreferredSong && !heard.contains($0.id) }).count >= 12 { break }
                 }
@@ -60,6 +67,15 @@ final class DiscoveryViewModel: ObservableObject {
             guard requestID == token, !Task.isCancelled else { return }
             state = .failed(AppError.classify(error).localizedDescription)
         }
+    }
+
+    private func isBlocked(_ video: Video, ids: Set<String>, names: Set<String>) -> Bool {
+        if let cid = video.channelID, ids.contains(cid) { return true }
+        if let refs = video.artistRefs, refs.contains(where: { $0.browseID.map(ids.contains) == true }) { return true }
+        let name = video.canonicalArtistName
+            .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return names.contains(name)
     }
 
     private func variedAuthors(_ videos: [Video]) -> [Video] {

@@ -7,14 +7,27 @@ struct Video: Identifiable, Codable, Equatable, Sendable {
     var thumbnailURL: URL?
     var durationText: String?
     private var officialChannel: Bool?
+    // Metadatos de catálogo: todos opcionales para que las bibliotecas guardadas antes sigan decodificando.
+    var channelID: String?
+    var artistRefs: [ArtistRef]?
+    var album: AlbumRef?
+    var musicVideoType: MusicVideoType?
+    var catalogSource: CatalogSource?
 
-    init(id: String, title: String, author: String, thumbnailURL: URL? = nil, durationText: String? = nil, officialChannel: Bool? = nil) {
+    init(id: String, title: String, author: String, thumbnailURL: URL? = nil, durationText: String? = nil, officialChannel: Bool? = nil,
+         channelID: String? = nil, artistRefs: [ArtistRef]? = nil, album: AlbumRef? = nil,
+         musicVideoType: MusicVideoType? = nil, catalogSource: CatalogSource? = nil) {
         self.id = id
         self.title = title
         self.author = author
         self.thumbnailURL = thumbnailURL
         self.durationText = durationText
         self.officialChannel = officialChannel
+        self.channelID = channelID
+        self.artistRefs = artistRefs
+        self.album = album
+        self.musicVideoType = musicVideoType
+        self.catalogSource = catalogSource
     }
 
     var isPreferredSong: Bool { songPriority == 0 }
@@ -25,13 +38,15 @@ struct Video: Identifiable, Codable, Equatable, Sendable {
     var isOfficialChannel: Bool { officialChannel == true }
     var containsSoulReference: Bool { Self.normalizedCatalogText(title + " " + author).contains("soul") }
 
+    /// Señales de canal oficial presentes en el nombre. YouTube muestra la verificación como una insignia
+    /// que YouTubeKit no extrae, así que esto es solo una pista, nunca una garantía.
+    /// La nota musical (♪♫♬) ya no cuenta: la usan igualmente canales de fans o de contenido generado.
     static func isOfficialChannelName(_ author: String) -> Bool {
-        let normalized = normalizedCatalogText(author)
+        let normalized = normalizedCatalogText(author).trimmingCharacters(in: .whitespacesAndNewlines)
         let hasVerificationMark = author.contains(where: { "✓✔☑".contains($0) })
-        let hasMusicNote = author.contains(where: { "♪♫♬𝅘𝅥𝅮".contains($0) })
-        return hasVerificationMark || hasMusicNote
+        return hasVerificationMark
             || normalized == "topic" || normalized.hasSuffix(" - topic")
-            || normalized.contains("vevo")
+            || normalized.hasSuffix("vevo")
     }
 
     fileprivate var songPriority: Int {

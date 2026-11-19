@@ -39,7 +39,23 @@ final class YouTubeMappingTests: XCTestCase {
 
         let mapped = YouTubeMapping.videos(from: [topic, vevo, musicArtist, verified, regular])
 
-        XCTAssertEqual(mapped.map(\.isOfficialChannel), [true, true, true, true, false])
+        XCTAssertEqual(mapped.map(\.isOfficialChannel), [true, true, false, true, false])
+    }
+
+    func testMusicNoteAndLookalikeNamesAreNotTreatedAsOfficial() {
+        // La nota musical la usan también canales de fans o de contenido generado; ya no es señal de canal oficial.
+        XCTAssertFalse(Video.isOfficialChannelName("♫ Música Romántica ♫"))
+        XCTAssertFalse(Video.isOfficialChannelName("Revevolution"))
+        XCTAssertFalse(Video.isOfficialChannelName("Vevo Fans Club"))
+        XCTAssertTrue(Video.isOfficialChannelName("ArtistaVEVO"))
+        XCTAssertTrue(Video.isOfficialChannelName("Artista VEVO"))
+        XCTAssertTrue(Video.isOfficialChannelName("Artista - Topic"))
+    }
+
+    func testMappingKeepsChannelIDAndMarksWebSource() {
+        let mapped = YouTubeMapping.videos(from: [YTVideo(videoId: "ccccccccccc", title: "A", channel: YTLittleChannelInfos(channelId: "UCc", name: "Canal"), timeLength: "3:30")])
+        XCTAssertEqual(mapped.first?.channelID, "UCc")
+        XCTAssertEqual(mapped.first?.catalogSource, .youtubeWeb)
     }
 
     func testHLSIsPreferredOverCombinedStream() throws {

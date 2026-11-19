@@ -19,7 +19,9 @@ enum YouTubeMapping {
                 author: video.channel?.name ?? "Autor desconocido",
                 thumbnailURL: video.thumbnails.last(where: { $0.url.scheme == "https" })?.url,
                 durationText: video.timeLength,
-                officialChannel: Video.isOfficialChannelName(video.channel?.name ?? "")
+                officialChannel: Video.isOfficialChannelName(video.channel?.name ?? ""),
+                channelID: video.channel?.channelId,
+                catalogSource: .youtubeWeb
             )
             return excludingSoul && mapped.containsSoulReference ? nil : mapped
         }

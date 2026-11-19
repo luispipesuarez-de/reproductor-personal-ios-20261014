@@ -3,6 +3,68 @@ import YouTubeKit
 
 actor YouTubeClient: YouTubeProviding {
     private let model = YouTubeModel()
+    private let music: YouTubeMusicClient
+
+    init(music: YouTubeMusicClient = YouTubeMusicClient()) {
+        self.music = music
+    }
+
+    func musicSearch(query: String, filter: MusicSearchFilter?, continuation: String?) async throws -> MusicSearchResult {
+        try await music.search(query: query, filter: filter, continuation: continuation)
+    }
+
+    func artistCatalog(artistID: String) async throws -> ArtistCatalog {
+        let page = try await music.browseArtist(id: artistID)
+        let artistRef = page.name.isEmpty ? nil : ArtistRef(name: page.name, browseID: artistID)
+        let fallbackArtists = artistRef.map { [$0] } ?? []
+
+        async let albumsTask: [AlbumSummary]? = {
+            guard let link = page.albumsMore else { return page.albums }
+            return try? await music.browseReleases(browseID: link.browseID, params: link.params, artist: artistRef)
+        }()
+        async let singlesTask: [AlbumSummary]? = {
+            guard let link = page.singlesMore else { return page.singles }
+            return try? await music.browseReleases(browseID: link.browseID, params: link.params, artist: artistRef)
+        }()
+        async let songsTask: RecommendationPage? = {
+            guard let browseID = page.allSongsBrowseID else { return nil }
+            return try? await music.browsePlaylist(id: browseID, continuation: nil, fallbackArtists: fallbackArtists)
+        }()
+
+        let resolvedAlbums = await albumsTask
+        let resolvedSingles = await singlesTask
+        let resolvedSongs = await songsTask
+
+        let isPartial = (page.albumsMore != nil && resolvedAlbums == nil)
+            || (page.singlesMore != nil && resolvedSingles == nil)
+            || (page.allSongsBrowseID != nil && resolvedSongs == nil)
+
+        let songs = (resolvedSongs?.videos.isEmpty == false) ? (resolvedSongs?.videos ?? []) : page.topSongs
+        return ArtistCatalog(
+            artistName: page.name,
+            thumbnailURL: page.thumbnailURL,
+            songs: songs,
+            albums: resolvedAlbums ?? page.albums,
+            singles: resolvedSingles ?? page.singles,
+            channelID: artistID,
+            radioPlaylistID: page.radioPlaylistID,
+            allSongsBrowseID: page.allSongsBrowseID,
+            songsContinuation: resolvedSongs?.continuation,
+            isPartial: isPartial
+        )
+    }
+
+    func artistReleases(artistID: String, params: String) async throws -> [AlbumSummary] {
+        try await music.browseReleases(browseID: artistID, params: params, artist: nil)
+    }
+
+    func albumTracks(albumID: String) async throws -> [Video] {
+        try await music.browseAlbum(id: albumID).tracks
+    }
+
+    func playlistTracks(browseID: String, continuation: String?) async throws -> RecommendationPage {
+        try await music.browsePlaylist(id: browseID, continuation: continuation)
+    }
 
     func recommendations(seed: RecommendationSeed, continuation: String?) async throws -> RecommendationPage {
         do {

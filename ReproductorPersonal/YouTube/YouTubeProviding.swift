@@ -7,11 +7,37 @@ protocol YouTubeProviding: Sendable {
     func recommendations(seed: RecommendationSeed, continuation: String?) async throws -> RecommendationPage
     func artistCatalog(for artistName: String) async throws -> ArtistCatalog
     func albumTracks(for album: AlbumSummary) async throws -> [Video]
+
+    func musicSearch(query: String, filter: MusicSearchFilter?, continuation: String?) async throws -> MusicSearchResult
+    func artistCatalog(artistID: String) async throws -> ArtistCatalog
+    func artistReleases(artistID: String, params: String) async throws -> [AlbumSummary]
+    func albumTracks(albumID: String) async throws -> [Video]
+    func playlistTracks(browseID: String, continuation: String?) async throws -> RecommendationPage
 }
 
 extension YouTubeProviding {
     func searchDeep(query: String, maxPages: Int = 3) async throws -> [Video] {
         try await search(query: query)
+    }
+
+    func musicSearch(query: String, filter: MusicSearchFilter?, continuation: String?) async throws -> MusicSearchResult {
+        throw AppError.unavailable
+    }
+
+    func artistCatalog(artistID: String) async throws -> ArtistCatalog {
+        throw AppError.unavailable
+    }
+
+    func artistReleases(artistID: String, params: String) async throws -> [AlbumSummary] {
+        throw AppError.unavailable
+    }
+
+    func albumTracks(albumID: String) async throws -> [Video] {
+        throw AppError.unavailable
+    }
+
+    func playlistTracks(browseID: String, continuation: String?) async throws -> RecommendationPage {
+        throw AppError.unavailable
     }
 
     func artistCatalog(for artistName: String) async throws -> ArtistCatalog {

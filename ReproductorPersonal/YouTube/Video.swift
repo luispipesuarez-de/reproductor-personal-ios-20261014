@@ -115,13 +115,30 @@ struct Video: Identifiable, Codable, Equatable, Sendable {
     }
 }
 
+enum ReleaseType: String, Equatable, Sendable {
+    case album, single, ep, other
+
+    /// Interpreta la etiqueta del subtítulo de un lanzamiento («Álbum», «Single», «EP», «Sencillo»…).
+    init(label: String?) {
+        let text = (label ?? "")
+            .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        if text.contains("single") || text.contains("sencillo") { self = .single }
+        else if text == "ep" || text.hasPrefix("ep ") { self = .ep }
+        else if text.contains("album") { self = .album }
+        else { self = .other }
+    }
+}
+
 struct ArtistSummary: Identifiable, Equatable, Sendable {
-    var id: String { normalizedName }
+    var id: String { browseID ?? normalizedName }
     let name: String
     let normalizedName: String
     let thumbnailURL: URL?
     let isOfficial: Bool
     let sampleVideos: [Video]
+    /// Identificador de artista del catálogo (`UC…`) cuando existe.
+    var browseID: String? = nil
 }
 
 struct AlbumSummary: Identifiable, Equatable, Sendable {
@@ -130,6 +147,10 @@ struct AlbumSummary: Identifiable, Equatable, Sendable {
     let artistName: String
     let thumbnailURL: URL?
     let tracks: [Video]
+    /// Identificador de álbum del catálogo (`MPREb_…`) cuando existe.
+    var browseID: String? = nil
+    var releaseType: ReleaseType? = nil
+    var year: String? = nil
 }
 
 struct ArtistCatalog: Equatable, Sendable {
@@ -137,6 +158,14 @@ struct ArtistCatalog: Equatable, Sendable {
     let thumbnailURL: URL?
     let songs: [Video]
     let albums: [AlbumSummary]
+    var singles: [AlbumSummary] = []
+    var channelID: String? = nil
+    var radioPlaylistID: String? = nil
+    var allSongsBrowseID: String? = nil
+    /// Token para pedir más canciones de `allSongsBrowseID`.
+    var songsContinuation: String? = nil
+    /// `true` si alguna sección no pudo cargarse y el catálogo puede estar incompleto.
+    var isPartial: Bool = false
 }
 
 extension Array where Element == Video {

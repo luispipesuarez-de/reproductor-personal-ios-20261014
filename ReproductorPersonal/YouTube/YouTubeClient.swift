@@ -139,7 +139,7 @@ actor YouTubeClient: YouTubeProviding {
                 let excludesSoul = isMerengue(trimmed)
                 if let result = try? await music.search(query: Self.genreQuery(for: trimmed), filter: .songs, continuation: continuation) {
                     let songs = result.songs.filter { !(excludesSoul && $0.containsSoulReference) }
-                    if !songs.isEmpty || result.continuation != nil {
+                    if !songs.isEmpty {
                         return RecommendationPage(videos: songs, continuation: result.continuation)
                     }
                 }

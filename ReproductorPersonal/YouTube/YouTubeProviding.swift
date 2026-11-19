@@ -3,6 +3,7 @@ import Foundation
 protocol YouTubeProviding: Sendable {
     func search(query: String) async throws -> [Video]
     func searchDeep(query: String, maxPages: Int) async throws -> [Video]
+    func searchDeepWithStatus(query: String, maxPages: Int) async throws -> (videos: [Video], isPartial: Bool)
     func resolve(videoID: String) async throws -> PlaybackResource
     func recommendations(seed: RecommendationSeed, continuation: String?) async throws -> RecommendationPage
     func artistCatalog(for artistName: String) async throws -> ArtistCatalog

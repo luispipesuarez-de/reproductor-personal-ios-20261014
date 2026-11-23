@@ -211,6 +211,7 @@ final class LibraryStoreTests: XCTestCase {
 
     func testIncompatibleQueueDoesNotBlockSavedLibrary() throws {
         let url = try libraryURL()
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         let json = #"{"schemaVersion":1,"favorites":[{"id":"aaaaaaaaaaa","title":"Canción A","author":"Autor A"}],"playlists":[],"recent":[],"queue":{"bad":"shape"}}"#
         try Data(json.utf8).write(to: url)
 

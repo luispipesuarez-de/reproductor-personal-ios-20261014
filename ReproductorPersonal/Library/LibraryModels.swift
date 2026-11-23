@@ -34,17 +34,47 @@ struct LibrarySnapshot: Codable, Equatable, Sendable {
     }
 }
 
+private struct LossyArray<Element: Decodable>: Decodable {
+    let elements: [Element]
+
+    private struct AnyDecodable: Decodable {}
+
+    init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+        var items: [Element] = []
+        while !container.isAtEnd {
+            if let item = try? container.decode(Element.self) {
+                items.append(item)
+            } else {
+                _ = try? container.decode(AnyDecodable.self)
+            }
+        }
+        self.elements = items
+    }
+}
+
 extension LibrarySnapshot {
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        self.init(schemaVersion: try values.decode(Int.self, forKey: .schemaVersion),
-                  favorites: try values.decode([Video].self, forKey: .favorites),
-                  liked: try values.decodeIfPresent([Video].self, forKey: .liked) ?? [],
-                  disliked: try values.decodeIfPresent([Video].self, forKey: .disliked) ?? [],
-                  playlists: try values.decode([LocalPlaylist].self, forKey: .playlists),
-                  recent: try values.decode([Video].self, forKey: .recent),
-                  queue: try values.decodeIfPresent(QueueSnapshot.self, forKey: .queue),
-                  customGenres: try values.decodeIfPresent([String].self, forKey: .customGenres) ?? [],
-                  blockedChannels: try values.decodeIfPresent([BlockedChannel].self, forKey: .blockedChannels) ?? [])
+        let version = try values.decode(Int.self, forKey: .schemaVersion)
+        let favorites = (try values.decodeIfPresent(LossyArray<Video>.self, forKey: .favorites))?.elements ?? []
+        let liked = (try values.decodeIfPresent(LossyArray<Video>.self, forKey: .liked))?.elements ?? []
+        let disliked = (try values.decodeIfPresent(LossyArray<Video>.self, forKey: .disliked))?.elements ?? []
+        let playlists = (try values.decodeIfPresent(LossyArray<LocalPlaylist>.self, forKey: .playlists))?.elements ?? []
+        let recent = (try values.decodeIfPresent(LossyArray<Video>.self, forKey: .recent))?.elements ?? []
+        // Una cola guardada incompatible nunca debe bloquear favoritos, listas ni preferencias.
+        let queue = try? values.decodeIfPresent(QueueSnapshot.self, forKey: .queue)
+        let customGenres = (try values.decodeIfPresent([String].self, forKey: .customGenres)) ?? []
+        let blockedChannels = (try values.decodeIfPresent(LossyArray<BlockedChannel>.self, forKey: .blockedChannels))?.elements ?? []
+
+        self.init(schemaVersion: version,
+                  favorites: favorites,
+                  liked: liked,
+                  disliked: disliked,
+                  playlists: playlists,
+                  recent: recent,
+                  queue: queue,
+                  customGenres: customGenres,
+                  blockedChannels: blockedChannels)
     }
 }

@@ -209,6 +209,19 @@ final class LibraryStoreTests: XCTestCase {
         try assertUnreadableLibraryIsPreserved(JSONEncoder().encode(original))
     }
 
+    func testIncompatibleQueueDoesNotBlockSavedLibrary() throws {
+        let url = try libraryURL()
+        let json = #"{"schemaVersion":1,"favorites":[{"id":"aaaaaaaaaaa","title":"Canción A","author":"Autor A"}],"playlists":[],"recent":[],"queue":{"bad":"shape"}}"#
+        try Data(json.utf8).write(to: url)
+
+        let store = LibraryStore(fileURL: url)
+        try store.load()
+        XCTAssertEqual(store.snapshot.favorites.map(\.id), ["aaaaaaaaaaa"])
+        XCTAssertNil(store.snapshot.queue)
+        try store.setLiked(videoB, enabled: true)
+        XCTAssertEqual(store.snapshot.liked.map(\.id), [videoB.id])
+    }
+
     func testFailedWriteKeepsPreviousSnapshotAndBytes() throws {
         let url = try libraryURL()
         let store = LibraryStore(fileURL: url)

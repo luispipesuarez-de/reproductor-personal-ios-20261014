@@ -231,12 +231,28 @@ final class SearchViewModel: ObservableObject {
 
     private func perform(query: String, request currentRequest: UUID) async {
         do {
-            if let music = try? await source.musicSearch(query: query, filter: nil, continuation: nil),
-               !music.isEmpty {
+            async let baseTask = try? source.musicSearch(query: query, filter: nil, continuation: nil)
+            async let songsTask: MusicSearchResult? = categoryFilter == .all
+                ? (try? source.musicSearch(query: query, filter: .songs, continuation: nil))
+                : nil
+
+            let baseMusic = await baseTask
+            let songsMusic = await songsTask
+            let music: MusicSearchResult?
+            if let baseMusic, !baseMusic.isEmpty {
+                music = baseMusic
+            } else if let songsMusic, !songsMusic.isEmpty {
+                music = songsMusic
+            } else {
+                music = nil
+            }
+
+            if let music {
                 guard requestID == currentRequest else { return }
                 guard !Task.isCancelled else { state = .idle; return }
                 usedMusicCatalog = true
-                originalResults = Self.orderedByAuthenticity(music.songs + music.videos)
+                let combinedSongs = (songsMusic?.songs ?? []) + music.songs + music.videos
+                originalResults = Self.orderedByAuthenticity(combinedSongs)
                 var artists: [ArtistSummary] = []
                 var seenArtists: Set<String> = []
                 for artist in ([music.topArtist].compactMap { $0 } + music.artists) {
@@ -244,7 +260,13 @@ final class SearchViewModel: ObservableObject {
                 }
                 musicArtists = artists
                 musicAlbums = music.albums
-                continuations[.all] = music.continuation
+                if let songsMusic, !songsMusic.songs.isEmpty {
+                    filterCache[.songs] = songsMusic
+                    continuations[.songs] = songsMusic.continuation
+                    continuations[.all] = songsMusic.continuation ?? music.continuation
+                } else {
+                    continuations[.all] = music.continuation
+                }
                 if let activeFilter = categoryFilter.musicFilter {
                     await fetchFiltered(query: query, category: categoryFilter, musicFilter: activeFilter, request: currentRequest)
                 }

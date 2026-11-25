@@ -6,6 +6,7 @@ protocol SiriPlaybackControlling: AnyObject {
     var state: PlaybackState { get }
     func play(_ videos: [Video]) async
     func play(_ videos: [Video], seed: RecommendationSeed?) async
+    func startRadio(genre: String) async
     func pause()
     func resume() async
 }
@@ -14,6 +15,8 @@ extension SiriPlaybackControlling {
     func play(_ videos: [Video], seed: RecommendationSeed?) async {
         await play(videos)
     }
+
+    func startRadio(genre: String) async {}
 }
 
 extension PlaybackController: SiriPlaybackControlling {
@@ -172,6 +175,19 @@ final class SiriPlaybackService {
         return library.allMusic.map(\.title)
     }
 
+    func knownGenres() -> [String] {
+        try? library.load()
+        return library.genres
+    }
+
+    func playGenre(_ genre: String) async throws {
+        let trimmed = genre.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { throw SiriPlaybackError.emptyQuery }
+        try? library.load()
+        let saved = (try? library.addGenre(trimmed)) ?? trimmed
+        await playback.startRadio(genre: saved)
+    }
+
     func pauseOrResume() async {
         if playback.state.isPlaying { playback.pause() }
         else { await playback.resume() }
@@ -196,6 +212,12 @@ final class SiriPlaybackBridge {
     }
     func knownSongs() -> [String] {
         configuredService().knownSongs()
+    }
+    func knownGenres() -> [String] {
+        configuredService().knownGenres()
+    }
+    func playGenre(_ genre: String) async throws {
+        try await configuredService().playGenre(genre)
     }
     func pauseOrResume() async throws {
         await configuredService().pauseOrResume()
@@ -375,6 +397,69 @@ struct PauseOrResumeIntent: AppIntent {
     func perform() async throws -> some IntentResult {
         try await SiriPlaybackBridge.shared.pauseOrResume()
         return .result()
+    }
+}
+
+@available(iOS 16.0, *)
+struct GenreAppEntity: AppEntity {
+    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Género")
+    static var defaultQuery = GenreEntityQuery()
+    let id: String
+    let name: String
+    var displayRepresentation: DisplayRepresentation { DisplayRepresentation(title: "\(name)") }
+}
+
+@available(iOS 16.0, *)
+struct GenreEntityQuery: EntityStringQuery {
+    func entities(for identifiers: [String]) async throws -> [GenreAppEntity] {
+        identifiers.map { GenreAppEntity(id: $0, name: $0) }
+    }
+    func entities(matching string: String) async throws -> [GenreAppEntity] {
+        let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return try await suggestedEntities() }
+        return [GenreAppEntity(id: trimmed, name: trimmed)]
+    }
+    func suggestedEntities() async throws -> [GenreAppEntity] {
+        let saved = await MainActor.run { SiriPlaybackBridge.shared.knownGenres() }
+        let extras = ["Merengue", "Cumbia", "Reggaetón", "Boleros", "Jazz", "Clásica", "Electrónica"]
+        let combined = Array(NSOrderedSet(array: saved + extras)).compactMap { $0 as? String }
+        return combined.map { GenreAppEntity(id: $0, name: $0) }
+    }
+}
+
+@available(iOS 16.0, *)
+struct PlayGenreEntityIntent: AppIntent {
+    static var title: LocalizedStringResource = "Reproducir género"
+    static var description = IntentDescription("Inicia una radio del género pedido en Aparato Reproductor.")
+    static var openAppWhenRun = true
+
+    @Parameter(title: "Género")
+    var genre: GenreAppEntity
+
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        try await SiriPlaybackBridge.shared.playGenre(genre.name)
+        return .result(dialog: "Reproduciendo \(genre.name)")
+    }
+}
+
+@available(iOS 16.0, *)
+struct PlayGenreIntent: AppIntent {
+    static var title: LocalizedStringResource = "Reproducir un género musical"
+    static var description = IntentDescription("Pregunta qué género quieres escuchar y reproduce su radio.")
+    static var openAppWhenRun = true
+
+    @Parameter(title: "Género", requestValueDialog: IntentDialog("¿Qué género quieres escuchar?"))
+    var genre: String?
+
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        let target: String
+        if let genre, !genre.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            target = genre
+        } else {
+            target = try await $genre.requestValue("¿Qué género quieres escuchar?")
+        }
+        try await SiriPlaybackBridge.shared.playGenre(target)
+        return .result(dialog: "Reproduciendo \(target)")
     }
 }
 

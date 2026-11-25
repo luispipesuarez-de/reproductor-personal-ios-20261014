@@ -23,6 +23,13 @@ targets:
       properties:
         UIBackgroundModes: [audio]
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
+        INAlternativeAppNames:
+          - INAlternativeAppName: "Mi Aparato Reproductor"
+            INAlternativeAppNamePronunciationHint: "Mi Aparato Reproductor"
+          - INAlternativeAppName: "Aparato"
+            INAlternativeAppNamePronunciationHint: "Aparato"
+          - INAlternativeAppName: "Reproductor"
+            INAlternativeAppNamePronunciationHint: "Reproductor"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: personal.reproductor.ios
@@ -33,7 +40,7 @@ targets:
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         MARKETING_VERSION: 0.2.0
-        CURRENT_PROJECT_VERSION: 12
+        CURRENT_PROJECT_VERSION: 13
   ReproductorPersonalTests:
     type: bundle.unit-test
     platform: iOS

@@ -36,10 +36,33 @@ struct ReproductorAppShortcuts: AppShortcutsProvider {
                     shortTitle: "Buscar artista",
                     systemImageName: "music.mic")
 
+        AppShortcut(intent: PlayGenreEntityIntent(),
+                    phrases: [
+                        "Reproduce \(\.$genre) en \(.applicationName)",
+                        "Pon \(\.$genre) en \(.applicationName)",
+                        "Pon música \(\.$genre) en \(.applicationName)",
+                        "Escuchar \(\.$genre) en \(.applicationName)",
+                        "Radio \(\.$genre) en \(.applicationName)",
+                        "Radio de \(\.$genre) en \(.applicationName)"
+                    ],
+                    shortTitle: "Reproducir género",
+                    systemImageName: "radio")
+
+        AppShortcut(intent: PlayGenreIntent(),
+                    phrases: [
+                        "Reproduce un género en \(.applicationName)",
+                        "Pon un género en \(.applicationName)"
+                    ],
+                    shortTitle: "Elegir género",
+                    systemImageName: "guitars")
+
         AppShortcut(intent: PlaySongIntent(),
                     phrases: [
                         "Busca una canción en \(.applicationName)",
-                        "Pon una canción específica en \(.applicationName)"
+                        "Pon una canción específica en \(.applicationName)",
+                        "Pon una canción en \(.applicationName)",
+                        "Reproduce una canción en \(.applicationName)",
+                        "Buscar música en \(.applicationName)"
                     ],
                     shortTitle: "Buscar canción",
                     systemImageName: "music.note.list")

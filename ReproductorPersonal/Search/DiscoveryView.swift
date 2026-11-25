@@ -104,7 +104,8 @@ struct DiscoveryView: View {
     private func refresh() async {
         await discovery.refresh(favorites: library.snapshot.favorites,
                                 likes: library.snapshot.liked,
-                                dislikedIDs: Set(library.snapshot.disliked.map(\.id)),
+                                loved: library.snapshot.loved,
+                                dislikedIDs: library.negativeVideoIDs,
                                 recent: library.snapshot.recent,
                                 blockedChannelIDs: library.blockedChannelIDs,
                                 blockedArtistNames: library.blockedArtistNames)

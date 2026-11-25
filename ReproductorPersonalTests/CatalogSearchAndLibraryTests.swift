@@ -127,10 +127,56 @@ final class CatalogSearchAndLibraryTests: XCTestCase {
         XCTAssertTrue(CatalogSettings.policy(officialOnly: false).allowUnknownFallback())
     }
 
+    func testLovedAndHatedRatingsPersistAndStayMutuallyExclusive() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let file = dir.appendingPathComponent("library.json")
+
+        let store = LibraryStore(fileURL: file)
+        try store.setLoved(videoA, enabled: true)
+        XCTAssertEqual(store.snapshot.loved.map(\.id), [videoA.id])
+
+        // «Lo detesto» quita «Me encanta» y «Me gusta» y entra en negativeVideoIDs.
+        try store.setLiked(videoA, enabled: true)
+        try store.setHated(videoA, enabled: true)
+        XCTAssertTrue(store.snapshot.loved.isEmpty)
+        XCTAssertTrue(store.snapshot.liked.isEmpty)
+        XCTAssertEqual(store.snapshot.hated.map(\.id), [videoA.id])
+        XCTAssertTrue(store.negativeVideoIDs.contains(videoA.id))
+
+        let reopened = LibraryStore(fileURL: file)
+        try reopened.load()
+        XCTAssertEqual(reopened.snapshot.hated.map(\.id), [videoA.id])
+    }
+
+    func testSiriPlayGenreStartsRadioAndRejectsEmptyQuery() async throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let library = LibraryStore(fileURL: dir.appendingPathComponent("library.json"))
+        let spy = GenreSiriSpy()
+        let service = SiriPlaybackService(library: library, playback: spy)
+
+        try await service.playGenre("  Salsa ")
+        XCTAssertEqual(spy.startedGenre, "Salsa")
+        XCTAssertTrue(service.knownGenres().contains("Salsa"))
+    }
+
     private func fixtureData(_ name: String) throws -> Data {
         let url = try XCTUnwrap(Bundle(for: Self.self).url(forResource: name, withExtension: "json", subdirectory: "Fixtures"))
         return try Data(contentsOf: url)
     }
+}
+
+@MainActor
+private final class GenreSiriSpy: SiriPlaybackControlling {
+    var state: PlaybackState = .idle
+    var startedGenre: String?
+    func play(_ videos: [Video]) async {}
+    func startRadio(genre: String) async { startedGenre = genre }
+    func pause() {}
+    func resume() async {}
 }
 
 private struct StubMusicSearchProvider: YouTubeProviding {

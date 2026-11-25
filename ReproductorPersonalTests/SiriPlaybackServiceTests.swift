@@ -124,20 +124,6 @@ final class SiriPlaybackServiceTests: XCTestCase {
         XCTAssertNotNil(known)
     }
 
-    func testPlayGenreStartsRadioAndPersistsCustomGenre() async throws {
-        let library = LibraryStore(fileURL: try libraryURL())
-        let playback = SiriPlaybackControllerSpy(state: .idle)
-        let service = SiriPlaybackService(library: library, playback: playback)
-
-        try await service.playGenre("Salsa")
-        XCTAssertEqual(playback.startedGenres, ["Salsa"])
-        XCTAssertTrue(service.knownGenres().contains("Salsa"))
-
-        try await service.playGenre("Cumbia")
-        XCTAssertEqual(playback.startedGenres, ["Salsa", "Cumbia"])
-        XCTAssertTrue(service.knownGenres().contains("Cumbia"))
-    }
-
     private func libraryURL() throws -> URL {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         addTeardownBlock { try? FileManager.default.removeItem(at: directory) }
@@ -149,14 +135,12 @@ final class SiriPlaybackServiceTests: XCTestCase {
 private final class SiriPlaybackControllerSpy: SiriPlaybackControlling {
     var state: PlaybackState
     private(set) var playedVideos: [Video] = []
-    private(set) var startedGenres: [String] = []
     private(set) var pauseCount = 0
     private(set) var resumeCount = 0
 
     init(state: PlaybackState) { self.state = state }
 
     func play(_ videos: [Video]) async { playedVideos = videos }
-    func startRadio(genre: String) async { startedGenres.append(genre) }
     func pause() { pauseCount += 1 }
     func resume() async { resumeCount += 1 }
 }

@@ -20,14 +20,14 @@ final class DiscoveryViewModel: ObservableObject {
         await refresh(favorites: favorites, likes: [], dislikedIDs: [], recent: recent)
     }
 
-    func refresh(favorites: [Video], likes: [Video], dislikedIDs: Set<String>, recent: [Video],
+    func refresh(favorites: [Video], likes: [Video], loved: [Video] = [], dislikedIDs: Set<String>, recent: [Video],
                  blockedChannelIDs: Set<String> = [], blockedArtistNames: Set<String> = []) async {
         requestID = UUID()
         let token = requestID
         var seedIDs: Set<String> = []
         let references: [Video]
-        if !likes.isEmpty {
-            references = likes + favorites + recent
+        if !loved.isEmpty || !likes.isEmpty {
+            references = loved + likes + favorites + recent
         } else {
             references = Array(recent.prefix(1)) + favorites + Array(recent.dropFirst())
         }

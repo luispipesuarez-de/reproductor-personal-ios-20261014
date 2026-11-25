@@ -36,14 +36,22 @@ struct ReproductorAppShortcuts: AppShortcutsProvider {
                     shortTitle: "Buscar artista",
                     systemImageName: "music.mic")
 
-        AppShortcut(intent: PlayGenreEntityIntent(),
+        AppShortcut(intent: PlaySongIntent(),
+                    phrases: [
+                        "Busca una canción en \(.applicationName)",
+                        "Pon una canción específica en \(.applicationName)",
+                        "Pon una canción en \(.applicationName)",
+                        "Quiero escuchar una canción en \(.applicationName)"
+                    ],
+                    shortTitle: "Buscar canción",
+                    systemImageName: "music.note.list")
+
+        AppShortcut(intent: PlaySavedGenreIntent(),
                     phrases: [
                         "Reproduce \(\.$genre) en \(.applicationName)",
                         "Pon \(\.$genre) en \(.applicationName)",
                         "Pon música \(\.$genre) en \(.applicationName)",
-                        "Escuchar \(\.$genre) en \(.applicationName)",
-                        "Radio \(\.$genre) en \(.applicationName)",
-                        "Radio de \(\.$genre) en \(.applicationName)"
+                        "Escuchar \(\.$genre) en \(.applicationName)"
                     ],
                     shortTitle: "Reproducir género",
                     systemImageName: "radio")
@@ -55,17 +63,6 @@ struct ReproductorAppShortcuts: AppShortcutsProvider {
                     ],
                     shortTitle: "Elegir género",
                     systemImageName: "guitars")
-
-        AppShortcut(intent: PlaySongIntent(),
-                    phrases: [
-                        "Busca una canción en \(.applicationName)",
-                        "Pon una canción específica en \(.applicationName)",
-                        "Pon una canción en \(.applicationName)",
-                        "Reproduce una canción en \(.applicationName)",
-                        "Buscar música en \(.applicationName)"
-                    ],
-                    shortTitle: "Buscar canción",
-                    systemImageName: "music.note.list")
 
         AppShortcut(intent: PlayFavoritesIntent(),
                     phrases: [

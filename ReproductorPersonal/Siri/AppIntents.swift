@@ -165,6 +165,17 @@ final class SiriPlaybackService {
         await playback.play(localMatches)
     }
 
+    func playGenre(_ genre: String) async throws {
+        let trimmed = genre.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { throw SiriPlaybackError.emptyQuery }
+        await playback.startRadio(genre: trimmed)
+    }
+
+    func knownGenres() -> [String] {
+        try? library.load()
+        return library.genres
+    }
+
     func knownArtists() -> [String] {
         try? library.load()
         return library.allMusic.groupedArtists().map(\.name)
@@ -173,19 +184,6 @@ final class SiriPlaybackService {
     func knownSongs() -> [String] {
         try? library.load()
         return library.allMusic.map(\.title)
-    }
-
-    func knownGenres() -> [String] {
-        try? library.load()
-        return library.genres
-    }
-
-    func playGenre(_ genre: String) async throws {
-        let trimmed = genre.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { throw SiriPlaybackError.emptyQuery }
-        try? library.load()
-        let saved = (try? library.addGenre(trimmed)) ?? trimmed
-        await playback.startRadio(genre: saved)
     }
 
     func pauseOrResume() async {
@@ -207,17 +205,14 @@ final class SiriPlaybackBridge {
     func playMusic() async throws { try await configuredService().playMusic() }
     func playArtist(_ artistName: String) async throws { try await configuredService().playArtist(artistName) }
     func playSong(_ query: String, artist: String? = nil) async throws { try await configuredService().playSong(query, artist: artist) }
+    func playGenre(_ genre: String) async throws { try await configuredService().playGenre(genre) }
+    func knownGenres() -> [String] { configuredService().knownGenres() }
+
     func knownArtists() -> [String] {
         configuredService().knownArtists()
     }
     func knownSongs() -> [String] {
         configuredService().knownSongs()
-    }
-    func knownGenres() -> [String] {
-        configuredService().knownGenres()
-    }
-    func playGenre(_ genre: String) async throws {
-        try await configuredService().playGenre(genre)
     }
     func pauseOrResume() async throws {
         await configuredService().pauseOrResume()
@@ -231,7 +226,7 @@ final class SiriPlaybackBridge {
             blockedChannelIDs: { library.blockedChannelIDs },
             blockedArtistNames: { library.blockedArtistNames }
         )
-        let playback = PlaybackController(source: source, dislikedIDs: { Set(library.snapshot.disliked.map { $0.id }) }, policy: policy)
+        let playback = PlaybackController(source: source, dislikedIDs: { library.negativeVideoIDs }, policy: policy)
         let newService = SiriPlaybackService(library: library, playback: playback, source: source)
         self.service = newService
         return newService
@@ -401,6 +396,17 @@ struct PauseOrResumeIntent: AppIntent {
 }
 
 @available(iOS 16.0, *)
+struct PlayMusicIntent: AppIntent {
+    static var title: LocalizedStringResource = "Reproducir mi música"
+    static var openAppWhenRun = true
+
+    func perform() async throws -> some IntentResult {
+        try await SiriPlaybackBridge.shared.playMusic()
+        return .result()
+    }
+}
+
+@available(iOS 16.0, *)
 struct GenreAppEntity: AppEntity {
     static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Género")
     static var defaultQuery = GenreEntityQuery()
@@ -414,23 +420,26 @@ struct GenreEntityQuery: EntityStringQuery {
     func entities(for identifiers: [String]) async throws -> [GenreAppEntity] {
         identifiers.map { GenreAppEntity(id: $0, name: $0) }
     }
+
     func entities(matching string: String) async throws -> [GenreAppEntity] {
         let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return try await suggestedEntities() }
-        return [GenreAppEntity(id: trimmed, name: trimmed)]
+        let known = await MainActor.run { SiriPlaybackBridge.shared.knownGenres() }
+        let matches = known.filter { $0.localizedCaseInsensitiveContains(trimmed) }
+        let names = matches.isEmpty ? [trimmed] : matches
+        return names.map { GenreAppEntity(id: $0, name: $0) }
     }
+
     func suggestedEntities() async throws -> [GenreAppEntity] {
-        let saved = await MainActor.run { SiriPlaybackBridge.shared.knownGenres() }
-        let extras = ["Merengue", "Cumbia", "Reggaetón", "Boleros", "Jazz", "Clásica", "Electrónica"]
-        let combined = Array(NSOrderedSet(array: saved + extras)).compactMap { $0 as? String }
-        return combined.map { GenreAppEntity(id: $0, name: $0) }
+        let genres = await MainActor.run { SiriPlaybackBridge.shared.knownGenres() }
+        return genres.map { GenreAppEntity(id: $0, name: $0) }
     }
 }
 
 @available(iOS 16.0, *)
-struct PlayGenreEntityIntent: AppIntent {
+struct PlaySavedGenreIntent: AppIntent {
     static var title: LocalizedStringResource = "Reproducir género"
-    static var description = IntentDescription("Inicia una radio del género pedido en Aparato Reproductor.")
+    static var description = IntentDescription("Inicia una radio del género musical elegido.")
     static var openAppWhenRun = true
 
     @Parameter(title: "Género")
@@ -444,8 +453,8 @@ struct PlayGenreEntityIntent: AppIntent {
 
 @available(iOS 16.0, *)
 struct PlayGenreIntent: AppIntent {
-    static var title: LocalizedStringResource = "Reproducir un género musical"
-    static var description = IntentDescription("Pregunta qué género quieres escuchar y reproduce su radio.")
+    static var title: LocalizedStringResource = "Reproducir un género"
+    static var description = IntentDescription("Busca y reproduce música de un género específico.")
     static var openAppWhenRun = true
 
     @Parameter(title: "Género", requestValueDialog: IntentDialog("¿Qué género quieres escuchar?"))
@@ -460,16 +469,5 @@ struct PlayGenreIntent: AppIntent {
         }
         try await SiriPlaybackBridge.shared.playGenre(target)
         return .result(dialog: "Reproduciendo \(target)")
-    }
-}
-
-@available(iOS 16.0, *)
-struct PlayMusicIntent: AppIntent {
-    static var title: LocalizedStringResource = "Reproducir mi música"
-    static var openAppWhenRun = true
-
-    func perform() async throws -> some IntentResult {
-        try await SiriPlaybackBridge.shared.playMusic()
-        return .result()
     }
 }

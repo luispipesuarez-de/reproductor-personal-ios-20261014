@@ -36,7 +36,7 @@ struct ReproductorPersonalApp: App {
             )
         let playback = PlaybackController(
             source: source,
-            dislikedIDs: { Set(library.snapshot.disliked.map(\.id)) },
+            dislikedIDs: { library.negativeVideoIDs },
             policy: policy
         )
         _playback = StateObject(wrappedValue: playback)

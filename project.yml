@@ -23,13 +23,6 @@ targets:
       properties:
         UIBackgroundModes: [audio]
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
-        INAlternativeAppNames:
-          - INAlternativeAppName: "Mi Aparato Reproductor"
-            INAlternativeAppNamePronunciationHint: "Mi Aparato Reproductor"
-          - INAlternativeAppName: "Aparato"
-            INAlternativeAppNamePronunciationHint: "Aparato"
-          - INAlternativeAppName: "Reproductor"
-            INAlternativeAppNamePronunciationHint: "Reproductor"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: personal.reproductor.ios

@@ -22,7 +22,9 @@ struct LibrarySnapshot: Codable, Equatable, Sendable {
     var schemaVersion: Int = 1
     var favorites: [Video] = []
     var liked: [Video] = []
+    var loved: [Video] = []
     var disliked: [Video] = []
+    var hated: [Video] = []
     var playlists: [LocalPlaylist] = []
     var recent: [Video] = []
     var queue: QueueSnapshot?
@@ -30,7 +32,7 @@ struct LibrarySnapshot: Codable, Equatable, Sendable {
     var blockedChannels: [BlockedChannel] = []
 
     private enum CodingKeys: String, CodingKey {
-        case schemaVersion, favorites, liked, disliked, playlists, recent, queue, customGenres, blockedChannels
+        case schemaVersion, favorites, liked, loved, disliked, hated, playlists, recent, queue, customGenres, blockedChannels
     }
 }
 
@@ -59,7 +61,9 @@ extension LibrarySnapshot {
         let version = try values.decode(Int.self, forKey: .schemaVersion)
         let favorites = (try values.decodeIfPresent(LossyArray<Video>.self, forKey: .favorites))?.elements ?? []
         let liked = (try values.decodeIfPresent(LossyArray<Video>.self, forKey: .liked))?.elements ?? []
+        let loved = (try values.decodeIfPresent(LossyArray<Video>.self, forKey: .loved))?.elements ?? []
         let disliked = (try values.decodeIfPresent(LossyArray<Video>.self, forKey: .disliked))?.elements ?? []
+        let hated = (try values.decodeIfPresent(LossyArray<Video>.self, forKey: .hated))?.elements ?? []
         let playlists = (try values.decodeIfPresent(LossyArray<LocalPlaylist>.self, forKey: .playlists))?.elements ?? []
         let recent = (try values.decodeIfPresent(LossyArray<Video>.self, forKey: .recent))?.elements ?? []
         // Una cola guardada incompatible nunca debe bloquear favoritos, listas ni preferencias.
@@ -70,7 +74,9 @@ extension LibrarySnapshot {
         self.init(schemaVersion: version,
                   favorites: favorites,
                   liked: liked,
+                  loved: loved,
                   disliked: disliked,
+                  hated: hated,
                   playlists: playlists,
                   recent: recent,
                   queue: queue,

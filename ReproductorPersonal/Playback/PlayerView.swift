@@ -147,32 +147,64 @@ struct NowPlayingView: View {
                 .accessibilityIdentifier("toggleLyrics")
             }
             if let video = playback.state.video {
-                HStack(spacing: 16) {
-                    Button { setLiked(video) } label: {
-                        Label(isLiked(video) ? "Quitar Me gusta" : "Me gusta", systemImage: isLiked(video) ? "hand.thumbsup.fill" : "hand.thumbsup")
-                            .frame(minHeight: 44)
+                VStack(spacing: 10) {
+                    HStack(spacing: 12) {
+                        Button { setLiked(video) } label: {
+                            Label(isLiked(video) ? "Quitar Me gusta" : "Me gusta", systemImage: isLiked(video) ? "hand.thumbsup.fill" : "hand.thumbsup")
+                                .frame(minHeight: 44)
+                        }
+                        .buttonStyle(.bordered)
+                        .accessibilityIdentifier("likeButton")
+                        Button { setDisliked(video) } label: {
+                            Label(isDisliked(video) ? "Quitar No me gusta" : "No me gusta", systemImage: isDisliked(video) ? "hand.thumbsdown.fill" : "hand.thumbsdown")
+                                .frame(minHeight: 44)
+                        }
+                        .buttonStyle(.bordered)
+                        .accessibilityIdentifier("dislikeButton")
                     }
-                    .buttonStyle(.bordered)
-                    Button { setDisliked(video) } label: {
-                        Label(isDisliked(video) ? "Quitar No me gusta" : "No me gusta", systemImage: isDisliked(video) ? "hand.thumbsdown.fill" : "hand.thumbsdown")
-                            .frame(minHeight: 44)
+                    HStack(spacing: 12) {
+                        Button { setLoved(video) } label: {
+                            Label(isLoved(video) ? "Quitar Me encanta" : "Me encanta", systemImage: isLoved(video) ? "star.fill" : "star")
+                                .frame(minHeight: 44)
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.pink)
+                        .accessibilityIdentifier("loveButton")
+                        Button { setHated(video) } label: {
+                            Label(isHated(video) ? "Quitar Lo detesto" : "Lo detesto", systemImage: isHated(video) ? "xmark.octagon.fill" : "xmark.octagon")
+                                .frame(minHeight: 44)
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.red)
+                        .accessibilityIdentifier("hateButton")
                     }
-                    .buttonStyle(.bordered)
                 }
             }
         }
     }
 
     private func isLiked(_ video: Video) -> Bool { library.snapshot.liked.contains { $0.id == video.id } }
+    private func isLoved(_ video: Video) -> Bool { library.snapshot.loved.contains { $0.id == video.id } }
     private func isDisliked(_ video: Video) -> Bool { library.snapshot.disliked.contains { $0.id == video.id } }
+    private func isHated(_ video: Video) -> Bool { library.snapshot.hated.contains { $0.id == video.id } }
 
     private func setLiked(_ video: Video) {
         do { try library.setLiked(video, enabled: !isLiked(video)) }
         catch { preferenceError = error.localizedDescription }
     }
 
+    private func setLoved(_ video: Video) {
+        do { try library.setLoved(video, enabled: !isLoved(video)) }
+        catch { preferenceError = error.localizedDescription }
+    }
+
     private func setDisliked(_ video: Video) {
         do { try library.setDisliked(video, enabled: !isDisliked(video)) }
+        catch { preferenceError = error.localizedDescription }
+    }
+
+    private func setHated(_ video: Video) {
+        do { try library.setHated(video, enabled: !isHated(video)) }
         catch { preferenceError = error.localizedDescription }
     }
 

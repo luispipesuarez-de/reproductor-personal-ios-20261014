@@ -73,9 +73,21 @@ final class LibraryStore: ObservableObject {
         try mutate {
             if enabled {
                 $0.disliked.removeAll { $0.id == video.id }
+                $0.hated.removeAll { $0.id == video.id }
                 if let index = $0.liked.firstIndex(where: { $0.id == video.id }) { $0.liked[index] = video }
                 else { $0.liked.append(video) }
             } else { $0.liked.removeAll { $0.id == video.id } }
+        }
+    }
+
+    func setLoved(_ video: Video, enabled: Bool) throws {
+        try mutate {
+            if enabled {
+                $0.disliked.removeAll { $0.id == video.id }
+                $0.hated.removeAll { $0.id == video.id }
+                if let index = $0.loved.firstIndex(where: { $0.id == video.id }) { $0.loved[index] = video }
+                else { $0.loved.append(video) }
+            } else { $0.loved.removeAll { $0.id == video.id } }
         }
     }
 
@@ -83,10 +95,26 @@ final class LibraryStore: ObservableObject {
         try mutate {
             if enabled {
                 $0.liked.removeAll { $0.id == video.id }
+                $0.loved.removeAll { $0.id == video.id }
                 if let index = $0.disliked.firstIndex(where: { $0.id == video.id }) { $0.disliked[index] = video }
                 else { $0.disliked.append(video) }
             } else { $0.disliked.removeAll { $0.id == video.id } }
         }
+    }
+
+    func setHated(_ video: Video, enabled: Bool) throws {
+        try mutate {
+            if enabled {
+                $0.liked.removeAll { $0.id == video.id }
+                $0.loved.removeAll { $0.id == video.id }
+                if let index = $0.hated.firstIndex(where: { $0.id == video.id }) { $0.hated[index] = video }
+                else { $0.hated.append(video) }
+            } else { $0.hated.removeAll { $0.id == video.id } }
+        }
+    }
+
+    var negativeVideoIDs: Set<String> {
+        Set(snapshot.disliked.map(\.id)).union(snapshot.hated.map(\.id))
     }
 
     var blockedChannelIDs: Set<String> {

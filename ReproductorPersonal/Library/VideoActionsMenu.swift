@@ -12,7 +12,9 @@ struct VideoActionsMenu: View {
 
     private var isFavorite: Bool { library.snapshot.favorites.contains { $0.id == video.id } }
     private var isLiked: Bool { library.snapshot.liked.contains { $0.id == video.id } }
+    private var isLoved: Bool { library.snapshot.loved.contains { $0.id == video.id } }
     private var isDisliked: Bool { library.snapshot.disliked.contains { $0.id == video.id } }
+    private var isHated: Bool { library.snapshot.hated.contains { $0.id == video.id } }
     private var isBlockedChannel: Bool { library.isChannelBlocked(video) }
 
     var body: some View {
@@ -33,9 +35,17 @@ struct VideoActionsMenu: View {
                 catch { errorMessage = error.localizedDescription }
             } label: { Label(isLiked ? "Quitar Me gusta" : "Me gusta", systemImage: isLiked ? "hand.thumbsup.fill" : "hand.thumbsup") }
             Button {
+                do { try library.setLoved(video, enabled: !isLoved) }
+                catch { errorMessage = error.localizedDescription }
+            } label: { Label(isLoved ? "Quitar Me encanta" : "Me encanta", systemImage: isLoved ? "star.fill" : "star") }
+            Button {
                 do { try library.setDisliked(video, enabled: !isDisliked) }
                 catch { errorMessage = error.localizedDescription }
             } label: { Label(isDisliked ? "Quitar No me gusta" : "No me gusta", systemImage: isDisliked ? "hand.thumbsdown.fill" : "hand.thumbsdown") }
+            Button {
+                do { try library.setHated(video, enabled: !isHated) }
+                catch { errorMessage = error.localizedDescription }
+            } label: { Label(isHated ? "Quitar Lo detesto" : "Lo detesto", systemImage: isHated ? "xmark.octagon.fill" : "xmark.octagon") }
             Button { playback.enqueue(video) } label: { Label("Añadir a la cola", systemImage: "list.bullet") }
             Button { Task { await playback.startRadio(from: video) } } label: { Label("Iniciar radio", systemImage: "radio") }
             Button(role: isBlockedChannel ? nil : .destructive) {
